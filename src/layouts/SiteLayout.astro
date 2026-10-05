@@ -1,5 +1,6 @@
 ---
 import SiteFooter from '../components/SiteFooter.astro';
+import CookieBanner from '../components/CookieBanner.astro';
 import '../styles/site.css';
 
 const { title = 'ClickForNothing — wonderfully useless websites', description = 'Discover the weird, pointless and wonderfully useless websites on the internet.', canonicalPath = '/', noindex = false } = Astro.props;
@@ -30,5 +31,6 @@ const canonical = new URL(canonicalPath, Astro.site ?? 'https://clickfornothing.
   <body>
     <slot />
     <SiteFooter />
+    <CookieBanner />
   </body>
 </html>
