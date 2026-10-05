@@ -1,14 +1,12 @@
-<div class="mascot-shell" data-mascot aria-hidden="true">
-  <div class="mascot-fallback" data-mascot-fallback>🐸</div>
-</div>
+<link rel="preload" href="/Meshy_AI_T_Posing_Pepe_biped_Animation_01a1093d-f808-7748-b99e-773186993a94_withSkin.glb" as="fetch" crossorigin="anonymous" fetchpriority="high" />
+<div class="mascot-shell" data-mascot aria-hidden="true"></div>
 
 <script>
   const shell = document.querySelector('[data-mascot]');
-  const fallback = shell?.querySelector('[data-mascot-fallback]');
   const stage = document.querySelector('.hero-stage');
   const cta = stage?.querySelector('.go-button');
 
-  if (shell && fallback && stage) {
+  if (shell && stage) {
     const assets = {
       idle: '/Meshy_AI_T_Posing_Pepe_biped_Animation_01a1093d-f808-7748-b99e-773186993a94_withSkin.glb',
       hover: '/Meshy_AI_T_Posing_Pepe_biped_Animation_Walking_withSkin.glb',
@@ -358,7 +356,7 @@
         scene.add(ambient, keyLight);
         resizeRenderer();
       } catch (error) {
-        console.warn('3D mascot unavailable; keeping its static fallback.', error);
+        console.warn('3D mascot unavailable.', error);
         disposeRenderer();
         shell.dataset.ready = 'false';
         return;
@@ -408,7 +406,7 @@
         void preloadStateClip('hover', assets.hover);
         void preloadStateClip('excited', assets.excited);
       }, undefined, (error) => {
-        console.warn('Could not load the local 3D mascot; keeping its static fallback.', error);
+        console.warn('Could not load the 3D mascot.', error);
         disposeRenderer();
         shell.dataset.ready = 'false';
       });
@@ -579,11 +577,9 @@
 
 <style is:global>
   .mascot-shell { position: absolute; z-index: 2; top: 50%; right: 3.6%; width: clamp(220px, 22vw, 330px); height: clamp(240px, 28vw, 360px); pointer-events: none; transform: translateY(-51%); }
-  .mascot-fallback { position: absolute; inset: 0; display: grid; place-items: center; font: 170px/1 system-ui,sans-serif; filter: drop-shadow(0 8px 0 rgba(9,8,12,.18)); transition: opacity .22s ease; }
   .mascot-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .25s ease; }
-  .mascot-shell[data-ready="true"] .mascot-fallback { opacity: 0; }
   .mascot-shell[data-ready="true"] .mascot-canvas { opacity: 1; }
-  @media (max-width: 920px) and (min-width: 701px) { .mascot-shell { right: 1.2%; width: clamp(138px, 17vw, 190px); height: clamp(160px, 20vw, 220px); } .mascot-fallback { font-size: 130px; } }
-  @media (max-width: 700px) { .mascot-shell { position: relative; top: auto; right: auto; width: 146px; height: 142px; margin: -2px auto -4px; transform: none; } .mascot-fallback { font-size: 112px; } }
-  @media (prefers-reduced-motion: reduce) { .mascot-fallback, .mascot-canvas { transition: none; } }
+  @media (max-width: 920px) and (min-width: 701px) { .mascot-shell { right: 1.2%; width: clamp(138px, 17vw, 190px); height: clamp(160px, 20vw, 220px); } }
+  @media (max-width: 700px) { .mascot-shell { position: relative; top: auto; right: auto; width: 146px; height: 142px; margin: -2px auto -4px; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .mascot-canvas { transition: none; } }
 </style>
