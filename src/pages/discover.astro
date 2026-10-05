@@ -1,0 +1,233 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { websites } from '../data/websites.ts';
+
+const description = 'Pick a pointless destination, keep your place, and continue discovering weird corners of the web.';
+const destinations = websites.filter((site) => site.verified && /^https:\/\//i.test(site.url));
+const first = destinations[0];
+---
+<SiteLayout title="Discover Useless Websites — ClickForNothing" {description} canonicalPath="/discover/" noindex={true}>
+  <main class="discover-stage">
+    <span class="discover-deco discover-star" aria-hidden="true">✷</span>
+    <span class="discover-deco discover-squiggle" aria-hidden="true">〰</span>
+    <span class="discover-deco discover-dot" aria-hidden="true"></span>
+    <section class="discover-content" aria-labelledby="discover-title">
+      <a class="back-home" href="/">← Back to ClickForNothing</a>
+      <p class="discover-kicker">A tiny detour into the unnecessary</p>
+      <h1 id="discover-title">Choose Your Next Regret</h1>
+      <p class="discover-intro">One little website at a time. Visit it in a new tab, then come back here for another.</p>
+
+      <article class="website-card" aria-live="polite" aria-atomic="true">
+        {first ? (
+          <>
+            <div class="card-topline"><span class="category-badge" data-category>{first.category}</span><span class="site-position" data-position>1 of {destinations.length}</span></div>
+            <h2 data-name>{first.name}</h2>
+            <p class="site-description" data-description>{first.description}</p>
+            <a class="visit-button" data-visit href={first.url} target="_blank" rel="noopener noreferrer">Visit Website <span aria-hidden="true">↗</span></a>
+            <p class="visit-hint">Done regretting that? Find another. If a site doesn’t load, come back and try a different one.</p>
+          </>
+        ) : (
+          <div class="empty-discover" data-empty>
+            <span class="category-badge">Collection loading</span>
+            <h2>No regrets available just yet</h2>
+            <p class="site-description">The verified website collection is empty. Add a few verified destinations in the website data file to start exploring.</p>
+          </div>
+        )}
+      </article>
+
+      <div class="discover-controls" aria-label="Website discovery controls">
+        <button class="nav-button previous-button" type="button" data-previous disabled>← Previous</button>
+        <button class="nav-button next-button" type="button" data-next>Next Useless Website →</button>
+        <button class="nav-button surprise-button" type="button" data-surprise>Surprise Me</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    import { websites } from '../data/websites.ts';
+
+    const stateKey = 'clickfornothing:discovery:v2';
+    const safeSites = websites.flatMap((site) => {
+      if (!site.verified) return [];
+      try {
+        const url = new URL(site.url);
+        if (url.protocol !== 'https:') return [];
+        return [{ ...site, url: url.href }];
+      } catch {
+        return [];
+      }
+    });
+    const byId = new Map(safeSites.map((site) => [site.id, site]));
+    const positionById = new Map(safeSites.map((site, index) => [site.id, index + 1]));
+    const nameNode = document.querySelector('[data-name]');
+    const descriptionNode = document.querySelector('[data-description]');
+    const categoryNode = document.querySelector('[data-category]');
+    const positionNode = document.querySelector('[data-position]');
+    const visitNode = document.querySelector('[data-visit]');
+    const previousButton = document.querySelector('[data-previous]');
+    const nextButton = document.querySelector('[data-next]');
+    const surpriseButton = document.querySelector('[data-surprise]');
+    const emptyNode = document.querySelector('[data-empty]');
+
+    let navState = { history: [], index: -1, cycle: [], cursor: 0 };
+
+    function shuffledIds(excludeId) {
+      const ids = safeSites.map((site) => site.id).filter((id) => id !== excludeId);
+      for (let index = ids.length - 1; index > 0; index -= 1) {
+        const other = Math.floor(Math.random() * (index + 1));
+        [ids[index], ids[other]] = [ids[other], ids[index]];
+      }
+      if (excludeId && ids.length === safeSites.length - 1) ids.push(excludeId);
+      return ids;
+    }
+
+    function resetCycle(excludeId) {
+      navState.cycle = shuffledIds(excludeId);
+      navState.cursor = 0;
+    }
+
+    function startCycleAt(siteId) {
+      navState.cycle = [siteId, ...shuffledIds(siteId)];
+      navState.cursor = 1;
+    }
+
+    function saveState() {
+      try { window.sessionStorage.setItem(stateKey, JSON.stringify(navState)); } catch { /* Storage can be disabled; in-memory navigation still works. */ }
+    }
+
+    function render(siteId) {
+      const site = byId.get(siteId);
+      if (!site) return;
+      nameNode.textContent = site.name;
+      descriptionNode.textContent = site.description;
+      categoryNode.textContent = site.category;
+      const cyclePosition = navState.cycle.indexOf(site.id);
+      positionNode.textContent = `${(cyclePosition >= 0 ? cyclePosition : positionById.get(site.id) - 1) + 1} of ${safeSites.length}`;
+      visitNode.href = site.url;
+      visitNode.hidden = false;
+      emptyNode?.setAttribute('hidden', '');
+      previousButton.disabled = navState.index <= 0;
+      nextButton.disabled = safeSites.length < 2;
+      surpriseButton.disabled = safeSites.length < 2;
+    }
+
+    function syncUrl(push = true) {
+      const siteId = navState.history[navState.index];
+      if (!siteId) return;
+      const url = `/discover/?site=${encodeURIComponent(siteId)}`;
+      const method = push ? 'pushState' : 'replaceState';
+      window.history[method]({ siteId, index: navState.index }, '', url);
+    }
+
+    function commit(push = true) {
+      saveState();
+      render(navState.history[navState.index]);
+      syncUrl(push);
+    }
+
+    function consumeNext(randomize) {
+      if (!navState.cycle.length || navState.cycle.length !== safeSites.length) resetCycle();
+      if (navState.cursor >= navState.cycle.length) {
+        const currentId = navState.history[navState.index];
+        resetCycle(currentId);
+      }
+      if (randomize && navState.cursor < navState.cycle.length - 1) {
+        const currentId = navState.history[navState.index];
+        const currentIsReservedAtEnd = navState.cursor === 0 && navState.cycle[navState.cycle.length - 1] === currentId;
+        const availableCount = navState.cycle.length - navState.cursor - (currentIsReservedAtEnd ? 1 : 0);
+        const randomIndex = navState.cursor + Math.floor(Math.random() * availableCount);
+        [navState.cycle[navState.cursor], navState.cycle[randomIndex]] = [navState.cycle[randomIndex], navState.cycle[navState.cursor]];
+      }
+      const site = byId.get(navState.cycle[navState.cursor]);
+      navState.cursor += 1;
+      return site;
+    }
+
+    function chooseNew(site) {
+      if (!site) return;
+      navState.history = navState.history.slice(0, navState.index + 1);
+      navState.history.push(site.id);
+      navState.index = navState.history.length - 1;
+      commit(true);
+    }
+
+    function moveTo(index) {
+      if (index < 0 || index >= navState.history.length) return;
+      navState.index = index;
+      commit(true);
+    }
+
+    function initialize() {
+      if (!safeSites.length) {
+        document.querySelectorAll('[data-previous], [data-next], [data-surprise]').forEach((button) => { button.disabled = true; });
+        if (visitNode) visitNode.hidden = true;
+        return;
+      }
+
+      try {
+        const saved = JSON.parse(window.sessionStorage.getItem(stateKey) || 'null');
+        if (saved && Array.isArray(saved.history)) {
+          navState.history = saved.history.filter((id) => byId.has(id));
+          navState.index = Math.min(Math.max(Number(saved.index) || 0, 0), navState.history.length - 1);
+          navState.cycle = Array.isArray(saved.cycle) ? saved.cycle.filter((id, index, ids) => byId.has(id) && ids.indexOf(id) === index) : [];
+          navState.cursor = Math.min(Math.max(Number(saved.cursor) || 0, 0), navState.cycle.length);
+        }
+      } catch { /* Ignore unavailable or malformed session state. */ }
+
+      const requestedId = new URL(window.location.href).searchParams.get('site');
+      if (requestedId && byId.has(requestedId)) {
+        const existingIndex = navState.history.lastIndexOf(requestedId);
+        if (existingIndex >= 0) navState.index = existingIndex;
+        else {
+          if (!navState.cycle.length || navState.cycle.length !== safeSites.length) startCycleAt(requestedId);
+          else {
+            const requestedCycleIndex = navState.cycle.indexOf(requestedId, navState.cursor);
+            if (requestedCycleIndex >= 0) {
+              [navState.cycle[navState.cursor], navState.cycle[requestedCycleIndex]] = [navState.cycle[requestedCycleIndex], navState.cycle[navState.cursor]];
+              navState.cursor += 1;
+            } else startCycleAt(requestedId);
+          }
+          navState.history.push(requestedId);
+          navState.index = navState.history.length - 1;
+        }
+      } else if (!navState.history.length) {
+        if (!navState.cycle.length || navState.cycle.length !== safeSites.length) resetCycle();
+        const initial = byId.get(navState.cycle[navState.cursor]);
+        navState.cursor += 1;
+        navState.history = initial ? [initial.id] : [];
+        navState.index = initial ? 0 : -1;
+      }
+
+      if (navState.index >= 0) {
+        render(navState.history[navState.index]);
+        saveState();
+        if (!requestedId) syncUrl(false);
+      }
+    }
+
+    if (previousButton && nextButton && surpriseButton && visitNode) {
+      initialize();
+      previousButton.addEventListener('click', () => moveTo(navState.index - 1));
+      nextButton.addEventListener('click', () => {
+        if (navState.index < navState.history.length - 1) {
+          moveTo(navState.index + 1);
+          return;
+        }
+        chooseNew(consumeNext(false));
+      });
+      surpriseButton.addEventListener('click', () => chooseNew(consumeNext(true)));
+      window.addEventListener('popstate', (event) => {
+        const siteId = event.state?.siteId || new URL(window.location.href).searchParams.get('site');
+        if (!siteId || !byId.has(siteId)) return;
+        const stateIndex = Number(event.state?.index);
+        const existingIndex = Number.isInteger(stateIndex) && navState.history[stateIndex] === siteId ? stateIndex : navState.history.lastIndexOf(siteId);
+        if (existingIndex >= 0) navState.index = existingIndex;
+        else {
+          navState.history.push(siteId);
+          navState.index = navState.history.length - 1;
+        }
+        saveState();
+        render(siteId);
+      });
+    }
+  </script>
+</SiteLayout>

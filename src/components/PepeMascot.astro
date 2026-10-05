@@ -1,0 +1,589 @@
+<div class="mascot-shell" data-mascot aria-hidden="true">
+  <div class="mascot-fallback" data-mascot-fallback>🐸</div>
+</div>
+
+<script>
+  const shell = document.querySelector('[data-mascot]');
+  const fallback = shell?.querySelector('[data-mascot-fallback]');
+  const stage = document.querySelector('.hero-stage');
+  const cta = stage?.querySelector('.go-button');
+
+  if (shell && fallback && stage) {
+    const assets = {
+      idle: '/Meshy_AI_T_Posing_Pepe_biped_Animation_01a1093d-f808-7748-b99e-773186993a94_withSkin.glb',
+      hover: '/Meshy_AI_T_Posing_Pepe_biped_Animation_Walking_withSkin.glb',
+      excited: '/Meshy_AI_T_Posing_Pepe_biped_Animation_Running_withSkin.glb',
+    };
+    let renderer;
+    let scene;
+    let camera;
+    let modelRoot;
+    let mixer;
+    let activeAction;
+    let actions = new Map();
+    let observer;
+    let resizeObserver;
+    let frameId = 0;
+    let timerId = 0;
+    let loaded = false;
+    let disposed = false;
+    let requested = false;
+    let inView = false;
+    let pageVisible = !document.hidden;
+    let animationState = 'idle';
+    let stateTime = 0;
+    let lastTime = 0;
+    let listeningResize = false;
+    let three;
+    let GLTFLoaderClass;
+    let headBone;
+    let headOffsetEuler;
+    let headOffsetQuaternion;
+    let rigSignature = new Map();
+    let headLookX = 0;
+    let headLookY = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+    let pointerActive = false;
+    let mascotHovered = false;
+    let ctaHovered = false;
+    let ctaFocused = false;
+    let returnAfter = 0;
+    let baseScale = 1;
+    let modelHeight = 1;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const clipPromises = new Map();
+    const movementAudio = new Audio('/oo-ee-a-ea.mp3');
+    movementAudio.preload = 'none';
+    movementAudio.loop = true;
+    movementAudio.volume = 0.35;
+
+    function renderOnce() {
+      if (loaded && renderer && scene && camera && !disposed) renderer.render(scene, camera);
+    }
+
+    function canAnimate() {
+      return loaded && inView && pageVisible && !reducedMotion.matches && !disposed;
+    }
+
+    function stopLoop() {
+      if (timerId) window.clearTimeout(timerId);
+      if (frameId) window.cancelAnimationFrame(frameId);
+      timerId = 0;
+      frameId = 0;
+    }
+
+    function scheduleFrame() {
+      if (timerId || frameId || !canAnimate()) return;
+      timerId = window.setTimeout(() => {
+        timerId = 0;
+        if (canAnimate()) frameId = window.requestAnimationFrame(drawFrame);
+      }, 33);
+    }
+
+    function desiredStateAfterReturn() {
+      if (mascotHovered || ctaHovered || ctaFocused) return 'hover';
+      return pointerActive ? 'lookAtPointer' : 'idle';
+    }
+
+    function playClipFor(state) {
+      if (!mixer) return;
+      const next = actions.get(state === 'excited' ? 'excited' : state === 'hover' ? 'hover' : 'idle') || actions.get('idle');
+      if (!next || next === activeAction) return;
+      if (activeAction) {
+        next.reset().play();
+        activeAction.crossFadeTo(next, 0.24, false);
+      } else next.reset().fadeIn(0.24).play();
+      activeAction = next;
+    }
+
+    function stopMovementAudio() {
+      movementAudio.pause();
+      movementAudio.currentTime = 0;
+    }
+
+    function syncMovementAudio(state) {
+      if (state !== 'hover' && state !== 'excited') {
+        stopMovementAudio();
+        return;
+      }
+      if (!loaded || !inView || !pageVisible || reducedMotion.matches || disposed || !movementAudio.paused) return;
+      // Playback is tied to a user-triggered movement state. If the browser
+      // blocks it, the mascot and its existing interaction remain unaffected.
+      void movementAudio.play().catch(() => {});
+    }
+
+    function enterState(next) {
+      if (animationState === next) return;
+      animationState = next;
+      stateTime = 0;
+      playClipFor(next);
+      syncMovementAudio(next);
+    }
+
+    function returnToIdle() {
+      returnAfter = 0.3;
+      enterState('returnToIdle');
+    }
+
+    function updateInteractionState() {
+      if (animationState === 'excited') return;
+      if (mascotHovered || ctaHovered || ctaFocused) enterState('hover');
+      else if (animationState === 'hover') returnToIdle();
+      else if (pointerActive && animationState === 'idle') enterState('lookAtPointer');
+    }
+
+    function drawFrame(now) {
+      frameId = 0;
+      if (!canAnimate()) return;
+      const delta = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 1 / 30;
+      lastTime = now;
+      stateTime += delta;
+
+      if (animationState === 'excited' && stateTime >= 0.67) returnToIdle();
+      else if (animationState === 'returnToIdle') {
+        returnAfter -= delta;
+        if (returnAfter <= 0) enterState(desiredStateAfterReturn());
+      }
+
+      const follow = 1 - Math.exp(-delta * 5);
+      const trackHead = animationState === 'lookAtPointer' || animationState === 'hover';
+      const targetX = trackHead ? -pointerY * 0.12 : 0;
+      const targetY = trackHead ? pointerX * 0.2 : 0;
+      headLookX = three.MathUtils.lerp(headLookX, targetX, follow);
+      headLookY = three.MathUtils.lerp(headLookY, targetY, follow);
+      if (mixer) mixer.update(delta);
+      if (headBone) {
+        // Add the cursor offset after the current clip has posed the head.
+        // This keeps the animated quaternion as the base pose each frame.
+        headOffsetEuler.set(headLookX, headLookY, 0);
+        headOffsetQuaternion.setFromEuler(headOffsetEuler);
+        headBone.quaternion.multiply(headOffsetQuaternion);
+      }
+      renderer.render(scene, camera);
+      scheduleFrame();
+    }
+
+    function startLoop() {
+      lastTime = 0;
+      if (canAnimate()) scheduleFrame();
+      else renderOnce();
+    }
+
+    function resizeRenderer() {
+      if (!renderer || !camera || disposed) return;
+      const width = Math.max(shell.clientWidth, 1);
+      const height = Math.max(shell.clientHeight, 1);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      const fitHeight = modelHeight * baseScale;
+      const fitWidth = fitHeight * camera.aspect;
+      const fitSpan = Math.max(fitHeight, fitWidth);
+      // Extra framing margin accommodates the full stride on the walking and
+      // running clips without cutting off Pepe's head or feet.
+      const distance = fitSpan / (2 * Math.tan(three.MathUtils.degToRad(camera.fov / 2))) * 1.45;
+      camera.position.set(0, fitHeight * 0.5, distance);
+      camera.lookAt(0, fitHeight * 0.5, 0);
+      camera.updateProjectionMatrix();
+      renderOnce();
+    }
+
+    function decodeGlbHeader(bytes) {
+      if (bytes.byteLength < 20) throw new Error('Invalid GLB header.');
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      if (view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2) throw new Error('Unsupported GLB file.');
+      return { totalLength: view.getUint32(8, true), jsonLength: view.getUint32(12, true) };
+    }
+
+    async function requestBytes(url, start, end) {
+      const response = await fetch(url, { headers: { Range: `bytes=${start}-${end}` } });
+      if (!response.ok) throw new Error(`Could not fetch animation data (${response.status}).`);
+      return { status: response.status, bytes: new Uint8Array(await response.arrayBuffer()) };
+    }
+
+    function toBase64(bytes) {
+      let binary = '';
+      for (let start = 0; start < bytes.length; start += 0x8000) {
+        binary += String.fromCharCode(...bytes.subarray(start, Math.min(start + 0x8000, bytes.length)));
+      }
+      return btoa(binary);
+    }
+
+    async function loadAnimationOnly(url) {
+      const headerResponse = await requestBytes(url, 0, 19);
+      let fullFile = headerResponse.status === 200 ? headerResponse.bytes : undefined;
+      const headerBytes = fullFile || headerResponse.bytes;
+      const { totalLength, jsonLength } = decodeGlbHeader(headerBytes);
+      let jsonBytes;
+      if (fullFile) jsonBytes = fullFile.subarray(20, 20 + jsonLength);
+      else {
+        const jsonResponse = await requestBytes(url, 20, 19 + jsonLength);
+        if (jsonResponse.status === 200) {
+          fullFile = jsonResponse.bytes;
+          jsonBytes = fullFile.subarray(20, 20 + jsonLength);
+        } else jsonBytes = jsonResponse.bytes;
+      }
+      const source = JSON.parse(new TextDecoder().decode(jsonBytes));
+      if (!source.animations?.length || !source.buffers?.[0]) throw new Error('GLB has no animation data.');
+
+      const oldViews = new Set();
+      const oldAccessors = new Set();
+      for (const animation of source.animations) {
+        for (const sampler of animation.samplers) {
+          oldAccessors.add(sampler.input);
+          oldAccessors.add(sampler.output);
+        }
+      }
+      for (const index of oldAccessors) {
+        const accessor = source.accessors[index];
+        if (accessor?.bufferView === undefined || accessor.sparse) throw new Error('Unsupported sparse animation accessor.');
+        oldViews.add(accessor.bufferView);
+      }
+      const sourceViews = [...oldViews].map((index) => source.bufferViews[index]);
+      const start = Math.min(...sourceViews.map((view) => view.byteOffset || 0));
+      const end = Math.max(...sourceViews.map((view) => (view.byteOffset || 0) + view.byteLength));
+      const binaryStart = 28 + jsonLength;
+      let animationBytes;
+      if (fullFile) animationBytes = fullFile.subarray(binaryStart + start, binaryStart + end);
+      else {
+        const binaryResponse = await requestBytes(url, binaryStart + start, binaryStart + end - 1);
+        if (binaryResponse.status === 200) {
+          fullFile = binaryResponse.bytes;
+          animationBytes = fullFile.subarray(binaryStart + start, binaryStart + end);
+        } else animationBytes = binaryResponse.bytes;
+      }
+      if (animationBytes.byteLength !== end - start) throw new Error('Animation data range was incomplete.');
+
+      const viewMap = new Map();
+      const accessorMap = new Map();
+      const bufferViews = [];
+      for (const oldIndex of oldViews) {
+        const original = source.bufferViews[oldIndex];
+        viewMap.set(oldIndex, bufferViews.length);
+        bufferViews.push({ ...original, buffer: 0, byteOffset: (original.byteOffset || 0) - start });
+      }
+      const accessors = [];
+      for (const oldIndex of oldAccessors) {
+        const original = source.accessors[oldIndex];
+        accessorMap.set(oldIndex, accessors.length);
+        accessors.push({ ...original, bufferView: viewMap.get(original.bufferView) });
+      }
+
+      const animationDocument = { ...source };
+      delete animationDocument.meshes;
+      delete animationDocument.materials;
+      delete animationDocument.textures;
+      delete animationDocument.images;
+      delete animationDocument.samplers;
+      delete animationDocument.skins;
+      delete animationDocument.cameras;
+      animationDocument.nodes = source.nodes.map((node) => {
+        const clean = { ...node };
+        delete clean.mesh;
+        delete clean.skin;
+        delete clean.camera;
+        return clean;
+      });
+      animationDocument.animations = source.animations.map((animation) => ({
+        ...animation,
+        samplers: animation.samplers.map((sampler) => ({
+          ...sampler,
+          input: accessorMap.get(sampler.input),
+          output: accessorMap.get(sampler.output),
+        })),
+      }));
+      animationDocument.accessors = accessors;
+      animationDocument.bufferViews = bufferViews;
+      animationDocument.buffers = [{ byteLength: animationBytes.byteLength, uri: `data:application/octet-stream;base64,${toBase64(animationBytes)}` }];
+      delete animationDocument.extensionsRequired;
+      delete animationDocument.extensionsUsed;
+
+      const parsed = await new Promise((resolve, reject) => {
+        new GLTFLoaderClass().parse(JSON.stringify(animationDocument), '', resolve, reject);
+      });
+      return parsed;
+    }
+
+    function rigMatches(otherScene) {
+      const otherRig = new Map();
+      // GLTFLoader removes reserved ':' characters from node names when it
+      // creates AnimationClip track bindings (mixamorig:Head -> mixamorigHead).
+      const isRigNode = (object) => object.name.startsWith('mixamorig') || object.name === 'headfront';
+      otherScene.traverse((object) => { if (isRigNode(object)) otherRig.set(object.name, object); });
+      if (!rigSignature.size || rigSignature.size !== otherRig.size) return false;
+      for (const [name, bone] of rigSignature) {
+        const candidate = otherRig.get(name);
+        if (!candidate || (candidate.parent?.name || '') !== bone.parent) return false;
+        if (candidate.position.distanceTo(bone.position) > 0.0001 || candidate.quaternion.angleTo(bone.quaternion) > 0.0001) return false;
+      }
+      return true;
+    }
+
+    async function preloadStateClip(state, url) {
+      if (clipPromises.has(state)) return clipPromises.get(state);
+      const task = loadAnimationOnly(url).then((gltf) => {
+        if (disposed || !mixer) return;
+        if (!rigMatches(gltf.scene)) throw new Error(`The ${state} animation rig does not match the displayed Pepe rig.`);
+        const clip = gltf.animations.find((item) => item.duration > 0.2);
+        if (!clip) throw new Error(`The ${state} GLB has no usable motion clip.`);
+        const action = mixer.clipAction(clip);
+        actions.set(state, action);
+        if (animationState === state) playClipFor(state);
+      }).catch((error) => console.warn(`Could not prepare Pepe's ${state} animation.`, error));
+      clipPromises.set(state, task);
+      return task;
+    }
+
+    async function startLoading() {
+      if (requested || disposed) return;
+      requested = true;
+      try {
+        three = await import('three');
+        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+        GLTFLoaderClass = GLTFLoader;
+        if (disposed) return;
+        const { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, SRGBColorSpace, WebGLRenderer } = three;
+        renderer = new WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'low-power', stencil: false, depth: true });
+        renderer.outputColorSpace = SRGBColorSpace;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
+        renderer.setClearColor(0x000000, 0);
+        renderer.domElement.className = 'mascot-canvas';
+        renderer.domElement.setAttribute('aria-hidden', 'true');
+        shell.appendChild(renderer.domElement);
+        scene = new Scene();
+        camera = new PerspectiveCamera(34, 1, 0.1, 100);
+        const ambient = new AmbientLight(0xffffff, 2.25);
+        const keyLight = new DirectionalLight(0xffffff, 2.3);
+        keyLight.position.set(-3, 5, 5);
+        scene.add(ambient, keyLight);
+        resizeRenderer();
+      } catch (error) {
+        console.warn('3D mascot unavailable; keeping its static fallback.', error);
+        disposeRenderer();
+        shell.dataset.ready = 'false';
+        return;
+      }
+
+      new GLTFLoaderClass().load(assets.idle, (gltf) => {
+        if (disposed) {
+          disposeObject(gltf.scene);
+          return;
+        }
+        modelRoot = gltf.scene;
+        const bounds = new three.Box3().setFromObject(modelRoot);
+        const size = bounds.getSize(new three.Vector3());
+        const center = bounds.getCenter(new three.Vector3());
+        modelHeight = Math.max(size.y, 0.001);
+        baseScale = 1.48 / modelHeight;
+        modelRoot.position.set(-center.x, -bounds.min.y, -center.z);
+        modelRoot.scale.setScalar(baseScale);
+        modelRoot.traverse((object) => {
+          if (object.name.startsWith('mixamorig') || object.name === 'headfront') {
+            rigSignature.set(object.name, {
+              parent: object.parent?.name || '',
+              position: object.position.clone(),
+              quaternion: object.quaternion.clone(),
+            });
+          }
+        });
+        headBone = modelRoot.getObjectByName('mixamorigHead');
+        headOffsetEuler = new three.Euler(0, 0, 0, 'XYZ');
+        headOffsetQuaternion = new three.Quaternion();
+        scene.add(modelRoot);
+
+        // The first GLB contains a long, subtle idle loop plus a one-frame
+        // static pose clip. Select by duration rather than assuming a name.
+        const idleClip = gltf.animations.filter((clip) => clip.duration > 0.5).sort((a, b) => b.duration - a.duration)[0];
+        mixer = new three.AnimationMixer(modelRoot);
+        if (idleClip) {
+          const idleAction = mixer.clipAction(idleClip);
+          idleAction.setLoop(three.LoopRepeat, Infinity);
+          actions.set('idle', idleAction);
+        }
+        playClipFor('idle');
+        loaded = true;
+        shell.dataset.ready = 'true';
+        resizeRenderer();
+        startLoop();
+        void preloadStateClip('hover', assets.hover);
+        void preloadStateClip('excited', assets.excited);
+      }, undefined, (error) => {
+        console.warn('Could not load the local 3D mascot; keeping its static fallback.', error);
+        disposeRenderer();
+        shell.dataset.ready = 'false';
+      });
+    }
+
+    function setCtaHover(value) {
+      ctaHovered = value;
+      updateInteractionState();
+      startLoop();
+    }
+
+    function triggerExcited() {
+      enterState('excited');
+      if (canAnimate()) drawFrame(performance.now());
+      else startLoop();
+    }
+
+    function onPointerMove(event) {
+      if (reducedMotion.matches) return;
+      const mascot = shell.getBoundingClientRect();
+      const stageBounds = stage.getBoundingClientRect();
+      if (!mascot.width || !mascot.height || !stageBounds.width || !stageBounds.height) return;
+      const centerX = mascot.left + mascot.width / 2;
+      const centerY = mascot.top + mascot.height / 2;
+      pointerX = Math.max(-1, Math.min(1, ((event.clientX - centerX) / stageBounds.width) * 1.7));
+      pointerY = Math.max(-1, Math.min(1, ((event.clientY - centerY) / stageBounds.height) * 1.7));
+      pointerActive = true;
+      const overMascot = event.clientX >= mascot.left && event.clientX <= mascot.right && event.clientY >= mascot.top && event.clientY <= mascot.bottom;
+      if (overMascot !== mascotHovered) {
+        mascotHovered = overMascot;
+        updateInteractionState();
+      } else if (!mascotHovered && animationState === 'idle') updateInteractionState();
+      startLoop();
+    }
+
+    function onPointerLeave() {
+      pointerActive = false;
+      mascotHovered = false;
+      pointerX = 0;
+      pointerY = 0;
+      updateInteractionState();
+      startLoop();
+    }
+
+    function onCtaClick(event) {
+      // Keyboard activation has no pointerdown. Keep the anchor's native navigation.
+      if (event.detail === 0) triggerExcited();
+    }
+
+    function onVisibilityChange() {
+      pageVisible = !document.hidden;
+      if (pageVisible) startLoop();
+      else {
+        stopLoop();
+        stopMovementAudio();
+      }
+    }
+
+    function onMotionChange() {
+      if (reducedMotion.matches) {
+        stopLoop();
+        stopMovementAudio();
+        renderOnce();
+      } else startLoop();
+    }
+
+    function disposeObject(root) {
+      const disposedTextures = new Set();
+      root.traverse((object) => {
+        if (!object.isMesh) return;
+        object.geometry?.dispose();
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        for (const material of materials) {
+          if (!material) continue;
+          for (const value of Object.values(material)) {
+            if (value?.isTexture && !disposedTextures.has(value)) {
+              disposedTextures.add(value);
+              value.dispose();
+            }
+          }
+          material.dispose();
+        }
+      });
+    }
+
+    function disposeRenderer() {
+      stopLoop();
+      if (renderer) {
+        renderer.dispose();
+        renderer.domElement.remove();
+        renderer = undefined;
+      }
+      loaded = false;
+    }
+
+    function cleanup() {
+      if (disposed) return;
+      disposed = true;
+      stopLoop();
+      stopMovementAudio();
+      observer?.disconnect();
+      resizeObserver?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      reducedMotion.removeEventListener('change', onMotionChange);
+      stage.removeEventListener('pointermove', onPointerMove);
+      stage.removeEventListener('pointerleave', onPointerLeave);
+      cta?.removeEventListener('pointerenter', onCtaHoverStart);
+      cta?.removeEventListener('pointerleave', onCtaHoverEnd);
+      cta?.removeEventListener('focus', onCtaFocus);
+      cta?.removeEventListener('blur', onCtaBlur);
+      cta?.removeEventListener('pointerdown', onCtaPointerDown);
+      cta?.removeEventListener('click', onCtaClick);
+      if (mixer && modelRoot) {
+        mixer.stopAllAction();
+        for (const action of actions.values()) mixer.uncacheAction(action.getClip(), modelRoot);
+        mixer.uncacheRoot(modelRoot);
+      }
+      if (modelRoot) disposeObject(modelRoot);
+      disposeRenderer();
+      window.removeEventListener('pagehide', cleanup);
+      if (listeningResize) window.removeEventListener('resize', resizeRenderer);
+    }
+
+    function onCtaHoverStart() { setCtaHover(true); }
+    function onCtaHoverEnd() { setCtaHover(false); }
+    function onCtaFocus() { ctaFocused = true; updateInteractionState(); startLoop(); }
+    function onCtaBlur() { ctaFocused = false; updateInteractionState(); startLoop(); }
+    function onCtaPointerDown(event) { if (event.button === 0) triggerExcited(); }
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    reducedMotion.addEventListener('change', onMotionChange);
+    stage.addEventListener('pointermove', onPointerMove, { passive: true });
+    stage.addEventListener('pointerleave', onPointerLeave, { passive: true });
+    cta?.addEventListener('pointerenter', onCtaHoverStart, { passive: true });
+    cta?.addEventListener('pointerleave', onCtaHoverEnd, { passive: true });
+    cta?.addEventListener('focus', onCtaFocus);
+    cta?.addEventListener('blur', onCtaBlur);
+    cta?.addEventListener('pointerdown', onCtaPointerDown, { passive: true });
+    cta?.addEventListener('click', onCtaClick);
+    window.addEventListener('pagehide', cleanup, { once: true });
+
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver((entries) => {
+        inView = entries.some((entry) => entry.isIntersecting);
+        if (inView) {
+          startLoading();
+          startLoop();
+        } else {
+          stopLoop();
+          stopMovementAudio();
+        }
+      }, { rootMargin: '120px' });
+      observer.observe(shell);
+    } else {
+      inView = true;
+      startLoading();
+    }
+
+    if ('ResizeObserver' in window) {
+      resizeObserver = new ResizeObserver(resizeRenderer);
+      resizeObserver.observe(shell);
+    } else {
+      listeningResize = true;
+      window.addEventListener('resize', resizeRenderer, { passive: true });
+    }
+  }
+</script>
+
+<style is:global>
+  .mascot-shell { position: absolute; z-index: 2; top: 50%; right: 3.6%; width: clamp(220px, 22vw, 330px); height: clamp(240px, 28vw, 360px); pointer-events: none; transform: translateY(-51%); }
+  .mascot-fallback { position: absolute; inset: 0; display: grid; place-items: center; font: 170px/1 system-ui,sans-serif; filter: drop-shadow(0 8px 0 rgba(9,8,12,.18)); transition: opacity .22s ease; }
+  .mascot-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .25s ease; }
+  .mascot-shell[data-ready="true"] .mascot-fallback { opacity: 0; }
+  .mascot-shell[data-ready="true"] .mascot-canvas { opacity: 1; }
+  @media (max-width: 920px) and (min-width: 701px) { .mascot-shell { right: 1.2%; width: clamp(138px, 17vw, 190px); height: clamp(160px, 20vw, 220px); } .mascot-fallback { font-size: 130px; } }
+  @media (max-width: 700px) { .mascot-shell { position: relative; top: auto; right: auto; width: 146px; height: 142px; margin: -2px auto -4px; transform: none; } .mascot-fallback { font-size: 112px; } }
+  @media (prefers-reduced-motion: reduce) { .mascot-fallback, .mascot-canvas { transition: none; } }
+</style>

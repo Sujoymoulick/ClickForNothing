@@ -1,0 +1,37 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PepeMascot from '../components/PepeMascot.astro';
+const description = "Discover websites you never needed, but somehow won't forget.";
+---
+<SiteLayout title="ClickForNothing — Click Here To Regret It" {description}>
+  <main class="hero-stage">
+    <div class="deco checker checker-top" aria-hidden="true"></div>
+    <div class="deco checker checker-bottom" aria-hidden="true"></div>
+    <div class="deco pink-puddle" aria-hidden="true"></div>
+    <div class="deco purple-puddle" aria-hidden="true"></div>
+    <span class="deco burst burst-pink" aria-hidden="true">✹</span>
+    <span class="deco burst burst-teal" aria-hidden="true">✹</span>
+    <span class="deco burst burst-violet" aria-hidden="true">✷</span>
+    <span class="deco twinkle twinkle-left" aria-hidden="true">✦</span>
+    <span class="deco twinkle twinkle-right" aria-hidden="true">✦</span>
+    <span class="deco squiggle squiggle-pink" aria-hidden="true">〰</span>
+    <span class="deco squiggle squiggle-purple" aria-hidden="true">〰</span>
+    <span class="deco dot dot-one" aria-hidden="true"></span><span class="deco dot dot-two" aria-hidden="true"></span>
+    <span class="deco dot dot-three" aria-hidden="true"></span><span class="deco dot dot-four" aria-hidden="true"></span>
+    <span class="deco dot dot-five" aria-hidden="true"></span>
+    <span class="deco cursor" aria-hidden="true">➤</span>
+
+    <section class="hero-content" aria-labelledby="hero-title">
+      <h1 class="hero-title" id="hero-title"><span class="pink">Click Here To</span><span class="purple">Regret It.</span></h1>
+      <PepeMascot />
+      <p class="hero-subtitle">Discover websites you never needed, but somehow won’t forget.</p>
+      <a class="go-button" href="/discover/" aria-label="Take me to the discovery page">
+        <span>Take Me There!</span><span class="arrow" aria-hidden="true">↗︎</span>
+      </a>
+    </section>
+  </main>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'WebSite', name: 'ClickForNothing',
+    url: 'https://clickfornothing.com/', description,
+  })} />
+</SiteLayout>

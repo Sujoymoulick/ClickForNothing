@@ -1,0 +1,19 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { legalPages } from '../data/legalPages.js';
+
+export function getStaticPaths() {
+  return Object.entries(legalPages).map(([slug, page]) => ({ params: { slug }, props: { ...page, slug } }));
+}
+
+const { title, description, heading, paragraphs, slug } = Astro.props;
+---
+<SiteLayout {title} {description} canonicalPath={`/${slug}/`}>
+  <main class="policy-page">
+    <article>
+      <h1>{heading}</h1>
+      {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      <p><a href="/">Back to ClickForNothing</a></p>
+    </article>
+  </main>
+</SiteLayout>
