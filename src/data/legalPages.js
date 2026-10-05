@@ -10,7 +10,7 @@ export const legalPages = {
   },
   contact: {
     title: 'Contact ClickForNothing', description: 'Contact information for ClickForNothing.', heading: 'Contact',
-    paragraphs: ['There is currently no public contact address for ClickForNothing.'],
+    paragraphs: ['Have a question, feedback, or a wonderfully useless website to share? Reach out to us at contact@clickfornothing.com.'],
   },
   'privacy-policy': {
     title: 'Privacy Policy — ClickForNothing', description: 'Privacy information for ClickForNothing.', heading: 'Privacy Policy',

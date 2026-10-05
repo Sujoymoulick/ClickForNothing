@@ -1,3 +1,8 @@
 User-agent: *
 Allow: /
+
+# Disallow private preview or admin routes if applicable
+Disallow: /api/private/
+
+# Sitemap location
 Sitemap: https://clickfornothing.com/sitemap.xml

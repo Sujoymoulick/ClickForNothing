@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Baloo+2:wght@700;800&amp;display=swap');
+      .title { font-family: 'Lilita One', system-ui, sans-serif; font-size: 76px; font-weight: 900; }
+      .subtitle { font-family: 'Baloo 2', system-ui, sans-serif; font-size: 34px; font-weight: 700; fill: #101014; }
+      .badge { font-family: 'Lilita One', system-ui, sans-serif; font-size: 24px; }
+    </style>
+    <pattern id="checker" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#f4f71a" />
+      <rect x="20" width="20" height="20" fill="#f7fa27" />
+      <rect y="20" width="20" height="20" fill="#f7fa27" />
+      <rect x="20" y="20" width="20" height="20" fill="#f4f71a" />
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#f7fa27" />
+  <rect width="1200" height="630" fill="url(#checker)" opacity="0.35" />
+
+  <!-- Outer border -->
+  <rect x="20" y="20" width="1160" height="590" rx="32" fill="none" stroke="#101014" stroke-width="8" />
+
+  <!-- Colorful Card Container -->
+  <rect x="70" y="70" width="1060" height="490" rx="28" fill="#fff9df" stroke="#101014" stroke-width="6" />
+
+  <!-- Star Decos -->
+  <path d="M960 120 L972 158 L1010 162 L980 188 L988 226 L960 204 L932 226 L940 188 L910 162 L948 158 Z" fill="#f20caf" stroke="#101014" stroke-width="4" />
+  <path d="M160 410 L168 436 L195 439 L174 457 L180 484 L160 468 L140 484 L146 457 L125 439 L152 436 Z" fill="#7025ed" stroke="#101014" stroke-width="4" />
+
+  <!-- Badge -->
+  <g transform="translate(130, 130)">
+    <rect width="280" height="48" rx="24" fill="#f20caf" stroke="#101014" stroke-width="4" />
+    <text x="140" y="32" text-anchor="middle" fill="#ffffff" class="badge" letter-spacing="1">CLICK FOR NOTHING</text>
+  </g>
+
+  <!-- Title -->
+  <text x="130" y="260" class="title">
+    <tspan fill="#f20caf" stroke="#101014" stroke-width="2" paint-order="stroke fill">Click Here To </tspan>
+    <tspan fill="#7025ed" stroke="#101014" stroke-width="2" paint-order="stroke fill">Regret It.</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="130" y="340" class="subtitle">
+    Discover websites you never needed, but somehow won’t forget.
+  </text>
+
+  <!-- Pill tags -->
+  <g transform="translate(130, 420)">
+    <rect width="260" height="54" rx="27" fill="#7025ed" stroke="#101014" stroke-width="4" />
+    <text x="130" y="35" text-anchor="middle" fill="#ffffff" class="badge">Curated Collection ↗</text>
+  </g>
+  <g transform="translate(420, 420)">
+    <rect width="260" height="54" rx="27" fill="#101014" />
+    <text x="130" y="35" text-anchor="middle" fill="#f7fa27" class="badge">100% Free &amp; Pointless</text>
+  </g>
+</svg>

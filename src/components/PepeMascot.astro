@@ -1,4 +1,3 @@
-<link rel="preload" href="/Meshy_AI_T_Posing_Pepe_biped_Animation_01a1093d-f808-7748-b99e-773186993a94_withSkin.glb" as="fetch" crossorigin="anonymous" fetchpriority="high" />
 <div class="mascot-shell" data-mascot aria-hidden="true"></div>
 
 <script>
@@ -403,8 +402,6 @@
         shell.dataset.ready = 'true';
         resizeRenderer();
         startLoop();
-        void preloadStateClip('hover', assets.hover);
-        void preloadStateClip('excited', assets.excited);
       }, undefined, (error) => {
         console.warn('Could not load the 3D mascot.', error);
         disposeRenderer();
@@ -414,11 +411,17 @@
 
     function setCtaHover(value) {
       ctaHovered = value;
+      if (value && !clipPromises.has('hover')) {
+        void preloadStateClip('hover', assets.hover);
+      }
       updateInteractionState();
       startLoop();
     }
 
     function triggerExcited() {
+      if (!clipPromises.has('excited')) {
+        void preloadStateClip('excited', assets.excited);
+      }
       enterState('excited');
       if (canAnimate()) drawFrame(performance.now());
       else startLoop();
@@ -548,12 +551,28 @@
     cta?.addEventListener('click', onCtaClick);
     window.addEventListener('pagehide', cleanup, { once: true });
 
+    function triggerMascotInit() {
+      if (navigator.connection && (navigator.connection.saveData || /2g/.test(navigator.connection.effectiveType || ''))) {
+        return;
+      }
+      if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(() => {
+          startLoading();
+          startLoop();
+        }, { timeout: 1200 });
+      } else {
+        setTimeout(() => {
+          startLoading();
+          startLoop();
+        }, 300);
+      }
+    }
+
     if ('IntersectionObserver' in window) {
       observer = new IntersectionObserver((entries) => {
         inView = entries.some((entry) => entry.isIntersecting);
         if (inView) {
-          startLoading();
-          startLoop();
+          triggerMascotInit();
         } else {
           stopLoop();
           stopMovementAudio();
@@ -562,7 +581,7 @@
       observer.observe(shell);
     } else {
       inView = true;
-      startLoading();
+      triggerMascotInit();
     }
 
     if ('ResizeObserver' in window) {

@@ -1,0 +1,38 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Block indexing on Cloudflare preview/staging subdomains
+https://*.pages.dev/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+https://clickfornothing.pages.dev/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+https://*.workers.dev/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+# Cache hashed static assets
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache 3D models, audio, and images
+/*.glb
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.mp3
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
+
+/site.webmanifest
+  Cache-Control: public, max-age=604800

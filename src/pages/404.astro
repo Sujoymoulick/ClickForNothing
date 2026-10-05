@@ -1,0 +1,38 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const title = '404: Page Not Found — ClickForNothing';
+const description = 'You clicked into the void. This page does not exist, but plenty of useless websites do!';
+---
+<SiteLayout {title} {description} canonicalPath="/404" noindex={true}>
+  <main class="hero-stage">
+    <div class="deco checker checker-top" aria-hidden="true"></div>
+    <div class="deco checker checker-bottom" aria-hidden="true"></div>
+    <div class="deco pink-puddle" aria-hidden="true"></div>
+    <div class="deco purple-puddle" aria-hidden="true"></div>
+    <span class="deco burst burst-pink" aria-hidden="true">✹</span>
+    <span class="deco burst burst-teal" aria-hidden="true">✹</span>
+    <span class="deco burst burst-violet" aria-hidden="true">✷</span>
+    <span class="deco twinkle twinkle-left" aria-hidden="true">✦</span>
+    <span class="deco twinkle twinkle-right" aria-hidden="true">✦</span>
+
+    <section class="hero-content" aria-labelledby="not-found-title" style="max-width: 680px;">
+      <p class="discover-kicker" style="color: var(--pink); font-size: 1.2rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 8px;">Error 404</p>
+      <h1 class="hero-title" id="not-found-title">
+        <span class="pink">Nothing</span>
+        <span class="purple">To See Here.</span>
+      </h1>
+      <p class="hero-subtitle" style="margin: 20px 0 28px;">
+        Even for a site celebrating pointless things, this page is genuinely missing.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center;">
+        <a class="visit-button" href="/" style="text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
+          ← Back to Safety
+        </a>
+        <a class="visit-button" href="/discover/" style="background: var(--purple); text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
+          Discover Random Sites →
+        </a>
+      </div>
+    </section>
+  </main>
+</SiteLayout>
