@@ -1,0 +1,208 @@
+---
+// Vector-accurate neo-brutalist meme illustrations directly drawn for lightweight, crisp rendering
+interface Props {
+  meme: 'pepe-main' | 'trollface' | 'doge' | 'laugh-cry' | 'wojak' | 'shades-pepe' | 'pog-pepe' | 'smug-pepe';
+}
+const { meme } = Astro.props;
+---
+{meme === 'pepe-main' && (
+  <svg class="meme-svg pepe-main-svg" viewBox="0 0 280 260" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Green Pepe Wink">
+    <defs>
+      <radialGradient id="pepeSkin" cx="40%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#84e832"/>
+        <stop offset="65%" stop-color="#55a818"/>
+        <stop offset="100%" stop-color="#347207"/>
+      </radialGradient>
+      <linearGradient id="pepeLips" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ff7f32"/>
+        <stop offset="100%" stop-color="#d44b00"/>
+      </linearGradient>
+      <filter id="pepeShadow" x="-10%" y="-10%" width="130%" height="130%">
+        <feDropShadow dx="6" dy="8" stdDeviation="0" flood-color="#09080c" flood-opacity="1"/>
+      </filter>
+    </defs>
+    <g filter="url(#pepeShadow)">
+      <!-- Head shape -->
+      <path d="M 45 130 C 35 60, 95 20, 160 20 C 220 20, 260 70, 250 140 C 240 185, 230 230, 150 235 C 75 240, 52 185, 45 130 Z" fill="url(#pepeSkin)" stroke="#09080c" stroke-width="5" stroke-linejoin="round"/>
+      
+      <!-- Left Eye: Large wide open -->
+      <ellipse cx="98" cy="88" rx="36" ry="28" fill="#ffffff" stroke="#09080c" stroke-width="4.5"/>
+      <ellipse cx="98" cy="88" rx="36" ry="28" fill="#e6f5d0" fill-opacity="0.3"/>
+      <!-- Left Eye Iris & Pupil -->
+      <ellipse cx="106" cy="90" rx="14" ry="17" fill="#693208" stroke="#09080c" stroke-width="2.5"/>
+      <ellipse cx="107" cy="90" rx="7" ry="11" fill="#09080c"/>
+      <circle cx="103" cy="84" r="4.5" fill="#ffffff"/>
+      <path d="M 60 78 C 80 52, 120 54, 138 72" stroke="#09080c" stroke-width="5.5" stroke-linecap="round"/>
+      <!-- Heavy eye bag -->
+      <path d="M 68 114 C 90 128, 122 122, 135 110" stroke="#255504" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+      <!-- Right Eye: Playful Winking Eye -->
+      <path d="M 165 92 Q 195 65 225 90" stroke="#09080c" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+      <path d="M 160 84 Q 195 52 230 80" stroke="#09080c" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <!-- Cheek crease for wink -->
+      <path d="M 215 102 C 228 108, 232 118, 226 126" stroke="#255504" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+      <!-- Big expressive Pepe Lips -->
+      <!-- Upper Lip -->
+      <path d="M 65 145 C 95 125, 175 125, 230 148 C 220 178, 185 186, 140 184 C 95 182, 70 170, 65 145 Z" fill="url(#pepeLips)" stroke="#09080c" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M 80 148 C 120 135, 180 135, 215 152" stroke="#ffaa66" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <!-- Lip crease line -->
+      <path d="M 72 154 C 115 158, 175 158, 222 153" stroke="#09080c" stroke-width="4" stroke-linecap="round"/>
+      <!-- Lower Lip -->
+      <path d="M 88 178 C 115 210, 175 210, 205 178 C 185 218, 110 218, 88 178 Z" fill="#c73c00" stroke="#09080c" stroke-width="4.5" stroke-linejoin="round"/>
+
+      <!-- Nostrils -->
+      <ellipse cx="140" cy="132" rx="4" ry="2.5" fill="#09080c"/>
+      <ellipse cx="162" cy="132" rx="4" ry="2.5" fill="#09080c"/>
+    </g>
+  </svg>
+)}
+
+{meme === 'trollface' && (
+  <svg class="meme-svg trollface-svg" viewBox="0 0 160 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Trollface">
+    <g filter="drop-shadow(4px 5px 0 #09080c)">
+      <path d="M 28 82 C 15 45, 45 15, 95 18 C 135 20, 152 48, 145 80 C 140 115, 95 132, 55 122 C 35 116, 32 98, 28 82 Z" fill="#ffffff" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Wrinkles -->
+      <path d="M 52 32 C 78 24, 115 28, 130 38" stroke="#09080c" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 60 42 C 82 36, 112 40, 126 48" stroke="#09080c" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Eyes: mischievous narrow squint -->
+      <ellipse cx="62" cy="56" rx="8" ry="5" fill="#09080c" transform="rotate(-15 62 56)"/>
+      <ellipse cx="112" cy="58" rx="8" ry="5" fill="#09080c" transform="rotate(15 112 58)"/>
+      <path d="M 50 50 Q 64 46 76 54" stroke="#09080c" stroke-width="3.5" fill="none"/>
+      <path d="M 100 54 Q 114 48 126 52" stroke="#09080c" stroke-width="3.5" fill="none"/>
+      <!-- Giant Grin Outline -->
+      <path d="M 32 78 C 50 120, 120 120, 142 75 C 115 98, 60 98, 32 78 Z" fill="#ffffff" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Teeth grid -->
+      <path d="M 42 85 L 132 82" stroke="#09080c" stroke-width="3"/>
+      <path d="M 52 80 L 54 94" stroke="#09080c" stroke-width="2.5"/>
+      <path d="M 68 80 L 70 99" stroke="#09080c" stroke-width="2.5"/>
+      <path d="M 86 82 L 87 103" stroke="#09080c" stroke-width="2.5"/>
+      <path d="M 104 82 L 103 100" stroke="#09080c" stroke-width="2.5"/>
+      <path d="M 120 80 L 118 92" stroke="#09080c" stroke-width="2.5"/>
+      <!-- Cheek creases -->
+      <path d="M 24 74 C 22 84, 30 92, 36 94" stroke="#09080c" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 148 70 C 150 80, 142 88, 136 90" stroke="#09080c" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+  </svg>
+)}
+
+{meme === 'doge' && (
+  <svg class="meme-svg doge-svg" viewBox="0 0 150 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Doge Face">
+    <g filter="drop-shadow(4px 5px 0 #09080c)">
+      <!-- Ears -->
+      <polygon points="32,48 20,12 55,30" fill="#c48a3c" stroke="#09080c" stroke-width="4" stroke-linejoin="round"/>
+      <polygon points="118,48 132,14 95,30" fill="#c48a3c" stroke="#09080c" stroke-width="4" stroke-linejoin="round"/>
+      <!-- Face -->
+      <ellipse cx="75" cy="76" rx="55" ry="48" fill="#e8b86d" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Muzzle -->
+      <ellipse cx="75" cy="90" rx="30" ry="24" fill="#fff7e6" stroke="#09080c" stroke-width="3.5"/>
+      <!-- Nose -->
+      <path d="M 68 76 Q 75 72 82 76 Q 75 85 68 76 Z" fill="#09080c"/>
+      <!-- Mouth line -->
+      <path d="M 75 83 L 75 96 M 66 94 Q 75 99 84 94" stroke="#09080c" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <!-- Doge Side-eye Eyes -->
+      <ellipse cx="50" cy="62" rx="10" ry="9" fill="#ffffff" stroke="#09080c" stroke-width="3"/>
+      <circle cx="53" cy="61" r="5" fill="#2d1704"/>
+      <circle cx="51" cy="59" r="1.8" fill="#ffffff"/>
+      <ellipse cx="100" cy="62" rx="10" ry="9" fill="#ffffff" stroke="#09080c" stroke-width="3"/>
+      <circle cx="97" cy="61" r="5" fill="#2d1704"/>
+      <circle cx="95" cy="59" r="1.8" fill="#ffffff"/>
+      <!-- Raised Eyebrows -->
+      <path d="M 40 48 Q 50 42 60 48" stroke="#09080c" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 90 48 Q 100 42 110 48" stroke="#09080c" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+  </svg>
+)}
+
+{meme === 'laugh-cry' && (
+  <svg class="meme-svg laugh-cry-svg" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Laughing Crying Emoji">
+    <g filter="drop-shadow(4px 5px 0 #09080c)">
+      <circle cx="70" cy="70" r="54" fill="#ffcc00" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Big open laughing mouth -->
+      <path d="M 38 72 C 40 106, 100 106, 102 72 Z" fill="#661100" stroke="#09080c" stroke-width="4"/>
+      <!-- Teeth top -->
+      <path d="M 40 73 C 55 82, 85 82, 100 73 Z" fill="#ffffff" stroke="#09080c" stroke-width="2"/>
+      <!-- Tongue bottom -->
+      <path d="M 52 94 C 64 88, 76 88, 88 94 C 80 104, 60 104, 52 94 Z" fill="#ff4d4d"/>
+      <!-- Closed happy squint eyes -->
+      <path d="M 35 56 C 45 42, 57 52, 57 52" stroke="#09080c" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M 105 56 C 95 42, 83 52, 83 52" stroke="#09080c" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <!-- Big Cyan Tears streaming out -->
+      <path d="M 26 58 C 12 66, 14 80, 24 82 C 32 84, 38 72, 35 60 Z" fill="#19e8c5" stroke="#09080c" stroke-width="3.5"/>
+      <path d="M 114 58 C 128 66, 126 80, 116 82 C 108 84, 102 72, 105 60 Z" fill="#19e8c5" stroke="#09080c" stroke-width="3.5"/>
+    </g>
+  </svg>
+)}
+
+{meme === 'wojak' && (
+  <svg class="meme-svg wojak-svg" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Screaming Wojak">
+    <g filter="drop-shadow(4px 5px 0 #09080c)">
+      <path d="M 35 80 C 25 35, 60 18, 100 20 C 130 22, 142 55, 138 95 C 135 125, 95 135, 65 130 C 45 126, 38 105, 35 80 Z" fill="#fcf6ec" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Screaming Giant Open Mouth -->
+      <ellipse cx="92" cy="102" rx="28" ry="22" fill="#09080c" stroke="#09080c" stroke-width="3.5"/>
+      <path d="M 72 90 C 82 85, 102 85, 112 90" stroke="#ffffff" stroke-width="3"/>
+      <ellipse cx="92" cy="114" rx="16" ry="6" fill="#cc3333"/>
+      <!-- Stressed pop eyes -->
+      <circle cx="68" cy="56" r="14" fill="#ffffff" stroke="#09080c" stroke-width="3.5"/>
+      <circle cx="69" cy="56" r="4.5" fill="#09080c"/>
+      <circle cx="110" cy="58" r="14" fill="#ffffff" stroke="#09080c" stroke-width="3.5"/>
+      <circle cx="109" cy="58" r="4.5" fill="#09080c"/>
+      <!-- Stress wrinkles on forehead and cheeks -->
+      <path d="M 60 35 Q 85 28 110 35" stroke="#09080c" stroke-width="2.5" fill="none"/>
+      <path d="M 65 42 Q 85 36 105 42" stroke="#09080c" stroke-width="2.5" fill="none"/>
+      <path d="M 52 76 C 56 86, 60 92, 64 96" stroke="#09080c" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </svg>
+)}
+
+{meme === 'shades-pepe' && (
+  <svg class="meme-svg shades-pepe-svg" viewBox="0 0 150 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Cool Pepe Sunglasses">
+    <g filter="drop-shadow(4px 5px 0 #09080c)">
+      <path d="M 25 75 C 20 35, 55 18, 95 18 C 130 18, 142 50, 138 85 C 132 118, 95 125, 60 122 C 35 120, 26 100, 25 75 Z" fill="#62b823" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Big Cool Pixel / Sleek Black Sunglasses -->
+      <polygon points="30,48 76,46 72,74 38,76" fill="#09080c" stroke="#09080c" stroke-width="2"/>
+      <polygon points="82,46 128,48 120,76 86,74" fill="#09080c" stroke="#09080c" stroke-width="2"/>
+      <rect x="72" y="52" width="14" height="6" fill="#09080c"/>
+      <!-- White shine on shades -->
+      <line x1="42" y1="52" x2="64" y2="70" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+      <line x1="94" y1="52" x2="116" y2="70" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+      <!-- Smug Smirk Lips -->
+      <path d="M 45 92 C 65 84, 105 84, 125 96 C 110 110, 65 110, 45 92 Z" fill="#e66012" stroke="#09080c" stroke-width="3.5"/>
+    </g>
+  </svg>
+)}
+
+{meme === 'pog-pepe' && (
+  <svg class="meme-svg pog-pepe-svg" viewBox="0 0 150 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Surprised Pog Pepe">
+    <g filter="drop-shadow(4px 5px 0 #09080c)">
+      <path d="M 28 75 C 22 35, 55 18, 92 18 C 128 18, 138 50, 135 85 C 130 118, 95 128, 62 124 C 38 120, 30 100, 28 75 Z" fill="#62b823" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Wide shocked eyes -->
+      <ellipse cx="58" cy="52" rx="18" ry="16" fill="#ffffff" stroke="#09080c" stroke-width="3.5"/>
+      <circle cx="60" cy="52" r="7" fill="#09080c"/>
+      <ellipse cx="104" cy="52" rx="18" ry="16" fill="#ffffff" stroke="#09080c" stroke-width="3.5"/>
+      <circle cx="102" cy="52" r="7" fill="#09080c"/>
+      <!-- Pog 'O' Mouth -->
+      <ellipse cx="80" cy="95" rx="16" ry="19" fill="#e66012" stroke="#09080c" stroke-width="4"/>
+      <ellipse cx="80" cy="95" rx="9" ry="12" fill="#09080c"/>
+    </g>
+  </svg>
+)}
+
+{meme === 'smug-pepe' && (
+  <svg class="meme-svg smug-pepe-svg" viewBox="0 0 150 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Smug Pepe">
+    <g filter="drop-shadow(4px 5px 0 #09080c)">
+      <path d="M 26 75 C 20 35, 55 20, 92 20 C 130 20, 140 50, 136 85 C 130 118, 95 126, 60 122 C 35 120, 28 100, 26 75 Z" fill="#62b823" stroke="#09080c" stroke-width="4.5"/>
+      <!-- Droopy smug eyelids -->
+      <ellipse cx="56" cy="56" rx="16" ry="13" fill="#ffffff" stroke="#09080c" stroke-width="3"/>
+      <ellipse cx="58" cy="58" rx="6" ry="6" fill="#09080c"/>
+      <path d="M 38 52 Q 56 46 72 56" stroke="#09080c" stroke-width="4" stroke-linecap="round" fill="#62b823"/>
+      <ellipse cx="102" cy="56" rx="16" ry="13" fill="#ffffff" stroke="#09080c" stroke-width="3"/>
+      <ellipse cx="100" cy="58" rx="6" ry="6" fill="#09080c"/>
+      <path d="M 84 54 Q 102 46 118 52" stroke="#09080c" stroke-width="4" stroke-linecap="round" fill="#62b823"/>
+      <!-- Satisfied smirk -->
+      <path d="M 45 92 C 70 82, 105 82, 126 88 C 112 108, 65 106, 45 92 Z" fill="#e66012" stroke="#09080c" stroke-width="3.5"/>
+      <!-- Smug chin rest finger hint or line -->
+      <path d="M 115 102 C 128 104, 134 116, 128 126" stroke="#09080c" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </g>
+  </svg>
+)}

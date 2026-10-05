@@ -1,0 +1,430 @@
+---
+import MemeArt from './MemeArt.astro';
+
+// Floating Meme and Neo-Brutalist decorative items positioned in peripheral safe zones
+const floatingElements = [
+  // LEFT SIDE MEMES
+  {
+    id: 'pepe-main',
+    type: 'meme',
+    role: 'pepe',
+    meme: 'pepe-main',
+    zone: 'left-center',
+    baseX: 4,
+    baseY: 28,
+    width: 250,
+    height: 232,
+    zIndex: 3,
+    rot: -4,
+    speed: 0.8,
+  },
+  {
+    id: 'pog-pepe',
+    type: 'meme',
+    role: 'small-face',
+    meme: 'pog-pepe',
+    zone: 'left-top',
+    baseX: 8,
+    baseY: 6,
+    width: 120,
+    height: 112,
+    zIndex: 2,
+    rot: -8,
+    speed: 1.1,
+  },
+  {
+    id: 'smug-pepe',
+    type: 'meme',
+    role: 'small-face',
+    meme: 'smug-pepe',
+    zone: 'left-bottom',
+    baseX: 7,
+    baseY: 68,
+    width: 125,
+    height: 116,
+    zIndex: 2,
+    rot: 6,
+    speed: 0.9,
+  },
+  {
+    id: 'doge',
+    type: 'meme',
+    role: 'doge',
+    meme: 'doge',
+    zone: 'left-lower',
+    baseX: 18,
+    baseY: 82,
+    width: 115,
+    height: 108,
+    zIndex: 2,
+    rot: -12,
+    speed: 1.0,
+  },
+
+  // RIGHT SIDE MEMES
+  {
+    id: 'trollface',
+    type: 'meme',
+    role: 'trollface',
+    meme: 'trollface',
+    zone: 'right-top',
+    baseX: 82,
+    baseY: 7,
+    width: 135,
+    height: 118,
+    zIndex: 2,
+    rot: 10,
+    speed: 1.2,
+  },
+  {
+    id: 'laugh-cry',
+    type: 'meme',
+    role: 'small-face',
+    meme: 'laugh-cry',
+    zone: 'right-mid-top',
+    baseX: 86,
+    baseY: 34,
+    width: 115,
+    height: 115,
+    zIndex: 2,
+    rot: -7,
+    speed: 1.3,
+  },
+  {
+    id: 'wojak',
+    type: 'meme',
+    role: 'small-face',
+    meme: 'wojak',
+    zone: 'right-mid-bottom',
+    baseX: 84,
+    baseY: 60,
+    width: 125,
+    height: 125,
+    zIndex: 2,
+    rot: 8,
+    speed: 1.0,
+  },
+  {
+    id: 'shades-pepe',
+    type: 'meme',
+    role: 'small-face',
+    meme: 'shades-pepe',
+    zone: 'right-bottom',
+    baseX: 78,
+    baseY: 82,
+    width: 120,
+    height: 112,
+    zIndex: 2,
+    rot: -6,
+    speed: 1.1,
+  },
+
+  // RETRO SHAPES & ACCENTS
+  {
+    id: 'star-purple-1',
+    type: 'deco',
+    role: 'star',
+    glyph: '✦',
+    color: 'purple',
+    zone: 'left-top-deco',
+    baseX: 20,
+    baseY: 14,
+    width: 44,
+    height: 44,
+    zIndex: 1,
+    rot: 15,
+    speed: 0.7,
+  },
+  {
+    id: 'star-purple-2',
+    type: 'deco',
+    role: 'star',
+    glyph: '✦',
+    color: 'purple',
+    zone: 'right-deco',
+    baseX: 74,
+    baseY: 26,
+    width: 50,
+    height: 50,
+    zIndex: 1,
+    rot: -20,
+    speed: 0.8,
+  },
+  {
+    id: 'burst-pink-1',
+    type: 'deco',
+    role: 'star',
+    glyph: '✹',
+    color: 'pink',
+    zone: 'top-mid-deco',
+    baseX: 52,
+    baseY: 3,
+    width: 52,
+    height: 52,
+    zIndex: 1,
+    rot: 0,
+    speed: 0.6,
+  },
+  {
+    id: 'burst-pink-2',
+    type: 'deco',
+    role: 'star',
+    glyph: '✷',
+    color: 'pink',
+    zone: 'right-top-deco',
+    baseX: 93,
+    baseY: 18,
+    width: 60,
+    height: 60,
+    zIndex: 1,
+    rot: 25,
+    speed: 0.9,
+  },
+  {
+    id: 'dot-cyan-1',
+    type: 'deco',
+    role: 'dot',
+    glyph: '●',
+    color: 'cyan',
+    zone: 'left-dot',
+    baseX: 19,
+    baseY: 55,
+    width: 22,
+    height: 22,
+    zIndex: 1,
+    rot: 0,
+    speed: 1.4,
+  },
+  {
+    id: 'dot-cyan-2',
+    type: 'deco',
+    role: 'dot',
+    glyph: '●',
+    color: 'cyan',
+    zone: 'right-dot',
+    baseX: 77,
+    baseY: 48,
+    width: 20,
+    height: 20,
+    zIndex: 1,
+    rot: 0,
+    speed: 1.2,
+  },
+  {
+    id: 'dot-pink-1',
+    type: 'deco',
+    role: 'dot',
+    glyph: '●',
+    color: 'pink',
+    zone: 'bottom-dot',
+    baseX: 34,
+    baseY: 90,
+    width: 24,
+    height: 24,
+    zIndex: 1,
+    rot: 0,
+    speed: 1.3,
+  },
+  {
+    id: 'squiggle-purple',
+    type: 'deco',
+    role: 'squiggle',
+    glyph: '〰',
+    color: 'purple',
+    zone: 'left-squigg',
+    baseX: 3,
+    baseY: 86,
+    width: 70,
+    height: 40,
+    zIndex: 1,
+    rot: -30,
+    speed: 0.7,
+  },
+  {
+    id: 'action-lines-left',
+    type: 'deco',
+    role: 'action-mark',
+    glyph: '彡',
+    color: 'ink',
+    zone: 'left-action',
+    baseX: 2,
+    baseY: 42,
+    width: 32,
+    height: 32,
+    zIndex: 1,
+    rot: -10,
+    speed: 0.9,
+  },
+  {
+    id: 'action-lines-right',
+    type: 'deco',
+    role: 'action-mark',
+    glyph: '彡',
+    color: 'ink',
+    zone: 'right-action',
+    baseX: 94,
+    baseY: 50,
+    width: 32,
+    height: 32,
+    zIndex: 1,
+    rot: 170,
+    speed: 0.9,
+  },
+];
+---
+
+<div class="meme-floating-canvas" aria-hidden="true" data-meme-stage>
+  {floatingElements.map((item) => (
+    <div
+      class={`floating-item ${item.type === 'meme' ? 'floating-meme' : 'floating-deco'} item-${item.id}`}
+      data-floating-id={item.id}
+      data-role={item.role}
+      data-zone={item.zone}
+      data-base-x={item.baseX}
+      data-base-y={item.baseY}
+      data-speed={item.speed}
+      data-rot={item.rot}
+      style={`left: ${item.baseX}%; top: ${item.baseY}%; width: ${item.width}px; z-index: ${item.zIndex};`}
+    >
+      {item.type === 'meme' ? (
+        <div class="meme-face-wrapper" data-interactive-face>
+          <MemeArt meme={item.meme as any} />
+        </div>
+      ) : (
+        <span class={`deco-glyph color-${item.color}`}>{item.glyph}</span>
+      )}
+    </div>
+  ))}
+</div>
+
+<style is:global>
+  .meme-floating-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .floating-item {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+    transform-origin: center center;
+    contain: layout style;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .floating-meme {
+    pointer-events: auto;
+    cursor: grab;
+  }
+
+  .meme-face-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .floating-meme:hover .meme-face-wrapper {
+    transform: scale(1.18) rotate(-4deg);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.7));
+  }
+
+  .floating-meme:active .meme-face-wrapper {
+    transform: scale(0.92) rotate(6deg);
+  }
+
+  .item-pepe-main:hover .meme-face-wrapper {
+    transform: scale(1.12) rotate(4deg);
+  }
+
+  .meme-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+
+  .deco-glyph {
+    display: inline-block;
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    text-shadow: 3px 4px 0 #09080c;
+  }
+
+  .deco-glyph.color-purple {
+    color: var(--purple, #7025ed);
+    font-size: 42px;
+  }
+
+  .deco-glyph.color-pink {
+    color: var(--pink, #f20caf);
+    font-size: 46px;
+  }
+
+  .deco-glyph.color-cyan {
+    color: var(--cyan, #19e8c5);
+    font-size: 26px;
+  }
+
+  .deco-glyph.color-ink {
+    color: var(--ink, #09080c);
+    font-size: 34px;
+    text-shadow: none;
+    opacity: 0.85;
+  }
+
+  /* Responsive boundary scaling */
+  @media (max-width: 1200px) {
+    .item-pepe-main {
+      width: 200px !important;
+    }
+    .floating-item[data-role="small-face"],
+    .floating-item[data-role="trollface"],
+    .floating-item[data-role="doge"] {
+      width: 95px !important;
+    }
+  }
+
+  @media (max-width: 920px) {
+    .item-pepe-main {
+      width: 160px !important;
+    }
+    .floating-item[data-role="small-face"],
+    .floating-item[data-role="trollface"],
+    .floating-item[data-role="doge"] {
+      width: 80px !important;
+    }
+    .deco-glyph.color-purple,
+    .deco-glyph.color-pink {
+      font-size: 32px;
+    }
+  }
+
+  /* On mobile screens, keep memes gently orbiting in edge margins */
+  @media (max-width: 640px) {
+    .item-pepe-main {
+      width: 125px !important;
+      opacity: 0.9;
+    }
+    .floating-item[data-role="small-face"],
+    .floating-item[data-role="trollface"],
+    .floating-item[data-role="doge"] {
+      width: 65px !important;
+      opacity: 0.85;
+    }
+    .floating-deco {
+      opacity: 0.7;
+    }
+  }
+</style>

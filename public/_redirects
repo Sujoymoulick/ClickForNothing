@@ -1,4 +1,5 @@
 # Cloudflare Pages Redirects
-/terms    /terms-and-conditions/  301
-/privacy  /privacy-policy/        301
-/legal    /terms-and-conditions/  301
+/discover/site  /discover/              302
+/terms          /terms-and-conditions/  301
+/privacy        /privacy-policy/        301
+/legal          /terms-and-conditions/  301

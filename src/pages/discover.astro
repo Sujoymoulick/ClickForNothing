@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import MemeDecoLayer from '../components/MemeDecoLayer.astro';
 import { websites } from '../data/websites.ts';
 
 const description = 'Pick a pointless destination, keep your place, and continue discovering weird corners of the web.';
@@ -8,9 +9,7 @@ const first = destinations[0];
 ---
 <SiteLayout title="Discover Useless Websites — ClickForNothing" {description} canonicalPath="/discover/" noindex={true}>
   <main class="discover-stage">
-    <span class="discover-deco discover-star" aria-hidden="true">✷</span>
-    <span class="discover-deco discover-squiggle" aria-hidden="true">〰</span>
-    <span class="discover-deco discover-dot" aria-hidden="true"></span>
+    <MemeDecoLayer />
     <section class="discover-content" aria-labelledby="discover-title">
       <a class="back-home" href="/">← Back to ClickForNothing</a>
       <p class="discover-kicker">A tiny detour into the unnecessary</p>
@@ -44,6 +43,10 @@ const first = destinations[0];
   </main>
   <script>
     import { websites } from '../data/websites.ts';
+    import { initMemeMovement } from '../scripts/memeMovement.ts';
+
+    // Start autonomous floating meme animation loop
+    initMemeMovement();
 
     const stateKey = 'clickfornothing:discovery:v2';
     const safeSites = websites.flatMap((site) => {
@@ -56,21 +59,34 @@ const first = destinations[0];
         return [];
       }
     });
+
+    const slugify = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+
     const byId = new Map(safeSites.map((site) => [site.id, site]));
+    const bySlug = new Map(safeSites.map((site) => [slugify(site.name), site]));
     const positionById = new Map(safeSites.map((site, index) => [site.id, index + 1]));
     const nameNode = document.querySelector('[data-name]');
     const descriptionNode = document.querySelector('[data-description]');
     const categoryNode = document.querySelector('[data-category]');
     const positionNode = document.querySelector('[data-position]');
-    const visitNode = document.querySelector('[data-visit]');
-    const previousButton = document.querySelector('[data-previous]');
-    const nextButton = document.querySelector('[data-next]');
-    const surpriseButton = document.querySelector('[data-surprise]');
+    const visitNode = document.querySelector('[data-visit]') as HTMLAnchorElement | null;
+    const previousButton = document.querySelector('[data-previous]') as HTMLButtonElement | null;
+    const nextButton = document.querySelector('[data-next]') as HTMLButtonElement | null;
+    const surpriseButton = document.querySelector('[data-surprise]') as HTMLButtonElement | null;
     const emptyNode = document.querySelector('[data-empty]');
 
-    let navState = { history: [], index: -1, cycle: [], cursor: 0 };
+    let navState: { history: string[]; index: number; cycle: string[]; cursor: number } = {
+      history: [],
+      index: -1,
+      cycle: [],
+      cursor: 0,
+    };
 
-    function shuffledIds(excludeId) {
+    function shuffledIds(excludeId?: string) {
       const ids = safeSites.map((site) => site.id).filter((id) => id !== excludeId);
       for (let index = ids.length - 1; index > 0; index -= 1) {
         const other = Math.floor(Math.random() * (index + 1));
@@ -80,34 +96,42 @@ const first = destinations[0];
       return ids;
     }
 
-    function resetCycle(excludeId) {
+    function resetCycle(excludeId?: string) {
       navState.cycle = shuffledIds(excludeId);
       navState.cursor = 0;
     }
 
-    function startCycleAt(siteId) {
+    function startCycleAt(siteId: string) {
       navState.cycle = [siteId, ...shuffledIds(siteId)];
       navState.cursor = 1;
     }
 
     function saveState() {
-      try { window.sessionStorage.setItem(stateKey, JSON.stringify(navState)); } catch { /* Storage can be disabled; in-memory navigation still works. */ }
+      try {
+        window.sessionStorage.setItem(stateKey, JSON.stringify(navState));
+      } catch {
+        /* Storage can be disabled; in-memory navigation still works. */
+      }
     }
 
-    function render(siteId) {
+    function render(siteId: string) {
       const site = byId.get(siteId);
       if (!site) return;
-      nameNode.textContent = site.name;
-      descriptionNode.textContent = site.description;
-      categoryNode.textContent = site.category;
+      if (nameNode) nameNode.textContent = site.name;
+      if (descriptionNode) descriptionNode.textContent = site.description;
+      if (categoryNode) categoryNode.textContent = site.category;
       const cyclePosition = navState.cycle.indexOf(site.id);
-      positionNode.textContent = `${(cyclePosition >= 0 ? cyclePosition : positionById.get(site.id) - 1) + 1} of ${safeSites.length}`;
-      visitNode.href = site.url;
-      visitNode.hidden = false;
+      if (positionNode) {
+        positionNode.textContent = `${(cyclePosition >= 0 ? cyclePosition : (positionById.get(site.id) || 1) - 1) + 1} of ${safeSites.length}`;
+      }
+      if (visitNode) {
+        visitNode.href = site.url;
+        visitNode.hidden = false;
+      }
       emptyNode?.setAttribute('hidden', '');
-      previousButton.disabled = navState.index <= 0;
-      nextButton.disabled = safeSites.length < 2;
-      surpriseButton.disabled = safeSites.length < 2;
+      if (previousButton) previousButton.disabled = navState.index <= 0;
+      if (nextButton) nextButton.disabled = safeSites.length < 2;
+      if (surpriseButton) surpriseButton.disabled = safeSites.length < 2;
     }
 
     function syncUrl(push = true) {
@@ -124,7 +148,7 @@ const first = destinations[0];
       syncUrl(push);
     }
 
-    function consumeNext(randomize) {
+    function consumeNext(randomize: boolean) {
       if (!navState.cycle.length || navState.cycle.length !== safeSites.length) resetCycle();
       if (navState.cursor >= navState.cycle.length) {
         const currentId = navState.history[navState.index];
@@ -142,7 +166,7 @@ const first = destinations[0];
       return site;
     }
 
-    function chooseNew(site) {
+    function chooseNew(site: any) {
       if (!site) return;
       navState.history = navState.history.slice(0, navState.index + 1);
       navState.history.push(site.id);
@@ -150,7 +174,7 @@ const first = destinations[0];
       commit(true);
     }
 
-    function moveTo(index) {
+    function moveTo(index: number) {
       if (index < 0 || index >= navState.history.length) return;
       navState.index = index;
       commit(true);
@@ -158,7 +182,9 @@ const first = destinations[0];
 
     function initialize() {
       if (!safeSites.length) {
-        document.querySelectorAll('[data-previous], [data-next], [data-surprise]').forEach((button) => { button.disabled = true; });
+        document.querySelectorAll('[data-previous], [data-next], [data-surprise]').forEach((button) => {
+          (button as HTMLButtonElement).disabled = true;
+        });
         if (visitNode) visitNode.hidden = true;
         return;
       }
@@ -171,13 +197,35 @@ const first = destinations[0];
           navState.cycle = Array.isArray(saved.cycle) ? saved.cycle.filter((id, index, ids) => byId.has(id) && ids.indexOf(id) === index) : [];
           navState.cursor = Math.min(Math.max(Number(saved.cursor) || 0, 0), navState.cycle.length);
         }
-      } catch { /* Ignore unavailable or malformed session state. */ }
+      } catch {
+        /* Ignore unavailable or malformed session state. */
+      }
 
-      const requestedId = new URL(window.location.href).searchParams.get('site');
+      // Check query params: support ?name=nyan-cat, ?site=nyan-cat, or ?id=nyan-cat
+      const urlParams = new URL(window.location.href).searchParams;
+      const rawParam = urlParams.get('name') || urlParams.get('site') || urlParams.get('id');
+      let requestedId: string | null = null;
+
+      if (rawParam) {
+        const cleanParam = rawParam.trim().toLowerCase();
+        if (byId.has(cleanParam)) {
+          requestedId = cleanParam;
+        } else if (bySlug.has(cleanParam)) {
+          requestedId = bySlug.get(cleanParam)!.id;
+        } else {
+          // Fuzzy search by name prefix or match
+          const matched = safeSites.find(
+            (s) => s.id.toLowerCase() === cleanParam || slugify(s.name) === cleanParam || s.name.toLowerCase() === cleanParam
+          );
+          if (matched) requestedId = matched.id;
+        }
+      }
+
       if (requestedId && byId.has(requestedId)) {
         const existingIndex = navState.history.lastIndexOf(requestedId);
-        if (existingIndex >= 0) navState.index = existingIndex;
-        else {
+        if (existingIndex >= 0) {
+          navState.index = existingIndex;
+        } else {
           if (!navState.cycle.length || navState.cycle.length !== safeSites.length) startCycleAt(requestedId);
           else {
             const requestedCycleIndex = navState.cycle.indexOf(requestedId, navState.cursor);
@@ -200,7 +248,7 @@ const first = destinations[0];
       if (navState.index >= 0) {
         render(navState.history[navState.index]);
         saveState();
-        if (!requestedId) syncUrl(false);
+        if (!rawParam) syncUrl(false);
       }
     }
 
@@ -216,8 +264,12 @@ const first = destinations[0];
       });
       surpriseButton.addEventListener('click', () => chooseNew(consumeNext(true)));
       window.addEventListener('popstate', (event) => {
-        const siteId = event.state?.siteId || new URL(window.location.href).searchParams.get('site');
-        if (!siteId || !byId.has(siteId)) return;
+        const urlParams = new URL(window.location.href).searchParams;
+        const siteParam = event.state?.siteId || urlParams.get('name') || urlParams.get('site') || urlParams.get('id');
+        if (!siteParam) return;
+        const targetSite = byId.get(siteParam) || bySlug.get(slugify(siteParam));
+        if (!targetSite) return;
+        const siteId = targetSite.id;
         const stateIndex = Number(event.state?.index);
         const existingIndex = Number.isInteger(stateIndex) && navState.history[stateIndex] === siteId ? stateIndex : navState.history.lastIndexOf(siteId);
         if (existingIndex >= 0) navState.index = existingIndex;
