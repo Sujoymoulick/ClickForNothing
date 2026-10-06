@@ -10,38 +10,39 @@ const baseUrl = 'https://clickfornothing.com';
 const lastmod = new Date().toISOString().split('T')[0];
 
 export const GET: APIRoute = () => {
-  const staticRoutes = [
-    '/',
-    '/discover/',
-    '/sites/',
-    '/categories/',
-    '/collections/',
-    '/articles/',
-    '/random/',
-    '/submit/',
-    '/search/',
-    '/about/',
-    '/contact/',
-    '/privacy-policy/',
-    '/terms-and-conditions/',
-    '/disclaimer/',
-    '/cookie-policy/',
+  const staticRoutes: { path: string; priority: string; changefreq: string }[] = [
+    { path: '/', priority: '1.0', changefreq: 'daily' },
+    { path: '/discover/', priority: '0.9', changefreq: 'daily' },
+    { path: '/sites/', priority: '0.9', changefreq: 'daily' },
+    { path: '/categories/', priority: '0.8', changefreq: 'daily' },
+    { path: '/collections/', priority: '0.8', changefreq: 'daily' },
+    { path: '/articles/', priority: '0.8', changefreq: 'daily' },
+    { path: '/random/', priority: '0.8', changefreq: 'daily' },
+    { path: '/about/', priority: '0.7', changefreq: 'weekly' },
+    { path: '/search/', priority: '0.7', changefreq: 'weekly' },
+    { path: '/submit/', priority: '0.7', changefreq: 'weekly' },
+    { path: '/contact/', priority: '0.5', changefreq: 'monthly' },
+    { path: '/privacy-policy/', priority: '0.5', changefreq: 'monthly' },
+    { path: '/terms-and-conditions/', priority: '0.5', changefreq: 'monthly' },
+    { path: '/disclaimer/', priority: '0.5', changefreq: 'monthly' },
+    { path: '/cookie-policy/', priority: '0.5', changefreq: 'monthly' },
   ];
 
   const basePaths: { path: string; priority: string; changefreq: string }[] = [
-    ...staticRoutes.map((r) => ({
-      path: r,
-      priority: r === '/' ? '1.0' : '0.8',
-      changefreq: 'daily',
-    })),
-    ...websites.map((w) => ({
-      path: `/sites/${w.slug}/`,
+    ...staticRoutes,
+    ...websites.map((w: any) => ({
+      path: `/sites/${w.slug || w.id}/`,
       priority: '0.8',
       changefreq: 'weekly',
     })),
     ...categories.map((c) => ({
       path: `/categories/${c.slug}/`,
       priority: '0.8',
+      changefreq: 'weekly',
+    })),
+    ...categories.map((c) => ({
+      path: `/random/${c.slug}/`,
+      priority: '0.7',
       changefreq: 'weekly',
     })),
     ...collections.map((col) => ({

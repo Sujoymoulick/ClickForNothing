@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from './config';
+import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from './config.ts';
 import enDict from './en.json';
 
 const cache = new Map<string, Record<string, any>>();
