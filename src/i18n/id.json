@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — situs web yang sungguh tidak berguna",
+    "description": "Temukan situs-situs aneh, tanpa tujuan, dan sangat tidak berguna di internet."
+  },
+  "hero": {
+    "title_start": "Klik Di Sini Untuk",
+    "title_end": "Menyesalinya.",
+    "subtitle": "Temukan situs web yang tidak pernah Anda butuhkan, namun tak bisa dilupakan.",
+    "cta": "Bawa Saya Ke Sana!",
+    "cta_aria": "Pergi ke halaman penjelajahan"
+  },
+  "discover": {
+    "seo_title": "Temukan Situs Tidak Berguna — ClickForNothing",
+    "seo_description": "Pilih tujuan yang sia-sia dan terus temukan sudut-sudut aneh di internet.",
+    "kicker": "Sedikit jalan memutar menuju hal tak penting",
+    "title": "Pilih Penyesalan Anda Berikutnya",
+    "intro": "Satu situs dalam satu waktu. Buka di tab baru, lalu kembali ke sini untuk yang lain.",
+    "visit_btn": "Kunjungi Situs",
+    "visit_hint": "Selesai menyesal? Cari yang lain. Jika gagal memuat, kembali dan coba yang berbeda.",
+    "btn_previous": "← Sebelumnya",
+    "btn_next": "Situs Tidak Berguna Berikutnya →",
+    "btn_surprise": "Beri Saya Kejutan",
+    "scroll_hint": "Gulir untuk penyesalan lainnya",
+    "of": "dari",
+    "empty_badge": "Memuat koleksi",
+    "empty_title": "Belum ada situs yang tersedia",
+    "empty_desc": "Koleksi situs web terverifikasi kosong. Tambahkan destinasi untuk mulai menjelajah."
+  },
+  "lang_selector": {
+    "button_label": "Pilih bahasa",
+    "search_placeholder": "Cari bahasa...",
+    "current_prefix": "Bahasa:"
+  },
+  "footer": {
+    "brand_desc": "Temukan situs-situs aneh, tanpa tujuan, dan sangat tidak berguna di internet.",
+    "about": "Tentang",
+    "contact": "Kontak",
+    "privacy": "Kebijakan Privasi",
+    "terms": "Syarat & Ketentuan",
+    "disclaimer": "Penafian",
+    "cookie_policy": "Kebijakan Cookie",
+    "cookie_settings": "Pengaturan Cookie"
+  },
+  "categories": {
+    "useless-websites": "Situs Tidak Berguna",
+    "weird-websites": "Situs Aneh",
+    "silly-animals": "Hewan Konyol",
+    "interactive": "Keseruan Interaktif",
+    "mini-games": "Game Mini",
+    "creative": "Mainan Kreatif",
+    "visual-oddities": "Keanehan Visual",
+    "music-sounds": "Musik & Suara",
+    "internet-nostalgia": "Nostalgia Internet",
+    "funny-websites": "Situs Lucu",
+    "time-wasters": "Pembuang Waktu",
+    "internet-experiments": "Eksperimen Web",
+    "food-for-thought": "Bahan Renungan"
+  },
+  "category_descriptions": {
+    "useless-websites": "Situs tanpa fungsi praktis yang membuat Anda terus mengklik.",
+    "weird-websites": "Artefak internet aneh dan konsep ganjil.",
+    "silly-animals": "Kucing, anjing, bebek, dan makhluk menari.",
+    "interactive": "Klik, seret, regangkan, dan sentuh layar.",
+    "mini-games": "Game mini yang mencuri 10 menit dari hari Anda.",
+    "creative": "Alat musik, aplikasi menggambar, dan kotak pasir digital.",
+    "visual-oddities": "Loop hipnotis, peninggalan retro, dan visual psikedelik.",
+    "music-sounds": "Soundboard, synthesizer, dan kejutan suara.",
+    "internet-nostalgia": "Energi Web 1.0, estetika GeoCities, dan meme legendaris.",
+    "funny-websites": "Komedi murni, lelucon konyol, dan humor.",
+    "time-wasters": "Tujuan sempurna untuk menunda-nunda pekerjaan.",
+    "internet-experiments": "Mainan web ganjil dan ide-ide eksperimental.",
+    "food-for-thought": "Refleksi unik, ketenangan digital, dan kontemplasi."
+  },
+  "nav": {
+    "home": "Beranda",
+    "discover": "Jelajahi",
+    "categories": "Kategori",
+    "collections": "Koleksi",
+    "articles": "Artikel",
+    "sites": "Situs",
+    "random": "Acak",
+    "submit": "Kirimkan",
+    "search": "Cari"
+  },
+  "search": {
+    "title": "Cari Situs Tidak Berguna",
+    "lead": "Temukan pembuang waktu, fisika kucing, soundboard, atau game seni.",
+    "placeholder": "Ketik kata kunci (misal: kucing, audio, game, retro)...",
+    "showing_all": "Menampilkan semua {count} situs web",
+    "no_results_title": "Tidak ada situs tidak berguna yang cocok 🔍",
+    "no_results_desc": "Coba gunakan kata yang lebih umum seperti \"kucing\", \"game\", atau \"seni\".",
+    "details": "Detail →",
+    "visit": "Kunjungi Situs ↗"
+  },
+  "submit": {
+    "title": "Kirimkan Situs Tidak Berguna",
+    "lead": "Menemukan situs tanpa tujuan atau bikin tertawa? Kirimkan kepada kami!",
+    "btn": "Kirim untuk Ditinjau 🚀",
+    "success": "Kiriman diterima! Terima kasih telah berbagi."
+  },
+  "error_404": {
+    "kicker": "Kesalahan 404",
+    "title_start": "Tidak Ada",
+    "title_end": "Yang Bisa Dilihat di Sini.",
+    "subtitle": "Bahkan untuk situs penuh hal sia-sia, halaman ini benar-benar tidak ada.",
+    "back_home": "← Kembali ke Tempat Aman",
+    "discover": "Jelajahi Situs Acak →"
+  },
+  "about": {
+    "title": "Tentang ClickForNothing — Temukan Internet yang Tidak Berguna",
+    "description": "Pelajari apa itu ClickForNothing dan bagaimana situs ini membantu Anda menemukan hal-hal absurd di web.",
+    "heading": "Tentang ClickForNothing",
+    "intro": "ClickForNothing adalah situs hiburan yang membantu menemukan situs-situs aneh di internet.",
+    "what_is": "Apa itu ClickForNothing?",
+    "what_is_body": "Platform kurasi untuk situs web tak berguna yang menghibur tanpa tujuan tertentu.",
+    "why_exist": "Mengapa Situs Ini Ada?",
+    "why_exist_body": "Kami percaya bagian terbaik dari internet adalah hal-hal aneh yang dibuat murni demi kesenangan."
+  }
+}

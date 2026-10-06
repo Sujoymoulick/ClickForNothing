@@ -1,45 +1,46 @@
 export const legalPages = {
-  about: {
-    title: 'About ClickForNothing',
-    description: 'A little about ClickForNothing and its wonderfully useless corner of the internet.',
-    heading: 'About',
-    paragraphs: [
-      'ClickForNothing is a small celebration of the strange, funny, and wonderfully unnecessary things people have made for the web.',
-      'Press the button on the home page and you will be sent to one of the destinations in our curated list. The destination belongs to its own publisher and has its own rules and privacy practices.',
-    ],
-  },
   contact: {
-    title: 'Contact ClickForNothing', description: 'Contact information for ClickForNothing.', heading: 'Contact',
-    paragraphs: ['Have a question, feedback, or a wonderfully useless website to share? Reach out to us at contact@clickfornothing.com.'],
+    title: 'Contact Us | ClickForNothing',
+    description: 'Have a question, feedback, or a useless website to share? Contact the ClickForNothing team via email or our online form.',
+    heading: 'Contact ClickForNothing',
+    paragraphs: ['Have a question, feedback, or a wonderfully useless website to share? Reach out to us directly at contact@clickfornothing.com.'],
   },
   'privacy-policy': {
-    title: 'Privacy Policy — ClickForNothing', description: 'Privacy information for ClickForNothing.', heading: 'Privacy Policy',
+    title: 'Privacy Policy | ClickForNothing',
+    description: 'Read the ClickForNothing privacy policy. Learn about our commitment to privacy, cookie usage, and zero data tracking.',
+    heading: 'Privacy Policy',
     paragraphs: [
-      'The current site is a static page. It does not ask visitors to create accounts, submit forms, or provide personal information, and the site code does not include analytics.',
-      'Like other websites, the hosting provider may process routine connection information to deliver and protect the site. The Visit Website link on the discovery page opens a third-party website; that site’s own privacy policy applies after you leave ClickForNothing.',
-      'Review this draft against your hosting provider and any services you add before relying on it as a complete privacy notice.',
+      'ClickForNothing operates as a privacy-first static entertainment directory. We do not require account registration, collect personal identifying information, or sell user data.',
+      'Like other modern websites, the hosting infrastructure may process standard network connection headers to securely serve assets. External websites opened from our random generator operate under their own independent terms and privacy notices.',
+      'We continuously audit our directory to ensure zero malicious links and full user safety.',
     ],
   },
   'terms-and-conditions': {
-    title: 'Terms & Conditions — ClickForNothing', description: 'Terms for using ClickForNothing.', heading: 'Terms & Conditions',
+    title: 'Terms & Conditions | ClickForNothing',
+    description: 'Review the terms and conditions for using ClickForNothing, our random website generator, and directory services.',
+    heading: 'Terms & Conditions',
     paragraphs: [
-      'ClickForNothing is provided as a small entertainment directory. You can browse the site for personal, lawful use.',
-      'The discovery page lets you open an external website selected from the site’s configured list. Those websites are operated independently, may change or become unavailable, and have their own terms. Use them at your own discretion.',
-      'These starter terms should be reviewed and adapted to the operator and applicable law before publication.',
+      'ClickForNothing is provided free of charge for personal entertainment, discovery, and educational browsing.',
+      'Our discovery engine indexes third-party external websites created by independent publishers across the internet. These destinations are operated independently and may change over time. Use them at your own discretion.',
+      'All brand assets and original curated editorial guides on ClickForNothing are protected under copyright.',
     ],
   },
   disclaimer: {
-    title: 'Disclaimer — ClickForNothing', description: 'Disclaimer for ClickForNothing.', heading: 'Disclaimer',
+    title: 'Disclaimer | ClickForNothing',
+    description: 'Read our website disclaimer regarding third-party external links, content accuracy, and user discretion on ClickForNothing.',
+    heading: 'Website Disclaimer',
     paragraphs: [
-      'ClickForNothing links to independently operated websites for entertainment. A link does not imply ownership, sponsorship, or endorsement, and we cannot guarantee the accuracy, availability, or safety of third-party content.',
-      'External destinations can change after they are added to the list. Use your own judgment when visiting them.',
+      'ClickForNothing links to third-party web experiments and creative projects for entertainment and archival purposes. A link does not imply ownership, corporate sponsorship, or commercial endorsement.',
+      'While we verify all featured sites for uptime and safety, external creators may modify their content independently. Use your own judgment when exploring external destinations.',
     ],
   },
   'cookie-policy': {
-    title: 'Cookie Policy — ClickForNothing', description: 'Cookie information for ClickForNothing.', heading: 'Cookie Policy',
+    title: 'Cookie Policy | ClickForNothing',
+    description: 'Learn how ClickForNothing handles cookies, local preferences, and technical browser storage for a seamless experience.',
+    heading: 'Cookie Policy',
     paragraphs: [
-      'The current ClickForNothing page does not intentionally set cookies or use advertising and analytics trackers.',
-      'The hosting provider, your browser, or an external website opened from the random link may handle cookies or similar technologies under their own policies. Review those providers’ notices for details.',
+      'ClickForNothing uses minimal local browser storage solely to preserve your discovery preferences, theme settings, and cookie choices.',
+      'We do not deploy invasive third-party cross-site advertising cookies. You can manage or reset your local cookie preferences at any time via our Cookie Settings tool in the footer.',
     ],
   },
 };

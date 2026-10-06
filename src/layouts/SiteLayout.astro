@@ -2,6 +2,8 @@
 import SiteFooter from '../components/SiteFooter.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import '../styles/site.css';
+import { getLocaleDirection, DEFAULT_LOCALE, type SupportedLocale } from '../i18n/config';
+import { getAlternateLinks, getLocaleFromUrl, stripLocaleFromPath, getLocalizedPath } from '../i18n/routing';
 
 interface Props {
   title?: string;
@@ -9,22 +11,64 @@ interface Props {
   canonicalPath?: string;
   noindex?: boolean;
   image?: string;
+  type?: 'website' | 'article';
+  hideFooter?: boolean;
 }
 
 const {
-  title = 'ClickForNothing — wonderfully useless websites',
-  description = 'Discover the weird, pointless and wonderfully useless websites on the internet.',
-  canonicalPath = '/',
+  title = 'The Useless Web: Random Useless Websites | ClickForNothing',
+  description = 'Discover the useless web with our random website generator! Explore 100+ funny and useless websites to pass time in office. Click now to start exploring!',
+  canonicalPath,
   noindex = false,
   image = '/og-image.png',
+  type = 'website',
+  hideFooter = false,
 } = Astro.props;
 
-const siteUrl = Astro.site ?? 'https://clickfornothing.com';
-const canonical = new URL(canonicalPath, siteUrl).href;
+const siteUrl = Astro.site?.toString() ?? 'https://clickfornothing.com';
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const dir = getLocaleDirection(currentLocale);
+
+// Localize pagePath for the current locale so canonical and alternate hreflangs match the page
+const basePath = canonicalPath ? stripLocaleFromPath(canonicalPath) : stripLocaleFromPath(Astro.url.pathname);
+const pagePath = getLocalizedPath(basePath, currentLocale);
+const { canonicalUrl, alternates } = getAlternateLinks(pagePath, siteUrl);
 const imageURL = new URL(image, siteUrl).href;
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': 'https://clickfornothing.com/#organization',
+  name: 'ClickForNothing',
+  url: 'https://clickfornothing.com/',
+  logo: 'https://clickfornothing.com/android-chrome-512x512.png',
+  description: 'The premier destination to explore the useless web and discover funny, weird, and random websites.',
+  sameAs: [],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': 'https://clickfornothing.com/#website',
+  url: 'https://clickfornothing.com/',
+  name: 'ClickForNothing',
+  alternateName: ['The Useless Web', 'The Pointless Web', 'Random Useless Website Generator'],
+  description: 'Discover the useless web and explore 100+ weird, funny, and wonderfully pointless websites on demand.',
+  publisher: {
+    '@id': 'https://clickfornothing.com/#organization',
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://clickfornothing.com/search/?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
 ---
 <!doctype html>
-<html lang="en">
+<html lang={currentLocale} dir={dir}>
   <head>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-L9R73KX5CB"></script>
@@ -45,12 +89,21 @@ const imageURL = new URL(image, siteUrl).href;
     <meta name="description" content={description} />
 
     {noindex ? (
-      <meta name="robots" content="noindex, follow" />
+      <>
+        <meta name="robots" content="noindex, follow" />
+        <meta name="googlebot" content="noindex, follow" />
+      </>
     ) : (
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <>
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      </>
     )}
 
-    <link rel="canonical" href={canonical} />
+    <link rel="canonical" href={canonicalUrl} />
+    {alternates.map((alt) => (
+      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+    ))}
     <link rel="sitemap" href="/sitemap.xml" />
 
     <!-- Standard Favicons -->
@@ -68,9 +121,10 @@ const imageURL = new URL(image, siteUrl).href;
     <link rel="manifest" href="/site.webmanifest" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
     <meta property="og:site_name" content="ClickForNothing" />
-    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={currentLocale} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={imageURL} />
@@ -80,18 +134,23 @@ const imageURL = new URL(image, siteUrl).href;
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:url" content={canonicalUrl} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageURL} />
+    <meta name="twitter:image:alt" content={title} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lilita+One&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lilita+One&family=Noto+Sans+Arabic:wght@500;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Global Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
   </head>
   <body>
     <slot />
-    <SiteFooter />
+    {!hideFooter && <SiteFooter />}
     <CookieBanner />
   </body>
 </html>

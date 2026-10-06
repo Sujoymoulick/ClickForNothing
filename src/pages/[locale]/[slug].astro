@@ -1,0 +1,21 @@
+---
+import LegalView from '../../views/LegalView.astro';
+import { NON_DEFAULT_LOCALES } from '../../i18n/config';
+import { legalPages } from '../../data/legalPages.js';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const locale of NON_DEFAULT_LOCALES) {
+    for (const [slug, page] of Object.entries(legalPages)) {
+      paths.push({
+        params: { locale, slug },
+        props: { ...page, slug },
+      });
+    }
+  }
+  return paths;
+}
+
+const props = Astro.props;
+---
+<LegalView {...props} />

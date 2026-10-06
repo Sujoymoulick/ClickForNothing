@@ -1,0 +1,436 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { categories } from '../data/categories.ts';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = "Submissions & User Login Portal Coming Soon | ClickForNothing";
+const description = "Website submissions and our community user login portal are coming soon to ClickForNothing! Create accounts, save favorite useless websites, and submit new projects.";
+
+const homeUrl = getLocalizedPath('/', currentLocale);
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
+const sitesUrl = getLocalizedPath('/sites/', currentLocale);
+const aboutUrl = getLocalizedPath('/about/', currentLocale);
+---
+<SiteLayout {title} {description} canonicalPath="/submit/">
+  <div class="submit-page-wrapper">
+    <!-- Centered Coming Soon Overlay Card -->
+    <div class="coming-soon-overlay">
+      <div class="coming-soon-card">
+        <div class="cs-badge-wrapper">
+          <span class="cs-badge">✨ COMING SOON</span>
+          <span class="cs-sub-badge">IN ACTIVE DEVELOPMENT</span>
+        </div>
+
+        <h1 class="cs-title">
+          Website Submissions & <span class="highlight-pink">User Login Portal</span> Coming Soon!
+        </h1>
+
+        <p class="cs-lead">
+          We are building an all-new interactive <strong>Community Portal & Member Dashboard</strong>. Soon you'll be able to create an account, log in, submit your favorite useless websites, track approval status, and vote on community favorites!
+        </p>
+
+        <div class="cs-features-grid">
+          <div class="cs-feature-item">
+            <div class="cs-feature-icon">🔐</div>
+            <div class="cs-feature-text">
+              <h3>User Login & Profiles</h3>
+              <p>Log into your personal dashboard, bookmark favorite weird sites, and customize your discovery feed.</p>
+            </div>
+          </div>
+
+          <div class="cs-feature-item">
+            <div class="cs-feature-icon">📮</div>
+            <div class="cs-feature-text">
+              <h3>Self-Serve Submissions</h3>
+              <p>Submit your own indie projects or discovered gems directly with instant validation and moderation status.</p>
+            </div>
+          </div>
+
+          <div class="cs-feature-item">
+            <div class="cs-feature-icon">🏆</div>
+            <div class="cs-feature-text">
+              <h3>Community Badges & Votes</h3>
+              <p>Upvote the most hilarious useless websites and earn top contributor badges in our monthly hall of fame.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="cs-actions">
+          <a href={discoverUrl} class="cs-btn cs-btn-primary">
+            <span>🎲 Explore Random Websites</span>
+          </a>
+          <a href={sitesUrl} class="cs-btn cs-btn-secondary">
+            <span>📂 Browse Directory</span>
+          </a>
+          <a href={homeUrl} class="cs-btn cs-btn-outline">
+            <span>🏠 Back to Home</span>
+          </a>
+        </div>
+
+        <p class="cs-footer-note">
+          💡 Have an urgent suggestion or partnership inquiry? You can reach us via our <a href={aboutUrl}>About page</a> while the login portal is being finished.
+        </p>
+      </div>
+    </div>
+
+    <!-- Blurred Background Content -->
+    <main class="submit-container submit-content-blurred" aria-hidden="true" tabindex="-1">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs" style="display: flex; gap: 8px; font-size: 0.9rem; color: #a1a1aa; margin-bottom: 20px;">
+        <a href={homeUrl} style="color: #f7fa27; text-decoration: none;">{t('nav.home')}</a> <span>/</span> <span aria-current="page" style="color: #fff;">{t('nav.submit')}</span>
+      </nav>
+      <header class="submit-header">
+        <span class="emoji-icon">📮</span>
+        <h2>{t('submit.title')}</h2>
+        <p class="lead">
+          {t('submit.lead')}
+        </p>
+      </header>
+
+      <section class="form-section">
+        <form class="submit-form" data-submit-form onsubmit="return false;">
+          <div class="form-group">
+            <label for="website-url">Website URL <span class="req">*</span></label>
+            <input type="url" id="website-url" name="url" placeholder="https://example.com/" disabled />
+            <small>Must start with https://. No malware, adult content, or spam links.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="website-name">Website Name <span class="req">*</span></label>
+            <input type="text" id="website-name" name="name" placeholder="e.g. Cat Bounce" disabled />
+          </div>
+
+          <div class="form-group">
+            <label for="website-category">Category <span class="req">*</span></label>
+            <select id="website-category" name="category" disabled>
+              <option value="">Select a category...</option>
+              {categories.map((cat) => (
+                <option value={cat.slug}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="website-description">Short Description <span class="req">*</span></label>
+            <textarea id="website-description" name="description" rows="3" placeholder="What does the website do?" disabled></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="why-useless">Why is it Useless? <span class="req">*</span></label>
+            <textarea id="why-useless" name="whyUseless" rows="3" placeholder="Explain why this website serves no practical purpose." disabled></textarea>
+          </div>
+
+          <button type="button" class="submit-btn" disabled>{t('submit.btn')}</button>
+        </form>
+      </section>
+
+      <section class="guidelines-box">
+        <h3>Submission Guidelines & Rules</h3>
+        <ul>
+          <li>✅ <strong>Must be real & safe:</strong> HTTPS supported, no dead links, no malware.</li>
+          <li>✅ <strong>Must be useless/fun:</strong> Web games, art toys, funny soundboards, or retro experiments.</li>
+          <li>❌ <strong>Rejected:</strong> Commercial spam, affiliate farms, AI auto-generated content, adult content, or phishing.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</SiteLayout>
+
+<style>
+  .submit-page-wrapper {
+    position: relative;
+    min-height: calc(100vh - 120px);
+    overflow: hidden;
+    padding: 32px 16px 80px;
+  }
+
+  /* Blurred Background Layer */
+  .submit-content-blurred {
+    filter: blur(10px) brightness(0.65);
+    opacity: 0.4;
+    user-select: none;
+    pointer-events: none;
+    transform: scale(0.98);
+    transition: all 0.3s ease;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* Coming Soon Overlay Container */
+  .coming-soon-overlay {
+    position: relative;
+    z-index: 10;
+    max-width: 820px;
+    margin: 0 auto 40px auto;
+    padding: 0 8px;
+    animation: fadeInCard 0.4s ease-out;
+  }
+
+  @keyframes fadeInCard {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .coming-soon-card {
+    background: linear-gradient(145deg, #181524 0%, #100e18 100%);
+    border: 3px solid #7025ed;
+    border-radius: 28px;
+    padding: clamp(28px, 5vw, 48px);
+    box-shadow:
+      0 20px 50px rgba(0, 0, 0, 0.65),
+      0 0 35px rgba(242, 12, 175, 0.22),
+      0 6px 0 #09080c;
+    text-align: center;
+    color: #f4f4f5;
+  }
+
+  .cs-badge-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .cs-badge {
+    display: inline-block;
+    background: #f20caf;
+    color: #ffffff;
+    font: 800 0.85rem/1 'Baloo 2', system-ui, sans-serif;
+    padding: 6px 14px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    box-shadow: 0 3px 0 #09080c;
+  }
+
+  .cs-sub-badge {
+    display: inline-block;
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    color: #f7fa27;
+    font: 700 0.8rem/1 'Baloo 2', system-ui, sans-serif;
+    padding: 5px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+  }
+
+  .cs-title {
+    font: 800 clamp(2rem, 4.2vw, 3rem)/1.15 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin: 0 0 16px 0;
+    text-shadow: 2px 2px 0 #09080c;
+  }
+
+  .highlight-pink {
+    color: #f20caf;
+    background: linear-gradient(90deg, #f20caf, #ff60cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cs-lead {
+    font: 500 1.12rem/1.6 'Baloo 2', system-ui, sans-serif;
+    color: #d4d4d8;
+    max-width: 680px;
+    margin: 0 auto 32px auto;
+  }
+
+  .cs-lead strong {
+    color: #f7fa27;
+  }
+
+  .cs-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+    text-align: left;
+  }
+
+  .cs-feature-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 20px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .cs-feature-item:hover {
+    transform: translateY(-3px);
+    border-color: rgba(242, 12, 175, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .cs-feature-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .cs-feature-text h3 {
+    font: 700 1.15rem/1.2 'Lilita One', system-ui, sans-serif;
+    color: #f7fa27;
+    margin: 0 0 6px 0;
+  }
+
+  .cs-feature-text p {
+    font: 500 0.92rem/1.45 'Baloo 2', system-ui, sans-serif;
+    color: #a1a1aa;
+    margin: 0;
+  }
+
+  .cs-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .cs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 26px;
+    border-radius: 14px;
+    font: 800 1.05rem/1 'Lilita One', system-ui, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  }
+
+  .cs-btn-primary {
+    background: #f20caf;
+    color: #ffffff;
+    border: 2px solid #09080c;
+    box-shadow: 0 4px 0 #09080c;
+  }
+
+  .cs-btn-primary:hover {
+    transform: translateY(-2px);
+    background: #e006a0;
+    box-shadow: 0 6px 0 #09080c;
+  }
+
+  .cs-btn-secondary {
+    background: #7025ed;
+    color: #ffffff;
+    border: 2px solid #09080c;
+    box-shadow: 0 4px 0 #09080c;
+  }
+
+  .cs-btn-secondary:hover {
+    transform: translateY(-2px);
+    background: #5f1bd1;
+    box-shadow: 0 6px 0 #09080c;
+  }
+
+  .cs-btn-outline {
+    background: #27272a;
+    color: #f4f4f5;
+    border: 2px solid #3f3f46;
+  }
+
+  .cs-btn-outline:hover {
+    transform: translateY(-2px);
+    background: #3f3f46;
+    color: #ffffff;
+  }
+
+  .cs-footer-note {
+    font: 500 0.92rem/1.5 'Baloo 2', system-ui, sans-serif;
+    color: #a1a1aa;
+    margin: 0;
+  }
+
+  .cs-footer-note a {
+    color: #f7fa27;
+    text-decoration: underline;
+    font-weight: 700;
+  }
+
+  .cs-footer-note a:hover {
+    color: #f20caf;
+  }
+
+  /* Underlying Form Styles */
+  .submit-container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+    color: #f4f4f5;
+  }
+  .submit-header { text-align: center; margin-bottom: 36px; }
+  .emoji-icon { font-size: 3.5rem; display: block; margin-bottom: 12px; }
+  .submit-header h2 {
+    font: 800 clamp(2.2rem, 4.5vw, 3.2rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 10px;
+  }
+  .lead { font-size: 1.1rem; color: #d4d4d8; line-height: 1.5; }
+
+  .form-section {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 40px;
+  }
+  .submit-form { display: flex; flex-direction: column; gap: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-weight: 700; font-size: 0.98rem; color: #f7fa27; }
+  .req { color: #f20caf; }
+  .form-group input, .form-group select, .form-group textarea {
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #fff;
+    font: 500 1rem/1.4 'Baloo 2', system-ui, sans-serif;
+  }
+  .form-group small { font-size: 0.82rem; color: #a1a1aa; }
+
+  .submit-btn {
+    background: #f20caf;
+    color: #fff;
+    font: 800 1.1rem/1 'Lilita One', system-ui, sans-serif;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .guidelines-box {
+    background: #18181b;
+    border-left: 4px solid #a855f7;
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .guidelines-box h3 { font: 700 1.3rem/1.2 'Lilita One', system-ui, sans-serif; color: #a855f7; margin-bottom: 12px; }
+  .guidelines-box ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .guidelines-box li { font-size: 0.96rem; color: #d4d4d8; line-height: 1.4; }
+
+  @media (max-width: 640px) {
+    .cs-actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    .cs-btn {
+      width: 100%;
+    }
+    .coming-soon-card {
+      padding: 24px 18px;
+    }
+  }
+</style>

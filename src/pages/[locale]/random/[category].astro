@@ -1,0 +1,21 @@
+---
+import RandomCategoryView from '../../../views/RandomCategoryView.astro';
+import { NON_DEFAULT_LOCALES } from '../../../i18n/config';
+import { categories } from '../../../data/categories';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const locale of NON_DEFAULT_LOCALES) {
+    for (const cat of categories) {
+      paths.push({
+        params: { locale, category: cat.slug },
+        props: { categoryObj: cat },
+      });
+    }
+  }
+  return paths;
+}
+
+const { categoryObj } = Astro.props;
+---
+<RandomCategoryView categoryObj={categoryObj} />

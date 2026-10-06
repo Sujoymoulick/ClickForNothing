@@ -1,4 +1,20 @@
-<div class="mascot-shell" data-mascot aria-hidden="true"></div>
+<div class="mascot-shell" data-mascot role="region" aria-label="Interactive 3D Pepe mascot">
+  <button
+    class="mascot-sound-badge"
+    type="button"
+    data-sound-toggle
+    aria-label="Toggle mascot sound"
+    title="Hover mascot to play oo-ee-a-ea sound. Click to mute/unmute"
+  >
+    <span class="sound-icon" data-sound-icon aria-hidden="true">🔊</span>
+    <span class="sound-text" data-sound-text>oo-ee-a-ea</span>
+    <span class="sound-waves" data-sound-waves aria-hidden="true">
+      <span class="bar bar-1"></span>
+      <span class="bar bar-2"></span>
+      <span class="bar bar-3"></span>
+    </span>
+  </button>
+</div>
 
 <script>
   const shell = document.querySelector('[data-mascot]');
@@ -6,11 +22,16 @@
   const cta = stage?.querySelector('.go-button');
 
   if (shell && stage) {
+    const soundToggleBtn = shell.querySelector('[data-sound-toggle]');
+    const soundIcon = shell.querySelector('[data-sound-icon]');
+    const soundText = shell.querySelector('[data-sound-text]');
+
     const assets = {
       idle: '/Meshy_AI_T_Posing_Pepe_biped_Animation_01a1093d-f808-7748-b99e-773186993a94_withSkin.glb',
       hover: '/Meshy_AI_T_Posing_Pepe_biped_Animation_Walking_withSkin.glb',
       excited: '/Meshy_AI_T_Posing_Pepe_biped_Animation_Running_withSkin.glb',
     };
+
     let renderer;
     let scene;
     let camera;
@@ -36,7 +57,6 @@
     let headBone;
     let headOffsetEuler;
     let headOffsetQuaternion;
-    let rigSignature = new Map();
     let headLookX = 0;
     let headLookY = 0;
     let pointerX = 0;
@@ -50,10 +70,184 @@
     let modelHeight = 1;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const clipPromises = new Map();
+
+    // Sound effects setup
+    const TARGET_VOLUME = 0.4;
     const movementAudio = new Audio('/oo-ee-a-ea.mp3');
-    movementAudio.preload = 'none';
+    movementAudio.preload = 'auto';
     movementAudio.loop = true;
-    movementAudio.volume = 0.35;
+    movementAudio.volume = 0;
+
+    let isMuted = false;
+    let isSoundRequested = false;
+    let userHasInteracted = false;
+    let fadeTimer = 0;
+    let resetIdleTimer = 0;
+
+    // Web Audio Stereo Panner
+    let audioCtx = null;
+    let audioSourceNode = null;
+    let pannerNode = null;
+
+    function initWebAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        audioCtx = new AudioContextClass();
+        if (typeof audioCtx.createStereoPanner === 'function') {
+          pannerNode = audioCtx.createStereoPanner();
+          audioSourceNode = audioCtx.createMediaElementSource(movementAudio);
+          audioSourceNode.connect(pannerNode);
+          pannerNode.connect(audioCtx.destination);
+        }
+      } catch (e) {
+        // Fallback: standard audio playback without stereo panning
+      }
+    }
+
+    function updateSoundUI(isPlaying, needsGesture = false) {
+      if (!soundToggleBtn) return;
+
+      soundToggleBtn.classList.toggle('is-playing', isPlaying && !isMuted);
+      soundToggleBtn.classList.toggle('is-muted', isMuted);
+      soundToggleBtn.classList.toggle('needs-gesture', needsGesture && !isMuted && isSoundRequested);
+
+      if (isMuted) {
+        if (soundIcon) soundIcon.textContent = '🔇';
+        if (soundText) soundText.textContent = 'Muted';
+        soundToggleBtn.setAttribute('aria-label', 'Unmute mascot sound');
+        soundToggleBtn.setAttribute('title', 'Sound is muted. Click to unmute');
+      } else if (needsGesture && isSoundRequested) {
+        if (soundIcon) soundIcon.textContent = '🎵';
+        if (soundText) soundText.textContent = 'Click for sound';
+        soundToggleBtn.setAttribute('aria-label', 'Click to enable mascot sound in your browser');
+        soundToggleBtn.setAttribute('title', 'Click to enable sound');
+      } else if (isPlaying) {
+        if (soundIcon) soundIcon.textContent = '🔊';
+        if (soundText) soundText.textContent = 'oo-ee-a-ea';
+        soundToggleBtn.setAttribute('aria-label', 'Mascot sound playing. Click to mute');
+        soundToggleBtn.setAttribute('title', 'Playing oo-ee-a-ea. Click to mute');
+      } else {
+        if (soundIcon) soundIcon.textContent = '🔊';
+        if (soundText) soundText.textContent = 'oo-ee-a-ea';
+        soundToggleBtn.setAttribute('aria-label', 'Mascot sound enabled. Hover mascot to play');
+        soundToggleBtn.setAttribute('title', 'Hover mascot to play oo-ee-a-ea sound. Click to mute');
+      }
+    }
+
+    function rampVolume(target, duration = 150, onComplete) {
+      if (fadeTimer) {
+        window.clearInterval(fadeTimer);
+        fadeTimer = 0;
+      }
+      const start = movementAudio.volume;
+      const diff = target - start;
+      if (Math.abs(diff) < 0.02) {
+        movementAudio.volume = target;
+        if (onComplete) onComplete();
+        return;
+      }
+      const steps = 10;
+      const stepTime = Math.max(10, Math.floor(duration / steps));
+      let curStep = 0;
+      fadeTimer = window.setInterval(() => {
+        curStep++;
+        const progress = Math.min(1, curStep / steps);
+        movementAudio.volume = Math.max(0, Math.min(1, start + diff * progress));
+        if (curStep >= steps) {
+          window.clearInterval(fadeTimer);
+          fadeTimer = 0;
+          movementAudio.volume = target;
+          if (onComplete) onComplete();
+        }
+      }, stepTime);
+    }
+
+    function startMovementAudio() {
+      if (isMuted || disposed || !pageVisible || reducedMotion.matches) return;
+      isSoundRequested = true;
+
+      if (resetIdleTimer) {
+        window.clearTimeout(resetIdleTimer);
+        resetIdleTimer = 0;
+      }
+
+      if (audioCtx && audioCtx.state === 'suspended' && userHasInteracted) {
+        audioCtx.resume().catch(() => {});
+      }
+
+      if (!movementAudio.paused) {
+        rampVolume(TARGET_VOLUME, 120);
+        updateSoundUI(true);
+        return;
+      }
+
+      movementAudio.volume = 0;
+      const playPromise = movementAudio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            userHasInteracted = true;
+            rampVolume(TARGET_VOLUME, 150);
+            updateSoundUI(true);
+          })
+          .catch(() => {
+            updateSoundUI(false, true);
+          });
+      }
+    }
+
+    function stopMovementAudio() {
+      isSoundRequested = false;
+      updateSoundUI(false);
+
+      if (movementAudio.paused) return;
+
+      rampVolume(0, 150, () => {
+        if (!isSoundRequested) {
+          movementAudio.pause();
+          if (!resetIdleTimer) {
+            resetIdleTimer = window.setTimeout(() => {
+              resetIdleTimer = 0;
+              if (movementAudio.paused) {
+                movementAudio.currentTime = 0;
+              }
+            }, 3500);
+          }
+        }
+      });
+    }
+
+    function handleUserActivation() {
+      userHasInteracted = true;
+      initWebAudio();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      if (isSoundRequested && !isMuted) {
+        startMovementAudio();
+      }
+    }
+
+    window.addEventListener('pointerdown', handleUserActivation, { passive: true });
+    window.addEventListener('click', handleUserActivation, { passive: true });
+    window.addEventListener('keydown', handleUserActivation, { passive: true });
+    window.addEventListener('touchstart', handleUserActivation, { passive: true });
+
+    if (soundToggleBtn) {
+      soundToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleUserActivation();
+        isMuted = !isMuted;
+        if (isMuted) {
+          stopMovementAudio();
+        } else {
+          updateSoundUI(false);
+          startMovementAudio();
+        }
+      });
+    }
 
     function renderOnce() {
       if (loaded && renderer && scene && camera && !disposed) renderer.render(scene, camera);
@@ -94,28 +288,17 @@
       activeAction = next;
     }
 
-    function stopMovementAudio() {
-      movementAudio.pause();
-      movementAudio.currentTime = 0;
-    }
-
-    function syncMovementAudio(state) {
-      if (state !== 'hover' && state !== 'excited') {
-        stopMovementAudio();
-        return;
-      }
-      if (!loaded || !inView || !pageVisible || reducedMotion.matches || disposed || !movementAudio.paused) return;
-      // Playback is tied to a user-triggered movement state. If the browser
-      // blocks it, the mascot and its existing interaction remain unaffected.
-      void movementAudio.play().catch(() => {});
-    }
-
     function enterState(next) {
       if (animationState === next) return;
       animationState = next;
       stateTime = 0;
       playClipFor(next);
-      syncMovementAudio(next);
+
+      if (next === 'hover' || next === 'excited') {
+        startMovementAudio();
+      } else {
+        stopMovementAudio();
+      }
     }
 
     function returnToIdle() {
@@ -151,8 +334,6 @@
       headLookY = three.MathUtils.lerp(headLookY, targetY, follow);
       if (mixer) mixer.update(delta);
       if (headBone) {
-        // Add the cursor offset after the current clip has posed the head.
-        // This keeps the animated quaternion as the base pose each frame.
         headOffsetEuler.set(headLookX, headLookY, 0);
         headOffsetQuaternion.setFromEuler(headOffsetEuler);
         headBone.quaternion.multiply(headOffsetQuaternion);
@@ -176,8 +357,6 @@
       const fitHeight = modelHeight * baseScale;
       const fitWidth = fitHeight * camera.aspect;
       const fitSpan = Math.max(fitHeight, fitWidth);
-      // Extra framing margin accommodates the full stride on the walking and
-      // running clips without cutting off Pepe's head or feet.
       const distance = fitSpan / (2 * Math.tan(three.MathUtils.degToRad(camera.fov / 2))) * 1.45;
       camera.position.set(0, fitHeight * 0.5, distance);
       camera.lookAt(0, fitHeight * 0.5, 0);
@@ -185,148 +364,30 @@
       renderOnce();
     }
 
-    function decodeGlbHeader(bytes) {
-      if (bytes.byteLength < 20) throw new Error('Invalid GLB header.');
-      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-      if (view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2) throw new Error('Unsupported GLB file.');
-      return { totalLength: view.getUint32(8, true), jsonLength: view.getUint32(12, true) };
-    }
-
-    async function requestBytes(url, start, end) {
-      const response = await fetch(url, { headers: { Range: `bytes=${start}-${end}` } });
-      if (!response.ok) throw new Error(`Could not fetch animation data (${response.status}).`);
-      return { status: response.status, bytes: new Uint8Array(await response.arrayBuffer()) };
-    }
-
-    function toBase64(bytes) {
-      let binary = '';
-      for (let start = 0; start < bytes.length; start += 0x8000) {
-        binary += String.fromCharCode(...bytes.subarray(start, Math.min(start + 0x8000, bytes.length)));
-      }
-      return btoa(binary);
-    }
-
-    async function loadAnimationOnly(url) {
-      const headerResponse = await requestBytes(url, 0, 19);
-      let fullFile = headerResponse.status === 200 ? headerResponse.bytes : undefined;
-      const headerBytes = fullFile || headerResponse.bytes;
-      const { totalLength, jsonLength } = decodeGlbHeader(headerBytes);
-      let jsonBytes;
-      if (fullFile) jsonBytes = fullFile.subarray(20, 20 + jsonLength);
-      else {
-        const jsonResponse = await requestBytes(url, 20, 19 + jsonLength);
-        if (jsonResponse.status === 200) {
-          fullFile = jsonResponse.bytes;
-          jsonBytes = fullFile.subarray(20, 20 + jsonLength);
-        } else jsonBytes = jsonResponse.bytes;
-      }
-      const source = JSON.parse(new TextDecoder().decode(jsonBytes));
-      if (!source.animations?.length || !source.buffers?.[0]) throw new Error('GLB has no animation data.');
-
-      const oldViews = new Set();
-      const oldAccessors = new Set();
-      for (const animation of source.animations) {
-        for (const sampler of animation.samplers) {
-          oldAccessors.add(sampler.input);
-          oldAccessors.add(sampler.output);
-        }
-      }
-      for (const index of oldAccessors) {
-        const accessor = source.accessors[index];
-        if (accessor?.bufferView === undefined || accessor.sparse) throw new Error('Unsupported sparse animation accessor.');
-        oldViews.add(accessor.bufferView);
-      }
-      const sourceViews = [...oldViews].map((index) => source.bufferViews[index]);
-      const start = Math.min(...sourceViews.map((view) => view.byteOffset || 0));
-      const end = Math.max(...sourceViews.map((view) => (view.byteOffset || 0) + view.byteLength));
-      const binaryStart = 28 + jsonLength;
-      let animationBytes;
-      if (fullFile) animationBytes = fullFile.subarray(binaryStart + start, binaryStart + end);
-      else {
-        const binaryResponse = await requestBytes(url, binaryStart + start, binaryStart + end - 1);
-        if (binaryResponse.status === 200) {
-          fullFile = binaryResponse.bytes;
-          animationBytes = fullFile.subarray(binaryStart + start, binaryStart + end);
-        } else animationBytes = binaryResponse.bytes;
-      }
-      if (animationBytes.byteLength !== end - start) throw new Error('Animation data range was incomplete.');
-
-      const viewMap = new Map();
-      const accessorMap = new Map();
-      const bufferViews = [];
-      for (const oldIndex of oldViews) {
-        const original = source.bufferViews[oldIndex];
-        viewMap.set(oldIndex, bufferViews.length);
-        bufferViews.push({ ...original, buffer: 0, byteOffset: (original.byteOffset || 0) - start });
-      }
-      const accessors = [];
-      for (const oldIndex of oldAccessors) {
-        const original = source.accessors[oldIndex];
-        accessorMap.set(oldIndex, accessors.length);
-        accessors.push({ ...original, bufferView: viewMap.get(original.bufferView) });
-      }
-
-      const animationDocument = { ...source };
-      delete animationDocument.meshes;
-      delete animationDocument.materials;
-      delete animationDocument.textures;
-      delete animationDocument.images;
-      delete animationDocument.samplers;
-      delete animationDocument.skins;
-      delete animationDocument.cameras;
-      animationDocument.nodes = source.nodes.map((node) => {
-        const clean = { ...node };
-        delete clean.mesh;
-        delete clean.skin;
-        delete clean.camera;
-        return clean;
-      });
-      animationDocument.animations = source.animations.map((animation) => ({
-        ...animation,
-        samplers: animation.samplers.map((sampler) => ({
-          ...sampler,
-          input: accessorMap.get(sampler.input),
-          output: accessorMap.get(sampler.output),
-        })),
-      }));
-      animationDocument.accessors = accessors;
-      animationDocument.bufferViews = bufferViews;
-      animationDocument.buffers = [{ byteLength: animationBytes.byteLength, uri: `data:application/octet-stream;base64,${toBase64(animationBytes)}` }];
-      delete animationDocument.extensionsRequired;
-      delete animationDocument.extensionsUsed;
-
-      const parsed = await new Promise((resolve, reject) => {
-        new GLTFLoaderClass().parse(JSON.stringify(animationDocument), '', resolve, reject);
-      });
-      return parsed;
-    }
-
-    function rigMatches(otherScene) {
-      const otherRig = new Map();
-      // GLTFLoader removes reserved ':' characters from node names when it
-      // creates AnimationClip track bindings (mixamorig:Head -> mixamorigHead).
-      const isRigNode = (object) => object.name.startsWith('mixamorig') || object.name === 'headfront';
-      otherScene.traverse((object) => { if (isRigNode(object)) otherRig.set(object.name, object); });
-      if (!rigSignature.size || rigSignature.size !== otherRig.size) return false;
-      for (const [name, bone] of rigSignature) {
-        const candidate = otherRig.get(name);
-        if (!candidate || (candidate.parent?.name || '') !== bone.parent) return false;
-        if (candidate.position.distanceTo(bone.position) > 0.0001 || candidate.quaternion.angleTo(bone.quaternion) > 0.0001) return false;
-      }
-      return true;
-    }
-
     async function preloadStateClip(state, url) {
       if (clipPromises.has(state)) return clipPromises.get(state);
-      const task = loadAnimationOnly(url).then((gltf) => {
-        if (disposed || !mixer) return;
-        if (!rigMatches(gltf.scene)) throw new Error(`The ${state} animation rig does not match the displayed Pepe rig.`);
-        const clip = gltf.animations.find((item) => item.duration > 0.2);
-        if (!clip) throw new Error(`The ${state} GLB has no usable motion clip.`);
-        const action = mixer.clipAction(clip);
-        actions.set(state, action);
-        if (animationState === state) playClipFor(state);
-      }).catch((error) => console.warn(`Could not prepare Pepe's ${state} animation.`, error));
+      const task = new Promise((resolve) => {
+        if (!GLTFLoaderClass || disposed) return resolve();
+        new GLTFLoaderClass().load(
+          url,
+          (gltf) => {
+            if (disposed || !mixer) return resolve();
+            const clip = gltf.animations.find((item) => item.duration > 0.2);
+            if (clip) {
+              const action = mixer.clipAction(clip);
+              action.setLoop(three.LoopRepeat, Infinity);
+              actions.set(state, action);
+              if (animationState === state) playClipFor(state);
+            }
+            resolve();
+          },
+          undefined,
+          (error) => {
+            console.warn(`Could not prepare Pepe's ${state} animation.`, error);
+            resolve();
+          }
+        );
+      });
       clipPromises.set(state, task);
       return task;
     }
@@ -336,7 +397,7 @@
       requested = true;
       try {
         three = await import('three');
-        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+        const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
         GLTFLoaderClass = GLTFLoader;
         if (disposed) return;
         const { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, SRGBColorSpace, WebGLRenderer } = three;
@@ -374,22 +435,11 @@
         baseScale = 1.48 / modelHeight;
         modelRoot.position.set(-center.x, -bounds.min.y, -center.z);
         modelRoot.scale.setScalar(baseScale);
-        modelRoot.traverse((object) => {
-          if (object.name.startsWith('mixamorig') || object.name === 'headfront') {
-            rigSignature.set(object.name, {
-              parent: object.parent?.name || '',
-              position: object.position.clone(),
-              quaternion: object.quaternion.clone(),
-            });
-          }
-        });
         headBone = modelRoot.getObjectByName('mixamorigHead');
         headOffsetEuler = new three.Euler(0, 0, 0, 'XYZ');
         headOffsetQuaternion = new three.Quaternion();
         scene.add(modelRoot);
 
-        // The first GLB contains a long, subtle idle loop plus a one-frame
-        // static pose clip. Select by duration rather than assuming a name.
         const idleClip = gltf.animations.filter((clip) => clip.duration > 0.5).sort((a, b) => b.duration - a.duration)[0];
         mixer = new three.AnimationMixer(modelRoot);
         if (idleClip) {
@@ -402,6 +452,8 @@
         shell.dataset.ready = 'true';
         resizeRenderer();
         startLoop();
+        void preloadStateClip('hover', assets.hover);
+        void preloadStateClip('excited', assets.excited);
       }, undefined, (error) => {
         console.warn('Could not load the 3D mascot.', error);
         disposeRenderer();
@@ -437,9 +489,19 @@
       pointerX = Math.max(-1, Math.min(1, ((event.clientX - centerX) / stageBounds.width) * 1.7));
       pointerY = Math.max(-1, Math.min(1, ((event.clientY - centerY) / stageBounds.height) * 1.7));
       pointerActive = true;
+
+      // Stereo panning tracks cursor position relative to the mascot
+      if (pannerNode && audioCtx && audioCtx.state === 'running') {
+        const panValue = Math.max(-0.8, Math.min(0.8, (event.clientX - centerX) / (mascot.width / 2)));
+        pannerNode.pan.setValueAtTime(panValue, audioCtx.currentTime);
+      }
+
       const overMascot = event.clientX >= mascot.left && event.clientX <= mascot.right && event.clientY >= mascot.top && event.clientY <= mascot.bottom;
       if (overMascot !== mascotHovered) {
         mascotHovered = overMascot;
+        if (mascotHovered && !clipPromises.has('hover')) {
+          void preloadStateClip('hover', assets.hover);
+        }
         updateInteractionState();
       } else if (!mascotHovered && animationState === 'idle') updateInteractionState();
       startLoop();
@@ -455,7 +517,6 @@
     }
 
     function onCtaClick(event) {
-      // Keyboard activation has no pointerdown. Keep the anchor's native navigation.
       if (event.detail === 0) triggerExcited();
     }
 
@@ -510,10 +571,22 @@
       disposed = true;
       stopLoop();
       stopMovementAudio();
+      if (fadeTimer) window.clearInterval(fadeTimer);
+      if (resetIdleTimer) window.clearTimeout(resetIdleTimer);
+      try {
+        movementAudio.pause();
+      } catch (e) {}
+      if (audioCtx && audioCtx.state !== 'closed') {
+        audioCtx.close().catch(() => {});
+      }
       observer?.disconnect();
       resizeObserver?.disconnect();
       document.removeEventListener('visibilitychange', onVisibilityChange);
       reducedMotion.removeEventListener('change', onMotionChange);
+      window.removeEventListener('pointerdown', handleUserActivation);
+      window.removeEventListener('click', handleUserActivation);
+      window.removeEventListener('keydown', handleUserActivation);
+      window.removeEventListener('touchstart', handleUserActivation);
       stage.removeEventListener('pointermove', onPointerMove);
       stage.removeEventListener('pointerleave', onPointerLeave);
       cta?.removeEventListener('pointerenter', onCtaHoverStart);
@@ -539,6 +612,25 @@
     function onCtaBlur() { ctaFocused = false; updateInteractionState(); startLoop(); }
     function onCtaPointerDown(event) { if (event.button === 0) triggerExcited(); }
 
+    shell.addEventListener('pointerenter', () => {
+      mascotHovered = true;
+      if (!clipPromises.has('hover')) void preloadStateClip('hover', assets.hover);
+      updateInteractionState();
+      startLoop();
+    }, { passive: true });
+
+    shell.addEventListener('pointerleave', () => {
+      mascotHovered = false;
+      updateInteractionState();
+      startLoop();
+    }, { passive: true });
+
+    shell.addEventListener('pointerdown', (e) => {
+      if (e.target && e.target.closest('[data-sound-toggle]')) return;
+      handleUserActivation();
+      triggerExcited();
+    }, { passive: true });
+
     document.addEventListener('visibilitychange', onVisibilityChange);
     reducedMotion.addEventListener('change', onMotionChange);
     stage.addEventListener('pointermove', onPointerMove, { passive: true });
@@ -552,20 +644,8 @@
     window.addEventListener('pagehide', cleanup, { once: true });
 
     function triggerMascotInit() {
-      if (navigator.connection && (navigator.connection.saveData || /2g/.test(navigator.connection.effectiveType || ''))) {
-        return;
-      }
-      if (typeof window.requestIdleCallback === 'function') {
-        window.requestIdleCallback(() => {
-          startLoading();
-          startLoop();
-        }, { timeout: 1200 });
-      } else {
-        setTimeout(() => {
-          startLoading();
-          startLoop();
-        }, 300);
-      }
+      startLoading();
+      startLoop();
     }
 
     if ('IntersectionObserver' in window) {
@@ -577,7 +657,7 @@
           stopLoop();
           stopMovementAudio();
         }
-      }, { rootMargin: '120px' });
+      }, { rootMargin: '200px' });
       observer.observe(shell);
     } else {
       inView = true;
@@ -595,10 +675,170 @@
 </script>
 
 <style is:global>
-  .mascot-shell { position: absolute; z-index: 2; top: 50%; right: 3.6%; width: clamp(220px, 22vw, 330px); height: clamp(240px, 28vw, 360px); pointer-events: none; transform: translateY(-51%); }
-  .mascot-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .25s ease; }
-  .mascot-shell[data-ready="true"] .mascot-canvas { opacity: 1; }
-  @media (max-width: 920px) and (min-width: 701px) { .mascot-shell { right: 1.2%; width: clamp(138px, 17vw, 190px); height: clamp(160px, 20vw, 220px); } }
-  @media (max-width: 700px) { .mascot-shell { position: relative; top: auto; right: auto; width: 146px; height: 142px; margin: -2px auto -4px; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .mascot-canvas { transition: none; } }
+  .mascot-shell {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: 3.6%;
+    width: clamp(220px, 22vw, 330px);
+    height: clamp(240px, 28vw, 360px);
+    pointer-events: auto;
+    cursor: pointer;
+    transform: translateY(-51%);
+  }
+
+  .mascot-canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+
+  .mascot-shell[data-ready="true"] .mascot-canvas {
+    opacity: 1;
+  }
+
+  /* Sound Badge Side by Side with Model */
+  .mascot-sound-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 4px 0 var(--ink);
+    color: var(--ink);
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    pointer-events: auto;
+    user-select: none;
+    white-space: nowrap;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+
+  .mascot-sound-badge:hover {
+    transform: translateX(-50%) translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 0 var(--ink);
+    background: var(--lime);
+  }
+
+  .mascot-sound-badge:active {
+    transform: translateX(-50%) translateY(2px) scale(0.98);
+    box-shadow: 0 2px 0 var(--ink);
+  }
+
+  .mascot-sound-badge:focus-visible {
+    outline: 3px dashed var(--purple);
+    outline-offset: 4px;
+  }
+
+  .mascot-sound-badge.is-playing {
+    background: #fff86a;
+    border-color: var(--ink);
+    box-shadow: 0 4px 0 var(--ink);
+  }
+
+  .mascot-sound-badge.is-muted {
+    opacity: 0.8;
+    background: #f1f2f6;
+    color: #555;
+  }
+
+  .mascot-sound-badge.needs-gesture {
+    background: var(--lime);
+    animation: badgeWiggle 1.2s ease-in-out infinite;
+  }
+
+  @keyframes badgeWiggle {
+    0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+    25% { transform: translateX(-50%) translateY(-3px) rotate(-2deg); }
+    75% { transform: translateX(-50%) translateY(-2px) rotate(2deg); }
+  }
+
+  .mascot-sound-badge .sound-icon {
+    font-size: 14px;
+    line-height: 1;
+    display: inline-block;
+  }
+
+  .mascot-sound-badge .sound-waves {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2.5px;
+    height: 12px;
+  }
+
+  .mascot-sound-badge .sound-waves .bar {
+    width: 3px;
+    height: 4px;
+    background: var(--purple);
+    border-radius: 2px;
+    transition: height 0.15s ease;
+  }
+
+  .mascot-sound-badge.is-playing .sound-waves .bar-1 {
+    animation: soundWave 0.5s ease-in-out infinite alternate;
+  }
+  .mascot-sound-badge.is-playing .sound-waves .bar-2 {
+    animation: soundWave 0.38s ease-in-out infinite alternate 0.15s;
+  }
+  .mascot-sound-badge.is-playing .sound-waves .bar-3 {
+    animation: soundWave 0.62s ease-in-out infinite alternate 0.3s;
+  }
+
+  @keyframes soundWave {
+    0% { height: 3px; background: var(--pink); }
+    100% { height: 12px; background: var(--purple); }
+  }
+
+  @media (max-width: 920px) and (min-width: 701px) {
+    .mascot-shell {
+      right: 1.2%;
+      width: clamp(138px, 17vw, 190px);
+      height: clamp(160px, 20vw, 220px);
+    }
+    .mascot-sound-badge {
+      bottom: 2px;
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .mascot-shell {
+      position: relative;
+      top: auto;
+      right: auto;
+      width: clamp(140px, 36vw, 180px);
+      height: clamp(140px, 36vw, 180px);
+      margin: 6px auto 10px;
+      transform: none;
+    }
+    .mascot-sound-badge {
+      bottom: -6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-width: 2.5px;
+      box-shadow: 0 3px 0 var(--ink);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mascot-canvas { transition: none; }
+    .mascot-sound-badge { transition: none; animation: none !important; }
+    .mascot-sound-badge .sound-waves .bar { animation: none !important; }
+  }
 </style>

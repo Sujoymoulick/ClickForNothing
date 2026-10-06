@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — sites maravilhosamente inúteis",
+    "description": "Descubra os sites mais estranhos, inúteis e maravilhosamente sem sentido da internet."
+  },
+  "hero": {
+    "title_start": "Clique Aqui Para",
+    "title_end": "Se Arrepender.",
+    "subtitle": "Descubra sites que você nunca precisou, mas de alguma forma jamais esquecerá.",
+    "cta": "Leve-me Até Lá!",
+    "cta_aria": "Ir para a página de descobertas"
+  },
+  "discover": {
+    "seo_title": "Descubra Sites Inúteis — ClickForNothing",
+    "seo_description": "Escolha um destino sem sentido e continue descobrindo cantos bizarros da web.",
+    "kicker": "Um pequeno desvio para o desnecessário",
+    "title": "Escolha Seu Próximo Arrependimento",
+    "intro": "Um pequeno site por vez. Visite em uma nova aba e volte aqui para outro.",
+    "visit_btn": "Visitar Site",
+    "visit_hint": "Terminou de se arrepender? Ache outro. Se não carregar, volte e tente um diferente.",
+    "btn_previous": "← Anterior",
+    "btn_next": "Próximo Site Inútil →",
+    "btn_surprise": "Surpreenda-me",
+    "scroll_hint": "Role para outro arrependimento",
+    "of": "de",
+    "empty_badge": "Carregando coleção",
+    "empty_title": "Nenhum arrependimento disponível ainda",
+    "empty_desc": "A coleção de sites verificados está vazia. Adicione destinos para começar a explorar."
+  },
+  "lang_selector": {
+    "button_label": "Selecionar idioma",
+    "search_placeholder": "Pesquisar idioma...",
+    "current_prefix": "Idioma:"
+  },
+  "footer": {
+    "brand_desc": "Descubra os sites mais estranhos, inúteis e maravilhosamente sem sentido da internet.",
+    "about": "Sobre",
+    "contact": "Contato",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos e Condições",
+    "disclaimer": "Aviso Legal",
+    "cookie_policy": "Política de Cookies",
+    "cookie_settings": "Configurações de Cookies"
+  },
+  "categories": {
+    "useless-websites": "Sites Inúteis",
+    "weird-websites": "Sites Estranhos",
+    "silly-animals": "Animais Bobos",
+    "interactive": "Diversão Interativa",
+    "mini-games": "Minijogos",
+    "creative": "Brinquedos Criativos",
+    "visual-oddities": "Esquisitices Visuais",
+    "music-sounds": "Música e Sons",
+    "internet-nostalgia": "Nostalgia da Internet",
+    "funny-websites": "Sites Engraçados",
+    "time-wasters": "Passatempos",
+    "internet-experiments": "Experimentos Web",
+    "food-for-thought": "Para Refletir"
+  },
+  "category_descriptions": {
+    "useless-websites": "Sites com utilidade zero que mantêm você clicando.",
+    "weird-websites": "Artefatos bizarros da internet e conceitos estranhos.",
+    "silly-animals": "Gatos, cachorros, patos e criaturas dançantes.",
+    "interactive": "Clique, arraste, estique e cutuque a tela.",
+    "mini-games": "Pequenos jogos que roubam 10 minutos do seu dia.",
+    "creative": "Brinquedos de áudio, ferramentas de desenho e curiosidades.",
+    "visual-oddities": "Loops hipnóticos, relíquias retrô e visuais psicodélicos.",
+    "music-sounds": "Mesa de efeitos sonoros, sintetizadores e surpresas.",
+    "internet-nostalgia": "Energia da Web 1.0, estética GeoCities e memes clássicos.",
+    "funny-websites": "Comédia pura, pegadinhas bobas e piadas.",
+    "time-wasters": "Destinos perfeitos para procrastinar.",
+    "internet-experiments": "Brinquedos web estranhos e ideias experimentais.",
+    "food-for-thought": "Reflexões peculiares, zen digital e contemplação."
+  },
+  "nav": {
+    "home": "Início",
+    "discover": "Descobrir",
+    "categories": "Categorias",
+    "collections": "Coleções",
+    "articles": "Artigos",
+    "sites": "Sites",
+    "random": "Aleatório",
+    "submit": "Enviar",
+    "search": "Buscar"
+  },
+  "search": {
+    "title": "Buscar Sites Inúteis",
+    "lead": "Encontre passatempos específicos, física de gatos ou jogos de arte.",
+    "placeholder": "Digite uma palavra-chave (ex: gato, áudio, jogos, retrô)...",
+    "showing_all": "Exibindo todos os {count} sites",
+    "no_results_title": "Nenhum site inútil encontrado para sua busca 🔍",
+    "no_results_desc": "Tente termos mais amplos como \"gatos\", \"jogo\", \"som\" ou \"arte\".",
+    "details": "Detalhes →",
+    "visit": "Visitar Site ↗"
+  },
+  "submit": {
+    "title": "Enviar um Site Inútil",
+    "lead": "Conhece um site que não serve para nada ou faz rir? Envie para nós!",
+    "btn": "Enviar para Revisão 🚀",
+    "success": "Envio recebido! Obrigado por compartilhar."
+  },
+  "error_404": {
+    "kicker": "Erro 404",
+    "title_start": "Nada",
+    "title_end": "Para Ver Aqui.",
+    "subtitle": "Mesmo para um site sobre coisas inúteis, esta página realmente não existe.",
+    "back_home": "← Voltar à Segurança",
+    "discover": "Descobrir Sites Aleatórios →"
+  },
+  "about": {
+    "title": "Sobre ClickForNothing — Descubra a Internet Inútil",
+    "description": "Saiba o que é o ClickForNothing e como ele ajuda você a descobrir sites estranhos e desnecessários.",
+    "heading": "Sobre o ClickForNothing",
+    "intro": "O ClickForNothing é um site de entretenimento que ajuda a descobrir sites estranhos e totalmente desnecessários da internet.",
+    "what_is": "O Que É ClickForNothing?",
+    "what_is_body": "ClickForNothing é uma plataforma de curadoria para sites inúteis que divertem sem motivo aparente.",
+    "why_exist": "Por Que Existe?",
+    "why_exist_body": "Acreditamos que as melhores partes da internet são aquelas estranhas, inúteis e criadas pelo simples prazer de criar."
+  }
+}

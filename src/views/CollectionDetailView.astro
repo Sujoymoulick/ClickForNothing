@@ -1,0 +1,209 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { type WebsiteCollection } from '../data/collections';
+import { websites } from '../data/websites';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+interface Props {
+  collection: WebsiteCollection;
+}
+
+const { collection } = Astro.props;
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const rawTitle = collection.seoTitle;
+const title = rawTitle.length <= 60 ? rawTitle : `${collection.title} | ClickForNothing`;
+const description = collection.seoDescription;
+const canonicalPath = `/collections/${collection.slug}/`;
+
+const listWebsites = websites.filter(w => collection.siteIds.includes(w.id));
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+const homeUrl = getLocalizedPath('/', currentLocale);
+const collectionsUrl = getLocalizedPath('/collections/', currentLocale);
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.collections') || 'Collections', item: `${siteOrigin}${collectionsUrl}` },
+    { '@type': 'ListItem', position: 3, name: collection.title, item: fullCanonicalUrl },
+  ],
+};
+
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: collection.title,
+  description: collection.description,
+  url: fullCanonicalUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: listWebsites.length,
+    itemListElement: listWebsites.map((site, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: site.name,
+      url: `${siteOrigin}${getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}`,
+    })),
+  },
+};
+---
+<SiteLayout {title} {description} {canonicalPath}>
+  <main class="collection-detail-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span>
+      <a href={collectionsUrl}>{t('nav.collections') || 'Collections'}</a> <span>/</span>
+      <span aria-current="page">{collection.title}</span>
+    </nav>
+
+    <header class="collection-header">
+      <span class="collection-tag">Curated List • {listWebsites.length} Items</span>
+      <h1>{collection.title}</h1>
+      <p class="subtitle">{collection.subtitle}</p>
+      <p class="desc">{collection.description}</p>
+    </header>
+
+    <section class="list-section">
+      <div class="list-grid">
+        {listWebsites.map((site, index) => (
+          <article class="list-item-card">
+            <div class="item-number">#{index + 1}</div>
+            <div class="item-content">
+              <div class="meta-row">
+                <a href={getLocalizedPath(`/categories/${site.categorySlug}/`, currentLocale)} class="category">
+                  {t(`categories.${site.categorySlug}`) || site.category}
+                </a>
+              </div>
+              <h2><a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a></h2>
+              <p class="item-desc">{site.description}</p>
+              <div class="why-useless">
+                <strong>Why it’s on this list:</strong> {site.whyItIsUseless}
+              </div>
+              <div class="item-actions">
+                <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-btn">Read Full Review & Details →</a>
+                <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-btn">Visit Website ↗</a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="random-cta">
+      <h2>Looking for Instant Random Discovery?</h2>
+      <p>Use our real-time website discovery engine to jump between random websites smoothly.</p>
+      <a href={discoverUrl} class="cta-btn">Launch Random Engine 🎲</a>
+    </section>
+  </main>
+
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+</SiteLayout>
+
+<style>
+  .collection-detail-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-bottom: 24px;
+  }
+  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
+
+  .collection-header {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 40px;
+  }
+  .collection-tag {
+    background: #f20caf;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .collection-header h1 {
+    font: 800 clamp(2.2rem, 4.5vw, 3.2rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 10px;
+  }
+  .subtitle { font-weight: 700; color: #a855f7; font-size: 1.15rem; margin-bottom: 12px; }
+  .desc { font-size: 1.05rem; color: #d4d4d8; line-height: 1.5; }
+
+  .list-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+  .list-item-card {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 16px;
+    padding: 28px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .item-number {
+    font: 800 2.2rem/1 'Lilita One', system-ui, sans-serif;
+    color: #f7fa27;
+    min-width: 60px;
+  }
+  .item-content { flex-grow: 1; }
+  .meta-row { margin-bottom: 6px; }
+  .category { color: #a855f7; font-size: 0.85rem; font-weight: 700; text-decoration: none; text-transform: uppercase; }
+  .list-item-card h2 { font: 700 1.5rem/1.2 'Lilita One', system-ui, sans-serif; margin-bottom: 8px; }
+  .list-item-card h2 a { color: #ffffff; text-decoration: none; }
+  .list-item-card h2 a:hover { color: #f7fa27; }
+  .item-desc { color: #e4e4e7; font-size: 1rem; margin-bottom: 12px; }
+  .why-useless {
+    background: #27272a;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    color: #d4d4d8;
+    margin-bottom: 16px;
+  }
+  .why-useless strong { color: #f7fa27; }
+  .item-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .detail-btn { color: #f20caf; font-weight: 700; font-size: 0.92rem; text-decoration: none; }
+  .visit-btn { background: #27272a; color: #fff; font-weight: 600; font-size: 0.88rem; padding: 6px 14px; border-radius: 8px; text-decoration: none; }
+  .visit-btn:hover { background: #3f3f46; color: #f7fa27; }
+
+  .random-cta {
+    background: linear-gradient(135deg, #7025ed 0%, #f20caf 100%);
+    border-radius: 20px;
+    padding: 36px;
+    text-align: center;
+  }
+  .random-cta h2 { font: 800 2rem/1.1 'Lilita One', system-ui, sans-serif; color: #fff; margin-bottom: 8px; }
+  .random-cta p { font-size: 1.05rem; color: #f4f4f5; margin-bottom: 20px; }
+  .cta-btn { display: inline-block; background: #f7fa27; color: #101014; font: 800 1.1rem/1 'Lilita One', system-ui, sans-serif; padding: 14px 28px; border-radius: 12px; text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .list-item-card { flex-direction: column; gap: 10px; padding: 20px; }
+    .item-number { font-size: 1.6rem; min-width: auto; }
+  }
+</style>

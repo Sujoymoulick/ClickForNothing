@@ -1,0 +1,21 @@
+---
+import ArticleDetailView from '../../../views/ArticleDetailView.astro';
+import { NON_DEFAULT_LOCALES } from '../../../i18n/config';
+import { articles, type EditorialArticle } from '../../../data/articles';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const locale of NON_DEFAULT_LOCALES) {
+    for (const art of articles) {
+      paths.push({
+        params: { locale, slug: art.slug },
+        props: { article: art },
+      });
+    }
+  }
+  return paths;
+}
+
+const { article } = Astro.props as { article: EditorialArticle };
+---
+<ArticleDetailView article={article} />

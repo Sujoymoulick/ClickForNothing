@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — wunderbar nutzlose Websites",
+    "description": "Entdecke die seltsamsten, sinnlosesten und wunderbar nutzlosen Websites im Internet."
+  },
+  "hero": {
+    "title_start": "Klicke hier und",
+    "title_end": "Bereue Es.",
+    "subtitle": "Entdecke Websites, die du nie gebraucht hast, aber nie wieder vergessen wirst.",
+    "cta": "Bring mich hin!",
+    "cta_aria": "Zur Entdeckungsseite gehen"
+  },
+  "discover": {
+    "seo_title": "Nutzlose Websites entdecken — ClickForNothing",
+    "seo_description": "Wähle ein sinnloses Ziel und entdecke weiterhin kuriose Ecken des Webs.",
+    "kicker": "Ein kleiner Abstecher ins Unnötige",
+    "title": "Wähle deine nächste Reue",
+    "intro": "Eine kleine Website nach der anderen. Öffne sie im neuen Tab und kehre für mehr zurück.",
+    "visit_btn": "Website besuchen",
+    "visit_hint": "Fertig mit Bereuen? Finde eine neue. Falls sie nicht lädt, komm zurück und probiere eine andere.",
+    "btn_previous": "← Vorherige",
+    "btn_next": "Nächste nutzlose Website →",
+    "btn_surprise": "Überrasche mich",
+    "scroll_hint": "Scrolle für eine weitere Reue",
+    "of": "von",
+    "empty_badge": "Sammlung lädt",
+    "empty_title": "Noch keine Reue verfügbar",
+    "empty_desc": "Die Sammlung verifizierter Websites ist leer. Füge Ziele hinzu, um mit dem Erkunden zu beginnen."
+  },
+  "lang_selector": {
+    "button_label": "Sprache wählen",
+    "search_placeholder": "Sprache suchen...",
+    "current_prefix": "Sprache:"
+  },
+  "footer": {
+    "brand_desc": "Entdecke die seltsamsten, sinnlosesten und wunderbar nutzlosen Websites im Internet.",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "disclaimer": "Haftungsausschluss",
+    "cookie_policy": "Cookie-Richtlinie",
+    "cookie_settings": "Cookie-Einstellungen"
+  },
+  "categories": {
+    "useless-websites": "Nutzlose Websites",
+    "weird-websites": "Kuriose Websites",
+    "silly-animals": "Alberne Tiere",
+    "interactive": "Interaktiver Spaß",
+    "mini-games": "Minispiele",
+    "creative": "Kreative Spielzeuge",
+    "visual-oddities": "Visuelle Kuriositäten",
+    "music-sounds": "Musik & Klänge",
+    "internet-nostalgia": "Internet-Nostalgie",
+    "funny-websites": "Lustige Websites",
+    "time-wasters": "Zeitverschwender",
+    "internet-experiments": "Web-Experimente",
+    "food-for-thought": "Denkanstöße"
+  },
+  "category_descriptions": {
+    "useless-websites": "Websites ohne jeden Nutzen, die dich trotzdem weitersurfen lassen.",
+    "weird-websites": "Bizarre Internet-Artefakte und abstruse Konzepte.",
+    "silly-animals": "Katzen, Hunde, Enten und tanzende Wesen.",
+    "interactive": "Klicken, ziehen, strecken und den Bildschirm berühren.",
+    "mini-games": "Kleine Spiele, die 10 Minuten deines Tages stehlen.",
+    "creative": "Audiotools, Zeichenwerkzeuge und Sandbox-Spielereien.",
+    "visual-oddities": "Hypnotische Schleifen, Retro-Relikte und bunte Visuals.",
+    "music-sounds": "Soundboards, Synths und auditive Überraschungen.",
+    "internet-nostalgia": "Web 1.0 Flair, GeoCities-Ästhetik und Kult-Memes.",
+    "funny-websites": "Reine Comedy, alberne Streiche und Witze.",
+    "time-wasters": "Perfekte Ziele zum Prokrastinieren.",
+    "internet-experiments": "Kuriose Webspielzeuge und experimentelle Ideen.",
+    "food-for-thought": "Eigenwillige Reflexionen, digitales Zen und Kontemplation."
+  },
+  "nav": {
+    "home": "Startseite",
+    "discover": "Entdecken",
+    "categories": "Kategorien",
+    "collections": "Sammlungen",
+    "articles": "Artikel",
+    "sites": "Websites",
+    "random": "Zufällig",
+    "submit": "Einreichen",
+    "search": "Suche"
+  },
+  "search": {
+    "title": "Nutzlose Websites durchsuchen",
+    "lead": "Finde Zeitfresser, Katzenphysik, Soundboards oder interaktive Kunstspiele.",
+    "placeholder": "Suchbegriff eingeben (z. B. Katze, Audio, Spiele, Retro)...",
+    "showing_all": "Alle {count} Websites werden angezeigt",
+    "no_results_title": "Keine passende nutzlose Website gefunden 🔍",
+    "no_results_desc": "Versuche allgemeinere Begriffe wie \"Katzen\", \"Spiel\", \"Sound\" oder \"Kunst\".",
+    "details": "Details →",
+    "visit": "Website aufrufen ↗"
+  },
+  "submit": {
+    "title": "Nutzlose Website einreichen",
+    "lead": "Kennst du eine Website, die absolut zwecklos ist oder dich zum Lachen bringt? Schick sie uns!",
+    "btn": "Zur Überprüfung einreichen 🚀",
+    "success": "Einsendung erhalten! Vielen Dank fürs Teilen."
+  },
+  "error_404": {
+    "kicker": "Fehler 404",
+    "title_start": "Hier gibt es",
+    "title_end": "Nichts zu sehen.",
+    "subtitle": "Selbst für eine Seite über sinnlose Dinge fehlt diese Seite wirklich.",
+    "back_home": "← Zurück zur Sicherheit",
+    "discover": "Zufällige Seiten entdecken →"
+  },
+  "about": {
+    "title": "Über ClickForNothing — Entdecke das nutzlose Internet",
+    "description": "Erfahre, was ClickForNothing ist und wie es dir hilft, die seltsamsten Websites der Welt zu entdecken.",
+    "heading": "Über ClickForNothing",
+    "intro": "ClickForNothing ist eine Unterhaltungswebsite, die Menschen dabei hilft, absurde und sinnlose Websites zu entdecken.",
+    "what_is": "Was ist ClickForNothing?",
+    "what_is_body": "ClickForNothing ist eine kuratierte Plattform für absurde und faszinierend nutzlose Websites.",
+    "why_exist": "Warum existiert es?",
+    "why_exist_body": "Wir glauben, dass die besten Seiten im Netz diejenigen sind, die einfach aus purer Spielfreude gemacht wurden."
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — harika derecede gereksiz web siteleri",
+    "description": "İnternetin en garip, anlamsız ve harika derecede işe yaramaz web sitelerini keşfedin."
+  },
+  "hero": {
+    "title_start": "Buraya Tıklayın ve",
+    "title_end": "Pişman Olun.",
+    "subtitle": "Asla ihtiyaç duymadığınız ama bir şekilde unutamayacağınız web sitelerini keşfedin.",
+    "cta": "Beni Oraya Götür!",
+    "cta_aria": "Keşif sayfasına git"
+  },
+  "discover": {
+    "seo_title": "Gereksiz Web Sitelerini Keşfet — ClickForNothing",
+    "seo_description": "Anlamsız bir hedef seçin ve internetin tuhaf köşelerini keşfetmeye devam edin.",
+    "kicker": "Gereksiz olana küçük bir kaçamak",
+    "title": "Bir Sonraki Pişmanlığınızı Seçin",
+    "intro": "Her seferinde bir web sitesi. Yeni sekmede ziyaret edin, ardından yenisi için buraya dönün.",
+    "visit_btn": "Web Sitesini Ziyaret Et",
+    "visit_hint": "Pişmanlığınız bitti mi? Başka bir tane bulun. Yüklenmezse geri dönüp farklı bir site deneyin.",
+    "btn_previous": "← Önceki",
+    "btn_next": "Sonraki Gereksiz Site →",
+    "btn_surprise": "Beni Şaşırt",
+    "scroll_hint": "Başka bir pişmanlık için kaydırın",
+    "of": "/",
+    "empty_badge": "Koleksiyon yükleniyor",
+    "empty_title": "Henüz pişmanlık bulunamadı",
+    "empty_desc": "Doğrulanmış web sitesi koleksiyonu boş. Keşfe başlamak için birkaç hedef ekleyin."
+  },
+  "lang_selector": {
+    "button_label": "Dil seçin",
+    "search_placeholder": "Dil ara...",
+    "current_prefix": "Dil:"
+  },
+  "footer": {
+    "brand_desc": "İnternetin en garip, anlamsız ve harika derecede işe yaramaz web sitelerini keşfedin.",
+    "about": "Hakkında",
+    "contact": "İletişim",
+    "privacy": "Gizlilik Politikası",
+    "terms": "Şartlar ve Koşullar",
+    "disclaimer": "Sorumluluk Reddi",
+    "cookie_policy": "Çerez Politikası",
+    "cookie_settings": "Çerez Ayarları"
+  },
+  "categories": {
+    "useless-websites": "Gereksiz Siteler",
+    "weird-websites": "Garip Siteler",
+    "silly-animals": "Komik Hayvanlar",
+    "interactive": "Etkileşimli Eğlence",
+    "mini-games": "Mini Oyunlar",
+    "creative": "Yaratıcı Oyuncaklar",
+    "visual-oddities": "Görsel Tuhaflıklar",
+    "music-sounds": "Müzik ve Sesler",
+    "internet-nostalgia": "İnternet Nostaljisi",
+    "funny-websites": "Eğlenceli Siteler",
+    "time-wasters": "Zaman Öldürücüler",
+    "internet-experiments": "Web Deneyleri",
+    "food-for-thought": "Düşündürenler"
+  },
+  "category_descriptions": {
+    "useless-websites": "Sıfır işlevselliğe sahip, yine de tıklatmayı başaran siteler.",
+    "weird-websites": "Tuhaf internet kalıntıları ve sıra dışı fikirler.",
+    "silly-animals": "Kediler, köpekler, ördekler ve dans eden yaratıklar.",
+    "interactive": "Tıklayın, sürükleyin, esnetin ve ekrana dokunun.",
+    "mini-games": "Gününüzden 10 dakika çalan minik oyunlar.",
+    "creative": "Ses araçları, çizim gereçleri ve dijital kum havuzları.",
+    "visual-oddities": "Hipnotik döngüler, retro kalıntılar ve ilginç görseller.",
+    "music-sounds": "Ses panoları, synthesizerlar ve işitsel sürprizler.",
+    "internet-nostalgia": "Web 1.0 ruhu, GeoCities estetiği ve unutulmaz memler.",
+    "funny-websites": "Saf komedi, saçma şakalar ve eğlence.",
+    "time-wasters": "Ertelemek için mükemmel duraklar.",
+    "internet-experiments": "Garip web oyuncakları ve deneysel projeler.",
+    "food-for-thought": "Farklı düşünceler, dijital huzur ve tefekkür."
+  },
+  "nav": {
+    "home": "Ana Sayfa",
+    "discover": "Keşfet",
+    "categories": "Kategoriler",
+    "collections": "Koleksiyonlar",
+    "articles": "Makaleler",
+    "sites": "Siteler",
+    "random": "Rastgele",
+    "submit": "Gönder",
+    "search": "Ara"
+  },
+  "search": {
+    "title": "Gereksiz Web Sitelerinde Ara",
+    "lead": "Zaman öldürücüleri, kedi fiziklerini, ses panolarını veya sanat oyunlarını bulun.",
+    "placeholder": "Bir anahtar kelime yazın (ör. kedi, ses, oyun, retro)...",
+    "showing_all": "Tüm {count} web sitesi gösteriliyor",
+    "no_results_title": "Aramanızla eşleşen gereksiz site bulunamadı 🔍",
+    "no_results_desc": "\"kediler\", \"oyun\", \"ses\" veya \"sanat\" gibi daha genel kelimeler deneyin.",
+    "details": "Detaylar →",
+    "visit": "Siteyi Ziyaret Et ↗"
+  },
+  "submit": {
+    "title": "Gereksiz Bir Web Sitesi Gönder",
+    "lead": "Hiçbir amacı olmayan veya güldüren bir site mi keşfettiniz? Bize gönderin!",
+    "btn": "İnceleme İçin Gönder 🚀",
+    "success": "Gönderiniz alındı! Paylaştığınız için teşekkürler."
+  },
+  "error_404": {
+    "kicker": "Hata 404",
+    "title_start": "Burada Görecek",
+    "title_end": "Hiçbir Şey Yok.",
+    "subtitle": "Anlamsız şeyleri toplayan bir site için bile bu sayfa gerçekten kayıp.",
+    "back_home": "← Güvenliğe Dön",
+    "discover": "Rastgele Siteleri Keşfet →"
+  },
+  "about": {
+    "title": "ClickForNothing Hakkında — Gereksiz İnterneti Keşfedin",
+    "description": "ClickForNothing'in ne olduğunu ve internetin en tuhaf sitelerini nasıl bulduğunuzu öğrenin.",
+    "heading": "ClickForNothing Hakkında",
+    "intro": "ClickForNothing, internetteki gereksiz ve eğlenceli siteleri keşfetmenizi sağlayan bir platformdur.",
+    "what_is": "ClickForNothing Nedir?",
+    "what_is_body": "Pratik bir amacı olmayan ancak eğlendiren gereksiz web sitelerinin seçilmiş bir derlemesidir.",
+    "why_exist": "Neden Var?",
+    "why_exist_body": "İnternetin en güzel yanının, sadece yaratma sevinciyle yapılmış anlamsız projeler olduğuna inanıyoruz."
+  }
+}

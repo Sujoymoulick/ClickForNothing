@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — wonderfully useless websites",
+    "description": "Discover the weird, pointless and wonderfully useless websites on the internet."
+  },
+  "hero": {
+    "title_start": "Click Here To",
+    "title_end": "Regret It.",
+    "subtitle": "Discover websites you never needed, but somehow won’t forget.",
+    "cta": "Take Me There!",
+    "cta_aria": "Take me to the discovery page"
+  },
+  "discover": {
+    "seo_title": "Discover Useless Websites — ClickForNothing",
+    "seo_description": "Pick a pointless destination, keep your place, and continue discovering weird corners of the web.",
+    "kicker": "A tiny detour into the unnecessary",
+    "title": "Choose Your Next Regret",
+    "intro": "One little website at a time. Visit it in a new tab, then come back here for another.",
+    "visit_btn": "Visit Website",
+    "visit_hint": "Done regretting that? Find another. If a site doesn’t load, come back and try a different one.",
+    "btn_previous": "← Previous",
+    "btn_next": "Next Useless Website →",
+    "btn_surprise": "Surprise Me",
+    "scroll_hint": "Scroll for another regret",
+    "of": "of",
+    "empty_badge": "Collection loading",
+    "empty_title": "No regrets available just yet",
+    "empty_desc": "The verified website collection is empty. Add a few verified destinations in the website data file to start exploring."
+  },
+  "lang_selector": {
+    "button_label": "Select language",
+    "search_placeholder": "Search language...",
+    "current_prefix": "Language:"
+  },
+  "footer": {
+    "brand_desc": "Discover the weird, pointless and wonderfully useless websites on the internet.",
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "disclaimer": "Disclaimer",
+    "cookie_policy": "Cookie Policy",
+    "cookie_settings": "Cookie Settings"
+  },
+  "categories": {
+    "useless-websites": "Useless Websites",
+    "weird-websites": "Weird Websites",
+    "silly-animals": "Silly Animals",
+    "interactive": "Interactive Fun",
+    "mini-games": "Mini Games",
+    "creative": "Creative Toys",
+    "visual-oddities": "Visual Oddities",
+    "music-sounds": "Music & Sounds",
+    "internet-nostalgia": "Internet Nostalgia",
+    "funny-websites": "Funny Websites",
+    "time-wasters": "Time Wasters",
+    "internet-experiments": "Internet Experiments",
+    "food-for-thought": "Food for Thought"
+  },
+  "category_descriptions": {
+    "useless-websites": "Sites with zero functional utility that somehow keep you clicking.",
+    "weird-websites": "Bizarre internet artifacts and odd concepts.",
+    "silly-animals": "Cats, dogs, ducks, and dancing creatures.",
+    "interactive": "Click, drag, stretch, and poke the screen.",
+    "mini-games": "Tiny games that steal 10 minutes of your day.",
+    "creative": "Audio toys, drawing tools, and sandbox curiosities.",
+    "visual-oddities": "Hypnotic loops, retro relics, and trippy visuals.",
+    "music-sounds": "Soundboards, synths, and auditory surprises.",
+    "internet-nostalgia": "Web 1.0 energy, GeoCities aesthetics, and memes.",
+    "funny-websites": "Pure comedy, silly pranks, and jokes.",
+    "time-wasters": "Perfect procrastination destinations.",
+    "internet-experiments": "Strange web toys and experimental ideas.",
+    "food-for-thought": "Quirky reflections, digital zen, and contemplation."
+  },
+  "nav": {
+    "home": "Home",
+    "discover": "Discover",
+    "categories": "Categories",
+    "collections": "Collections",
+    "articles": "Articles",
+    "sites": "Sites",
+    "random": "Random",
+    "submit": "Submit",
+    "search": "Search"
+  },
+  "search": {
+    "title": "Search Useless Websites",
+    "lead": "Find specific time-wasters, cat physics, soundboards, or interactive art games.",
+    "placeholder": "Type a keyword (e.g. cat, audio, games, space, retro)...",
+    "showing_all": "Showing all {count} websites",
+    "no_results_title": "No useless websites matched your search query 🔍",
+    "no_results_desc": "Try searching for broader terms like \"cats\", \"game\", \"sound\", \"art\", or \"space\".",
+    "details": "Details →",
+    "visit": "Visit Site ↗"
+  },
+  "submit": {
+    "title": "Submit a Useless Website",
+    "lead": "Discovered a website that serves no purpose, makes you laugh, or melts your brain? Send it over!",
+    "btn": "Submit for Review 🚀",
+    "success": "Submission received! Thank you for sharing. Our team will verify and curate your submission soon."
+  },
+  "error_404": {
+    "kicker": "Error 404",
+    "title_start": "Nothing",
+    "title_end": "To See Here.",
+    "subtitle": "Even for a site celebrating pointless things, this page is genuinely missing.",
+    "back_home": "← Back to Safety",
+    "discover": "Discover Random Sites →"
+  },
+  "about": {
+    "title": "About ClickForNothing — Discover the Useless Internet",
+    "description": "Learn what ClickForNothing is, why it exists, and how it helps you discover funny, weird, random and completely unnecessary websites across the internet.",
+    "heading": "About ClickForNothing",
+    "intro": "ClickForNothing is an entertainment website that helps people discover funny, weird, random and completely unnecessary websites from around the internet. Its core experience is simple: click a button, get sent somewhere unexpected, and waste a little time on something you absolutely did not need.",
+    "what_is": "What Is ClickForNothing?",
+    "what_is_body": "ClickForNothing is a curated discovery platform for useless websites—the wonderfully weird, pointless, and completely unnecessary corners of the internet that serve no practical purpose but somehow entertain, surprise, or confuse you in the best way possible.",
+    "why_exist": "Why Does ClickForNothing Exist?",
+    "why_exist_body": "We believe the best parts of the internet are the weird, pointless, and unnecessary ones. They represent creativity, humor, and the pure joy of making something just because you can."
+  }
+}

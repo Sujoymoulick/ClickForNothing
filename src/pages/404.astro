@@ -1,8 +1,16 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
 
 const title = '404: Page Not Found — ClickForNothing';
 const description = 'You clicked into the void. This page does not exist, but plenty of useless websites do!';
+const homeUrl = getLocalizedPath('/', currentLocale);
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
 ---
 <SiteLayout {title} {description} canonicalPath="/404" noindex={true}>
   <main class="hero-stage">
@@ -17,20 +25,20 @@ const description = 'You clicked into the void. This page does not exist, but pl
     <span class="deco twinkle twinkle-right" aria-hidden="true">✦</span>
 
     <section class="hero-content" aria-labelledby="not-found-title" style="max-width: 680px;">
-      <p class="discover-kicker" style="color: var(--pink); font-size: 1.2rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 8px;">Error 404</p>
+      <p class="discover-kicker" style="color: var(--pink); font-size: 1.2rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 8px;">{t('error_404.kicker') || 'Error 404'}</p>
       <h1 class="hero-title" id="not-found-title">
-        <span class="pink">Nothing</span>
-        <span class="purple">To See Here.</span>
+        <span class="pink">{t('error_404.title_start') || 'Nothing'}</span>
+        <span class="purple">{t('error_404.title_end') || 'To See Here.'}</span>
       </h1>
       <p class="hero-subtitle" style="margin: 20px 0 28px;">
-        Even for a site celebrating pointless things, this page is genuinely missing.
+        {t('error_404.subtitle') || 'Even for a site celebrating pointless things, this page is genuinely missing.'}
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center;">
-        <a class="visit-button" href="/" style="text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
-          ← Back to Safety
+        <a class="visit-button" href={homeUrl} style="text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
+          {t('error_404.back_home') || '← Back to Safety'}
         </a>
-        <a class="visit-button" href="/discover/" style="background: var(--purple); text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
-          Discover Random Sites →
+        <a class="visit-button" href={discoverUrl} style="background: var(--purple); text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
+          {t('error_404.discover') || 'Discover Random Sites →'}
         </a>
       </div>
     </section>

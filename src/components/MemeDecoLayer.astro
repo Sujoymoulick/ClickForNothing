@@ -387,44 +387,69 @@ const floatingElements = [
   /* Responsive boundary scaling */
   @media (max-width: 1200px) {
     .item-pepe-main {
-      width: 200px !important;
+      width: 190px !important;
     }
     .floating-item[data-role="small-face"],
     .floating-item[data-role="trollface"],
     .floating-item[data-role="doge"] {
-      width: 95px !important;
+      width: 90px !important;
     }
   }
 
   @media (max-width: 920px) {
     .item-pepe-main {
-      width: 160px !important;
+      width: 140px !important;
     }
     .floating-item[data-role="small-face"],
     .floating-item[data-role="trollface"],
     .floating-item[data-role="doge"] {
-      width: 80px !important;
+      width: 70px !important;
     }
     .deco-glyph.color-purple,
     .deco-glyph.color-pink {
-      font-size: 32px;
+      font-size: 28px;
     }
   }
 
-  /* On mobile screens, keep memes gently orbiting in edge margins */
-  @media (max-width: 640px) {
+  /* Mobile screens: Never block taps, scale down, and keep strictly in outer edges */
+  @media (max-width: 768px) {
+    .floating-item,
+    .floating-meme,
+    .floating-deco {
+      pointer-events: none !important;
+    }
     .item-pepe-main {
-      width: 125px !important;
-      opacity: 0.9;
+      width: 85px !important;
+      opacity: 0.7;
     }
     .floating-item[data-role="small-face"],
     .floating-item[data-role="trollface"],
     .floating-item[data-role="doge"] {
-      width: 65px !important;
-      opacity: 0.85;
+      width: 50px !important;
+      opacity: 0.65;
     }
     .floating-deco {
-      opacity: 0.7;
+      opacity: 0.5;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .item-pepe-main {
+      width: 68px !important;
+      opacity: 0.6;
+    }
+    .floating-item[data-role="small-face"],
+    .floating-item[data-role="trollface"],
+    .floating-item[data-role="doge"] {
+      width: 42px !important;
+      opacity: 0.55;
+    }
+    .floating-deco {
+      opacity: 0.4;
+    }
+    .item-action-lines-left,
+    .item-action-lines-right {
+      display: none !important;
     }
   }
 </style>

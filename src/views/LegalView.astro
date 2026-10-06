@@ -1,0 +1,48 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  paragraphs: string[];
+  slug: string;
+}
+
+const { title, description, heading, paragraphs, slug } = Astro.props;
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const homeUrl = getLocalizedPath('/', currentLocale);
+const canonicalPath = `/${slug}/`;
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: heading, item: fullCanonicalUrl },
+  ],
+};
+---
+<SiteLayout {title} {description} {canonicalPath}>
+  <main class="policy-page">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs" style="margin-bottom: 24px; font-size: 0.95rem; font-weight: 700;">
+      <a href={homeUrl} style="color: #7025ed; text-decoration: none;">{t('nav.home') || 'Home'}</a> <span style="color: #09080c;">/</span> <span style="color: #09080c;" aria-current="page">{heading}</span>
+    </nav>
+    <article>
+      <h1>{heading}</h1>
+      {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      <p style="margin-top: 32px;"><a href={homeUrl} style="color: #7025ed; font-weight: 800; text-decoration: underline;">← {t('error_404.back_home') || 'Back to The Useless Web'}</a></p>
+    </article>
+  </main>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+</SiteLayout>

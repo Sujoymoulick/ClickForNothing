@@ -1,0 +1,14 @@
+---
+import CategoryDetailView from '../../views/CategoryDetailView.astro';
+import { categories, type WebsiteCategory } from '../../data/categories';
+
+export function getStaticPaths() {
+  return categories.map((cat) => ({
+    params: { slug: cat.slug },
+    props: { category: cat },
+  }));
+}
+
+const { category } = Astro.props as { category: WebsiteCategory };
+---
+<CategoryDetailView category={category} />

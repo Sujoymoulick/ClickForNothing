@@ -1,0 +1,157 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { websites } from '../data/websites.ts';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = `${t('search.title')} | ClickForNothing`;
+const description = t('search.lead');
+const homeUrl = getLocalizedPath('/', currentLocale);
+---
+<SiteLayout {title} {description} canonicalPath="/search/">
+  <main class="search-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs" style="display: flex; gap: 8px; font-size: 0.9rem; color: #a1a1aa; margin-bottom: 20px;">
+      <a href={homeUrl} style="color: #f7fa27; text-decoration: none;">{t('nav.home')}</a> <span>/</span> <span aria-current="page" style="color: #fff;">{t('nav.search')}</span>
+    </nav>
+    <header class="search-header">
+      <h1>{t('search.title')}</h1>
+      <p class="lead">{t('search.lead')}</p>
+
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder={t('search.placeholder')} autofocus />
+      </div>
+    </header>
+
+    <section class="results-section">
+      <div id="results-count" class="results-count">{t('search.showing_all', { count: String(websites.length) })}</div>
+      <div id="results-grid" class="sites-grid">
+        {websites.map((site) => (
+          <article class="site-card" data-name={site.name.toLowerCase()} data-desc={site.description.toLowerCase()} data-category={site.category.toLowerCase()} data-tags={(site.tags || []).join(' ').toLowerCase()}>
+            <div class="meta">
+              <a href={getLocalizedPath(`/categories/${site.categorySlug || 'useless-websites'}/`, currentLocale)} class="category-tag">{site.category}</a>
+            </div>
+            <h2><a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a></h2>
+            <p>{site.description}</p>
+            <div class="card-actions">
+              <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-link">{t('search.details')}</a>
+              <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-link">{t('search.visit')}</a>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div id="no-results" class="no-results" style="display: none;">
+        <h3>{t('search.no_results_title')}</h3>
+        <p>{t('search.no_results_desc')}</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+    const cards = Array.from(document.querySelectorAll('.site-card')) as HTMLElement[];
+    const countNode = document.getElementById('results-count');
+    const noResultsNode = document.getElementById('no-results');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          const name = card.getAttribute('data-name') || '';
+          const desc = card.getAttribute('data-desc') || '';
+          const cat = card.getAttribute('data-category') || '';
+          const tags = card.getAttribute('data-tags') || '';
+
+          const match = !query || name.includes(query) || desc.includes(query) || cat.includes(query) || tags.includes(query);
+
+          if (match) {
+            card.style.display = 'flex';
+            visibleCount += 1;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (countNode) countNode.textContent = query ? `Found ${visibleCount} matching website${visibleCount === 1 ? '' : 's'}` : `Showing all ${cards.length} websites`;
+        if (noResultsNode) noResultsNode.style.display = visibleCount === 0 ? 'block' : 'none';
+      });
+    }
+  </script>
+</SiteLayout>
+
+<style>
+  .search-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .search-header { text-align: center; margin-bottom: 36px; }
+  .search-header h1 {
+    font: 800 clamp(2.2rem, 4.5vw, 3.2rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 10px;
+  }
+  .lead { font-size: 1.1rem; color: #d4d4d8; margin-bottom: 24px; }
+
+  .search-box {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .search-box input {
+    width: 100%;
+    background: #18181b;
+    border: 2px solid #a855f7;
+    border-radius: 999px;
+    padding: 16px 24px;
+    color: #fff;
+    font: 600 1.1rem/1 'Baloo 2', system-ui, sans-serif;
+  }
+  .search-box input:focus {
+    outline: none;
+    border-color: #f20caf;
+    box-shadow: 0 0 0 4px rgba(242, 12, 175, 0.25);
+  }
+
+  .results-count { font-size: 1rem; color: #a1a1aa; font-weight: 600; margin-bottom: 20px; }
+
+  .sites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .site-card {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .category-tag { color: #f7fa27; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; text-decoration: none; margin-bottom: 8px; display: inline-block; }
+  .site-card h2 { font: 700 1.35rem/1.2 'Baloo 2', system-ui, sans-serif; margin-bottom: 8px; }
+  .site-card h2 a { color: #fff; text-decoration: none; }
+  .site-card h2 a:hover { color: #f7fa27; }
+  .site-card p { color: #a1a1aa; font-size: 0.94rem; margin-bottom: 16px; flex-grow: 1; }
+
+  .card-actions { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #27272a; padding-top: 14px; }
+  .detail-link { color: #a855f7; font-weight: 700; font-size: 0.9rem; text-decoration: none; }
+  .visit-link { background: #27272a; color: #fff; font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; text-decoration: none; }
+
+  .no-results {
+    background: #18181b;
+    border: 2px dashed #3f3f46;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    margin-top: 24px;
+  }
+  .no-results h3 { font: 700 1.4rem/1.2 'Lilita One', system-ui, sans-serif; color: #f7fa27; margin-bottom: 8px; }
+  .no-results p { color: #a1a1aa; }
+</style>

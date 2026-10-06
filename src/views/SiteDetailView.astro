@@ -1,0 +1,385 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { type UselessWebsite } from '../data/websites.ts';
+import { websites } from '../data/websites.ts';
+import { collections } from '../data/collections.ts';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+interface Props {
+  site: UselessWebsite;
+}
+
+const { site } = Astro.props;
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const rawTitle = `${site.name} — Review & Guide | ClickForNothing`;
+const title = rawTitle.length <= 60 ? rawTitle : `${site.name} | ClickForNothing`;
+const baseDesc = `Explore ${site.name}: ${site.description} Learn why it is useless, what happens when you visit, and discover related weird websites to pass time.`;
+const description = baseDesc.length > 155 ? `${baseDesc.slice(0, 151)}...` : baseDesc;
+const canonicalPath = `/sites/${site.slug}/`;
+
+const relatedSites = websites
+  .filter((s) => (s.slug || s.id) !== site.slug && (s.categorySlug === site.categorySlug || (s.tags || []).some(tag => (site.tags || []).includes(tag))))
+  .slice(0, 4);
+
+const matchingCollections = collections.filter((col) => col.siteIds.includes(site.id));
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+const homeUrl = getLocalizedPath('/', currentLocale);
+const directoryUrl = getLocalizedPath('/sites/', currentLocale);
+const categoryUrl = getLocalizedPath(`/categories/${site.categorySlug || 'useless-websites'}/`, currentLocale);
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
+
+const catName = t(`categories.${site.categorySlug || 'useless-websites'}`) || site.category;
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.sites') || 'Websites Directory', item: `${siteOrigin}${directoryUrl}` },
+    { '@type': 'ListItem', position: 3, name: catName, item: `${siteOrigin}${categoryUrl}` },
+    { '@type': 'ListItem', position: 4, name: site.name, item: fullCanonicalUrl },
+  ],
+};
+
+const itemPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemPage',
+  name: site.name,
+  description: site.description,
+  url: fullCanonicalUrl,
+  mainEntity: {
+    '@type': 'WebSite',
+    name: site.name,
+    url: site.url,
+    description: site.description,
+  },
+};
+---
+<SiteLayout {title} {description} {canonicalPath}>
+  <main class="site-detail-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span>
+      <a href={directoryUrl}>{t('nav.sites') || 'Directory'}</a> <span>/</span>
+      <a href={categoryUrl}>{catName}</a> <span>/</span>
+      <span aria-current="page">{site.name}</span>
+    </nav>
+
+    <article class="detail-card">
+      <header class="detail-header">
+        <div class="meta-row">
+          <a href={categoryUrl} class="category-badge">
+            {catName}
+          </a>
+          <span class="verified-tag">✓ Verified Active Destination</span>
+        </div>
+        <h1 class="site-h1">{site.name}</h1>
+        <p class="summary-lead">{site.description}</p>
+
+        <div class="action-bar">
+          <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-primary-btn">
+            Visit Website Now ↗
+          </a>
+          <a href={discoverUrl} class="discover-next-btn">
+            Try Another Random Site 🎲
+          </a>
+        </div>
+      </header>
+
+      <section class="content-body">
+        <div class="info-block">
+          <h2>Why It Is Useless</h2>
+          <p>{site.whyItIsUseless || 'It serves no productivity purpose, solves zero real-world problems, and exists purely for entertaining boredom.'}</p>
+        </div>
+
+        <div class="info-block">
+          <h2>What Happens on the Website</h2>
+          <p>{site.whatHappens || site.description}</p>
+        </div>
+
+        {(site.tags || []).length > 0 && (
+          <div class="tags-block">
+            <h3>Tags & Topics</h3>
+            <div class="tags-list">
+              {(site.tags || []).map((tag) => (
+                <span class="tag-pill">#{tag}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {matchingCollections.length > 0 && (
+          <div class="collections-block">
+            <h3>Featured in Collections</h3>
+            <ul class="collections-list">
+              {matchingCollections.map((col) => (
+                <li>
+                  <a href={getLocalizedPath(`/collections/${col.slug}/`, currentLocale)}>📌 {col.title}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div class="share-block">
+          <h3>Share This Useless Treasure</h3>
+          <p>Send this to a friend who needs a 30-second distraction:</p>
+          <div class="share-buttons" data-share-container data-url={fullCanonicalUrl} data-title={site.name}>
+            <button class="share-btn copy-btn" type="button" data-copy-link>
+              📋 Copy Link
+            </button>
+            <a class="share-btn twitter-btn" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out ${site.name}: ${site.description}`)}&url=${encodeURIComponent(fullCanonicalUrl)}`} target="_blank" rel="noopener noreferrer">
+              🐦 X / Twitter
+            </a>
+            <a class="share-btn whatsapp-btn" href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${site.name} - ${fullCanonicalUrl}`)}`} target="_blank" rel="noopener noreferrer">
+              💬 WhatsApp
+            </a>
+            <a class="share-btn reddit-btn" href={`https://reddit.com/submit?url=${encodeURIComponent(fullCanonicalUrl)}&title=${encodeURIComponent(site.name)}`} target="_blank" rel="noopener noreferrer">
+              🤖 Reddit
+            </a>
+          </div>
+          <p class="copy-toast" data-copy-toast style="display:none;">Link copied to clipboard! 🚀</p>
+        </div>
+      </section>
+    </article>
+
+    {relatedSites.length > 0 && (
+      <section class="related-section">
+        <h2>Related Useless Destinations</h2>
+        <div class="related-grid">
+          {relatedSites.map((rel) => (
+            <div class="related-card">
+              <span class="rel-category">{t(`categories.${rel.categorySlug}`) || rel.category}</span>
+              <h3><a href={getLocalizedPath(`/sites/${rel.slug || rel.id}/`, currentLocale)}>{rel.name}</a></h3>
+              <p>{rel.description}</p>
+              <a href={getLocalizedPath(`/sites/${rel.slug || rel.id}/`, currentLocale)} class="rel-link">Explore →</a>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+  </main>
+
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(itemPageSchema)} />
+
+  <script>
+    const copyBtn = document.querySelector('[data-copy-link]');
+    const copyToast = document.querySelector('[data-copy-toast]') as HTMLElement | null;
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          if (copyToast) {
+            copyToast.style.display = 'block';
+            setTimeout(() => { copyToast.style.display = 'none'; }, 2500);
+          }
+        } catch {
+          /* Fallback */
+        }
+      });
+    }
+  </script>
+</SiteLayout>
+
+<style>
+  .site-detail-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
+  .breadcrumbs a:hover { text-decoration: underline; }
+
+  .detail-card {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 48px;
+  }
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .category-badge {
+    background: #7025ed;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .verified-tag {
+    color: #4ade80;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .site-h1 {
+    font: 800 clamp(2.2rem, 4.5vw, 3.2rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 14px;
+  }
+  .summary-lead {
+    font: 500 1.2rem/1.5 'Baloo 2', system-ui, sans-serif;
+    color: #d4d4d8;
+    margin-bottom: 28px;
+  }
+
+  .action-bar {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .visit-primary-btn {
+    background: #f20caf;
+    color: #fff;
+    font: 800 1.1rem/1 'Lilita One', system-ui, sans-serif;
+    padding: 14px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(242, 12, 175, 0.4);
+    transition: transform 0.15s ease;
+  }
+  .visit-primary-btn:hover { transform: scale(1.04); }
+  .discover-next-btn {
+    background: #27272a;
+    color: #f7fa27;
+    font: 700 1rem/1 'Baloo 2', system-ui, sans-serif;
+    padding: 14px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 1px solid #3f3f46;
+  }
+  .discover-next-btn:hover { background: #3f3f46; }
+
+  .content-body {
+    border-top: 1px solid #27272a;
+    padding-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .info-block h2 {
+    font: 700 1.5rem/1.2 'Lilita One', system-ui, sans-serif;
+    color: #f7fa27;
+    margin-bottom: 8px;
+  }
+  .info-block p {
+    font: 500 1.05rem/1.6 'Baloo 2', system-ui, sans-serif;
+    color: #e4e4e7;
+  }
+
+  .tags-block h3, .collections-block h3, .share-block h3 {
+    font: 700 1.2rem/1.2 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 12px;
+  }
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tag-pill {
+    background: #27272a;
+    color: #a855f7;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .collections-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .collections-list a {
+    color: #a855f7;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .collections-list a:hover { text-decoration: underline; }
+
+  .share-block {
+    background: #27272a;
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .share-block p { font-size: 0.95rem; color: #a1a1aa; margin-bottom: 12px; }
+  .share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .share-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+  .copy-btn { background: #3f3f46; color: #fff; }
+  .twitter-btn { background: #1d9bf0; color: #fff; }
+  .whatsapp-btn { background: #25d366; color: #fff; }
+  .reddit-btn { background: #ff4500; color: #fff; }
+  .copy-toast { color: #4ade80; font-weight: 700; font-size: 0.9rem; margin-top: 10px; }
+
+  .related-section h2 {
+    font: 800 1.8rem/1.1 'Lilita One', system-ui, sans-serif;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .related-card {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .rel-category { font-size: 0.75rem; color: #a855f7; font-weight: 700; text-transform: uppercase; }
+  .related-card h3 { font-size: 1.1rem; margin: 6px 0; }
+  .related-card h3 a { color: #fff; text-decoration: none; }
+  .related-card h3 a:hover { color: #f7fa27; }
+  .related-card p { font-size: 0.88rem; color: #a1a1aa; margin-bottom: 12px; }
+  .rel-link { color: #f20caf; font-weight: 700; font-size: 0.85rem; text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .detail-card { padding: 24px 16px; }
+    .action-bar { flex-direction: column; }
+    .visit-primary-btn, .discover-next-btn { text-align: center; }
+  }
+</style>

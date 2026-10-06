@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — 精彩绝伦的无聊网站",
+    "description": "探索互联网上那些古怪、荒谬且毫无意义的精彩无用网站。"
+  },
+  "hero": {
+    "title_start": "点击这里",
+    "title_end": "开始后悔。",
+    "subtitle": "发现你从未需要、却又念念不忘的奇葩网站。",
+    "cta": "带我过去！",
+    "cta_aria": "前往发现页面"
+  },
+  "discover": {
+    "seo_title": "发现无用网站 — ClickForNothing",
+    "seo_description": "挑选一个毫无意义的目的地，继续探索互联网的奇特角落。",
+    "kicker": "通往毫无必要世界的小小绕道",
+    "title": "选择你的下一次后悔",
+    "intro": "一次浏览一个网站。在新标签页打开，然后回来继续探索下一个。",
+    "visit_btn": "访问该网站",
+    "visit_hint": "后悔完了吗？再找一个吧。如果无法加载，请返回尝试其他网站。",
+    "btn_previous": "← 上一个",
+    "btn_next": "下一个无用网站 →",
+    "btn_surprise": "给我惊喜",
+    "scroll_hint": "滚动鼠标查看下一次后悔",
+    "of": "/",
+    "empty_badge": "合集加载中",
+    "empty_title": "暂无可选的后悔项目",
+    "empty_desc": "已验证网站合集目前为空。请在数据文件中添加一些目的地开始探索。"
+  },
+  "lang_selector": {
+    "button_label": "选择语言",
+    "search_placeholder": "搜索语言...",
+    "current_prefix": "语言:"
+  },
+  "footer": {
+    "brand_desc": "探索互联网上那些古怪、荒谬且毫无意义的精彩无用网站。",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "disclaimer": "免责声明",
+    "cookie_policy": "Cookie 政策",
+    "cookie_settings": "Cookie 设置"
+  },
+  "categories": {
+    "useless-websites": "无用网站",
+    "weird-websites": "怪异网站",
+    "silly-animals": "蠢萌动物",
+    "interactive": "互动乐趣",
+    "mini-games": "迷你游戏",
+    "creative": "创意玩具",
+    "visual-oddities": "视觉奇观",
+    "music-sounds": "音乐与声音",
+    "internet-nostalgia": "网络怀旧",
+    "funny-websites": "搞笑网站",
+    "time-wasters": "消磨时间",
+    "internet-experiments": "网络实验",
+    "food-for-thought": "发人深省"
+  },
+  "category_descriptions": {
+    "useless-websites": "没有任何实际功能却让你忍不住一直点击的网站。",
+    "weird-websites": "荒诞怪异的网络遗迹与奇特概念。",
+    "silly-animals": "猫咪、狗狗、鸭子以及跳舞的小生物。",
+    "interactive": "点击、拖动、拉伸并轻触屏幕。",
+    "mini-games": "偷走你十分钟时光的微型游戏。",
+    "creative": "声音玩具、涂鸦工具和数字沙盒。",
+    "visual-oddities": "催眠循环、复古遗迹与迷幻视觉。",
+    "music-sounds": "按键发声板、合成器与听觉惊喜。",
+    "internet-nostalgia": "Web 1.0 风情、GeoCities 复古美学与经典梗图。",
+    "funny-websites": "纯粹的喜剧、愚蠢的恶作剧和笑话。",
+    "time-wasters": "消磨时光与拖延症的绝佳目的地。",
+    "internet-experiments": "奇异的网页玩具与实验性创意。",
+    "food-for-thought": "奇思妙想、数字禅意与哲学沉思。"
+  },
+  "nav": {
+    "home": "首页",
+    "discover": "发现",
+    "categories": "分类",
+    "collections": "精选",
+    "articles": "文章",
+    "sites": "网站库",
+    "random": "随机",
+    "submit": "提交",
+    "search": "搜索"
+  },
+  "search": {
+    "title": "搜索无用网站",
+    "lead": "查找特定的时间消磨器、猫咪物理、声音板或艺术游戏。",
+    "placeholder": "输入关键词（如 cat、audio、game、retro）...",
+    "showing_all": "显示全部 {count} 个网站",
+    "no_results_title": "未找到匹配的无聊网站 🔍",
+    "no_results_desc": "尝试使用更宽泛的词语，如“猫”、“游戏”、“声音”或“艺术”。",
+    "details": "详情 →",
+    "visit": "访问网站 ↗"
+  },
+  "submit": {
+    "title": "提交一个无用网站",
+    "lead": "发现了一个毫无作用、让人发笑或脑洞大开的网站？发送给我们！",
+    "btn": "提交审核 🚀",
+    "success": "已收到提交！感谢您的分享。"
+  },
+  "error_404": {
+    "kicker": "错误 404",
+    "title_start": "这里",
+    "title_end": "什么都没有。",
+    "subtitle": "即使对于一个专门收集无聊内容的网站来说，这个页面也是真的找不到了。",
+    "back_home": "← 返回安全地带",
+    "discover": "探索随机网站 →"
+  },
+  "about": {
+    "title": "关于 ClickForNothing — 探索无聊互联网",
+    "description": "了解 ClickForNothing 是什么、为什么存在，以及它如何帮助你发现荒谬无用的网站。",
+    "heading": "关于 ClickForNothing",
+    "intro": "ClickForNothing 是一个娱乐网站，致力于帮助大家发现互联网上荒谬、搞笑且完全不必要的网站。",
+    "what_is": "什么是 ClickForNothing？",
+    "what_is_body": "ClickForNothing 是一个精心挑选的无聊网站发现平台，带给你意想不到的惊喜与欢笑。",
+    "why_exist": "它为什么存在？",
+    "why_exist_body": "我们相信互联网上最精彩的部分正是那些毫无功利心、纯粹因创造乐趣而生的奇思妙想。"
+  }
+}

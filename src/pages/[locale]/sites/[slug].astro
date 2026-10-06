@@ -1,0 +1,22 @@
+---
+import SiteDetailView from '../../../views/SiteDetailView.astro';
+import { NON_DEFAULT_LOCALES } from '../../../i18n/config';
+import { websites, type UselessWebsite } from '../../../data/websites.ts';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const locale of NON_DEFAULT_LOCALES) {
+    for (const site of websites) {
+      const slug = site.slug || site.id;
+      paths.push({
+        params: { locale, slug },
+        props: { site: { ...site, slug } },
+      });
+    }
+  }
+  return paths;
+}
+
+const { site } = Astro.props as { site: UselessWebsite };
+---
+<SiteDetailView site={site} />

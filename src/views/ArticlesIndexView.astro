@@ -1,0 +1,128 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { articles } from '../data/articles';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = "Articles & Guides on Useless Websites | ClickForNothing";
+const description = "Read editorial articles about internet culture, useless website history, time-wasting science, and funny web pranks from the ClickForNothing team.";
+const canonicalPath = "/articles/";
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+const homeUrl = getLocalizedPath('/', currentLocale);
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.articles') || 'Articles', item: fullCanonicalUrl },
+  ],
+};
+
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Articles & Guides — ClickForNothing Editorial',
+  description,
+  url: fullCanonicalUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: articles.length,
+    itemListElement: articles.map((art, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: art.title,
+      url: `${siteOrigin}${getLocalizedPath(`/articles/${art.slug}/`, currentLocale)}`,
+    })),
+  },
+};
+---
+<SiteLayout {title} {description} {canonicalPath}>
+  <main class="articles-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span> <span aria-current="page">{t('nav.articles') || 'Articles'}</span>
+    </nav>
+
+    <header class="header-section">
+      <h1>ClickForNothing Articles & Editorial</h1>
+      <p class="lead">
+        Insights into internet culture, history of useless websites, and web design comedy.
+      </p>
+    </header>
+
+    <section class="articles-grid">
+      {articles.map((art) => (
+        <article class="article-card">
+          <div class="meta-row">
+            <span class="read-time">⏱ {art.readTime}</span>
+            <span class="date">{art.publishDate}</span>
+          </div>
+          <h2><a href={getLocalizedPath(`/articles/${art.slug}/`, currentLocale)}>{art.title}</a></h2>
+          <p class="subtitle">{art.subtitle}</p>
+          <p class="desc">{art.description}</p>
+          <a href={getLocalizedPath(`/articles/${art.slug}/`, currentLocale)} class="read-more-btn">Read Full Article →</a>
+        </article>
+      ))}
+    </section>
+  </main>
+
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+</SiteLayout>
+
+<style>
+  .articles-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-bottom: 16px;
+  }
+  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
+
+  .header-section h1 {
+    font: 800 clamp(2rem, 4vw, 3rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 10px;
+  }
+  .lead {
+    font: 500 1.15rem/1.5 'Baloo 2', system-ui, sans-serif;
+    color: #d4d4d8;
+    margin-bottom: 36px;
+  }
+
+  .articles-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .article-card {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 18px;
+    padding: 28px;
+  }
+  .meta-row { display: flex; gap: 16px; font-size: 0.85rem; color: #a1a1aa; margin-bottom: 10px; }
+  .read-time { color: #a855f7; font-weight: 700; }
+  .article-card h2 { font: 700 1.6rem/1.2 'Lilita One', system-ui, sans-serif; margin-bottom: 8px; }
+  .article-card h2 a { color: #ffffff; text-decoration: none; }
+  .article-card h2 a:hover { color: #f7fa27; }
+  .subtitle { font-weight: 600; color: #d4d4d8; font-size: 1.05rem; margin-bottom: 10px; }
+  .desc { color: #a1a1aa; font-size: 0.96rem; line-height: 1.5; margin-bottom: 20px; }
+  .read-more-btn { color: #f20caf; font-weight: 700; font-size: 0.95rem; text-decoration: none; }
+  .read-more-btn:hover { text-decoration: underline; }
+</style>

@@ -1,0 +1,59 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { websites } from '../data/websites';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = "Random Useless Website Generator | ClickForNothing";
+const description = "Instantly jump to a random useless website with one click! Discover weird, funny, and pointless web experiments to kill boredom anytime. Try it now.";
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
+---
+<SiteLayout {title} {description} canonicalPath="/random/">
+  <main class="random-landing-container">
+    <div class="card-box">
+      <span class="dice">🎲</span>
+      <h1>Redirecting You to Something Useless...</h1>
+      <p class="status-msg">Spinning the random useless website selector.</p>
+      <a href={discoverUrl} class="fallback-link" id="manual-btn">Click here if not redirected automatically</a>
+    </div>
+  </main>
+
+  <script is:inline set:html={`
+    const sites = ${JSON.stringify(websites.filter(w => w.verified && /^https:\/\//i.test(w.url)).map(w => w.url))};
+    if (sites.length > 0) {
+      const randomIndex = Math.floor(Math.random() * sites.length);
+      const targetUrl = sites[randomIndex];
+      window.location.replace(targetUrl);
+    }
+  `} />
+</SiteLayout>
+
+<style>
+  .random-landing-container {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    color: #fff;
+    text-align: center;
+  }
+  .card-box {
+    background: #18181b;
+    border: 2px solid #f20caf;
+    border-radius: 24px;
+    padding: 48px 32px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 10px 0 #09080c;
+  }
+  .dice { font-size: 4rem; display: block; margin-bottom: 16px; animation: spin 2s infinite linear; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .card-box h1 { font: 800 1.8rem/1.2 'Lilita One', system-ui, sans-serif; margin-bottom: 12px; color: #f20caf; }
+  .status-msg { color: #a1a1aa; font-size: 1rem; margin-bottom: 24px; }
+  .fallback-link { color: #f7fa27; font-weight: 700; font-size: 0.95rem; text-decoration: underline; text-underline-offset: 3px; }
+</style>

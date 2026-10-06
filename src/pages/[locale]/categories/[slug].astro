@@ -1,0 +1,21 @@
+---
+import CategoryDetailView from '../../../views/CategoryDetailView.astro';
+import { NON_DEFAULT_LOCALES } from '../../../i18n/config';
+import { categories, type WebsiteCategory } from '../../../data/categories';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const locale of NON_DEFAULT_LOCALES) {
+    for (const cat of categories) {
+      paths.push({
+        params: { locale, slug: cat.slug },
+        props: { category: cat },
+      });
+    }
+  }
+  return paths;
+}
+
+const { category } = Astro.props as { category: WebsiteCategory };
+---
+<CategoryDetailView category={category} />

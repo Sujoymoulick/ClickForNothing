@@ -1,0 +1,202 @@
+---
+interface FAQItem {
+  question: string;
+  answer: string;
+  id?: string;
+}
+
+const faqs: FAQItem[] = [
+  {
+    id: "useless-websites-game",
+    question: "What is the Useless Websites Game?",
+    answer: "The Useless Websites game is an online discovery phenomenon where players click a single button (such as 'Take Me To Another Useless Website') to be randomly redirected to bizarre, absurd, and funny single-purpose websites. Content creators and gamers often play it as a challenge to discover the weirdest hidden corners of the internet or to see how long they can go without hitting a duplicate page."
+  },
+  {
+    id: "useless-web-2",
+    question: "Is there a 'The Useless Web 2'?",
+    answer: "While there is no official 'version 2.0' from original creator Tim Holman, modern discovery engines like ClickForNothing serve as the spiritual Useless Web 2.0. These next-generation platforms feature real-time active link checking, mobile-responsive interfaces, curated categories, search filters, and continuously updated 2026 submissions of useless websites."
+  },
+  {
+    id: "staggering-beauty",
+    question: "What is Staggering Beauty on The Useless Web?",
+    answer: "Staggering Beauty (staggeringbeauty.com) is one of the most famous viral sites featured on The Useless Web. It features a black worm-like creature that follows your mouse cursor. If you wiggle your mouse vigorously, the screen rapidly flashes bright colors accompanied by loud audio. WARNING: Staggering Beauty contains flashing lights and is NOT suitable for individuals with photosensitive epilepsy."
+  },
+  {
+    id: "useless-web-unblocked",
+    question: "How can I play The Useless Web unblocked at school or work?",
+    answer: "Network filters at schools and workplaces often block domains like theuselessweb.com under 'Gaming' or 'Time Waste' filters. To access useless websites unblocked, users typically rely on alternative discovery hubs like ClickForNothing, web proxies, or directory mirrors that index individual useless URLs directly without triggering domain blocklists."
+  },
+  {
+    id: "useless-web-worm",
+    question: "What is 'The Useless Web Worm'?",
+    answer: "The Useless Web Worm refers to Staggering Beauty—the iconic mouse-following black worm that wiggles and flashes rainbow colors when shaken. It can also refer to related worm-themed internet classics like Eel Slap or the Endless Worm interactive canvas."
+  },
+  {
+    id: "websites-like-useless-web",
+    question: "What are the best websites like The Useless Web?",
+    answer: "Top alternatives and websites like The Useless Web include: ClickForNothing (modern curated hub with search and categories), BoredButton (random mini-games and interactive tools), PointlessSites (classic directory of pointless web pages), and iconic individual sites like Eel Slap, Cat Bounce, Pointer Pointer, and Ducks Are Tough."
+  },
+  {
+    id: "is-useless-web-safe",
+    question: "Is The Useless Web safe to use?",
+    answer: "Yes! Major curated platforms like ClickForNothing and The Useless Web are completely safe. They link to harmless client-side HTML5, CSS, and JavaScript creative experiments. Reliable discovery engines regularly audit all external URLs to verify safety and remove broken or compromised links."
+  },
+  {
+    id: "useless-web-all-websites",
+    question: "Where can I find a list of all websites on The Useless Web?",
+    answer: "You can explore the full master directory of useless websites on our directory page (/sites/). This directory contains every indexed useless website with detailed previews, user ratings, tags, and category filters (Interactive, Visual Art, Audio & Music, Funny & Meme, and Bizarre)."
+  }
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<section class="faq-container" aria-labelledby="faq-main-heading">
+  <div class="faq-header">
+    <span class="faq-badge">Got Questions?</span>
+    <h2 id="faq-main-heading">The Useless Web — Frequently Asked Questions</h2>
+    <p class="faq-intro">Everything you ever wanted to know about useless websites, safety, popular classics like Staggering Beauty, unblocked access, and alternatives.</p>
+  </div>
+
+  <div class="faq-grid">
+    {faqs.map((faq) => (
+      <details class="faq-card" id={faq.id}>
+        <summary class="faq-question">
+          <span class="q-title">{faq.question}</span>
+          <span class="q-icon" aria-hidden="true">+</span>
+        </summary>
+        <div class="faq-answer">
+          <p>{faq.answer}</p>
+        </div>
+      </details>
+    ))}
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+</section>
+
+<style>
+  .faq-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .faq-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .faq-badge {
+    display: inline-block;
+    background: #f20caf;
+    color: #fff;
+    font: 700 0.85rem/1 'Baloo 2', system-ui, sans-serif;
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+
+  .faq-header h2 {
+    font: 800 clamp(1.8rem, 4vw, 2.5rem)/1.2 'Lilita One', system-ui, sans-serif;
+    color: #17141a;
+    margin: 0 0 12px 0;
+  }
+
+  .faq-intro {
+    font: 500 1.05rem/1.6 'Baloo 2', system-ui, sans-serif;
+    color: #4a4650;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .faq-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .faq-card {
+    background: #ffffff;
+    border: 2px solid #17141a;
+    border-radius: 12px;
+    box-shadow: 4px 4px 0px #17141a;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .faq-card[open] {
+    box-shadow: 2px 2px 0px #17141a;
+    background: #faf7ff;
+  }
+
+  .faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    font: 700 1.15rem/1.4 'Baloo 2', system-ui, sans-serif;
+    color: #17141a;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .q-title {
+    flex: 1;
+    padding-right: 16px;
+  }
+
+  .q-icon {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #7025ed;
+    transition: transform 0.2s ease;
+  }
+
+  .faq-card[open] .q-icon {
+    transform: rotate(45deg);
+    color: #f20caf;
+  }
+
+  .faq-answer {
+    padding: 0 24px 20px 24px;
+    font: 500 1rem/1.65 'Baloo 2', system-ui, sans-serif;
+    color: #333038;
+    border-top: 1px dashed #e2d9f3;
+    margin-top: 4px;
+    padding-top: 16px;
+  }
+
+  .faq-answer p {
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .faq-question {
+      padding: 14px 18px;
+      font-size: 1rem;
+    }
+    .faq-answer {
+      padding: 0 18px 16px 18px;
+      font-size: 0.95rem;
+    }
+  }
+</style>

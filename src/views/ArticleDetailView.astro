@@ -1,0 +1,146 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { type EditorialArticle } from '../data/articles';
+import { websites } from '../data/websites';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+interface Props {
+  article: EditorialArticle;
+}
+
+const { article } = Astro.props;
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const rawTitle = article.seoTitle;
+const title = rawTitle.length <= 60 ? rawTitle : `${article.title} | ClickForNothing`;
+const description = article.seoDescription;
+const canonicalPath = `/articles/${article.slug}/`;
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+const homeUrl = getLocalizedPath('/', currentLocale);
+const articlesUrl = getLocalizedPath('/articles/', currentLocale);
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.articles') || 'Articles', item: `${siteOrigin}${articlesUrl}` },
+    { '@type': 'ListItem', position: 3, name: article.title, item: fullCanonicalUrl },
+  ],
+};
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.title,
+  description: article.description,
+  author: { '@type': 'Organization', name: article.author },
+  publisher: { '@type': 'Organization', name: 'ClickForNothing', url: `${siteOrigin}/` },
+  datePublished: article.publishDate,
+  mainEntityOfPage: fullCanonicalUrl,
+};
+---
+<SiteLayout {title} {description} {canonicalPath} type="article">
+  <main class="article-detail-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span>
+      <a href={articlesUrl}>{t('nav.articles') || 'Articles'}</a> <span>/</span>
+      <span aria-current="page">{article.title}</span>
+    </nav>
+
+    <article class="article-body">
+      <header class="article-header">
+        <div class="meta-bar">
+          <span>{article.author}</span> •
+          <span>{article.publishDate}</span> •
+          <span>⏱ {article.readTime}</span>
+        </div>
+        <h1>{article.title}</h1>
+        <p class="subtitle">{article.subtitle}</p>
+      </header>
+
+      <div class="sections-wrapper">
+        {article.sections.map((sec) => {
+          const highlightSite = sec.highlightSiteId ? websites.find(w => w.id === sec.highlightSiteId) : null;
+          return (
+            <section class="art-section">
+              <h2>{sec.heading}</h2>
+              {sec.content.map(p => <p>{p}</p>)}
+
+              {highlightSite && (
+                <div class="site-feature-box">
+                  <span class="box-label">Featured Destination</span>
+                  <h3><a href={getLocalizedPath(`/sites/${highlightSite.slug}/`, currentLocale)}>{highlightSite.name}</a></h3>
+                  <p>{highlightSite.description}</p>
+                  <a href={getLocalizedPath(`/sites/${highlightSite.slug}/`, currentLocale)} class="box-link">Explore Website Review →</a>
+                </div>
+              )}
+            </section>
+          );
+        })}
+      </div>
+    </article>
+  </main>
+
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+</SiteLayout>
+
+<style>
+  .article-detail-container {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-bottom: 24px;
+  }
+  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
+
+  .article-header {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 40px;
+  }
+  .meta-bar { font-size: 0.88rem; color: #a855f7; font-weight: 600; margin-bottom: 12px; }
+  .article-header h1 {
+    font: 800 clamp(2rem, 4vw, 3rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 14px;
+  }
+  .subtitle { font-size: 1.15rem; color: #d4d4d8; line-height: 1.5; font-weight: 500; }
+
+  .sections-wrapper { display: flex; flex-direction: column; gap: 36px; }
+  .art-section h2 { font: 800 1.7rem/1.2 'Lilita One', system-ui, sans-serif; color: #f7fa27; margin-bottom: 12px; }
+  .art-section p { font: 500 1.1rem/1.65 'Baloo 2', system-ui, sans-serif; color: #e4e4e7; margin-bottom: 16px; }
+
+  .site-feature-box {
+    background: #27272a;
+    border-left: 4px solid #f20caf;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+  .box-label { font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #f20caf; display: block; margin-bottom: 4px; }
+  .site-feature-box h3 { font: 700 1.3rem/1.2 'Baloo 2', system-ui, sans-serif; margin-bottom: 6px; }
+  .site-feature-box h3 a { color: #fff; text-decoration: none; }
+  .site-feature-box h3 a:hover { color: #f7fa27; }
+  .site-feature-box p { font-size: 0.96rem; color: #a1a1aa; margin-bottom: 12px; }
+  .box-link { color: #f7fa27; font-weight: 700; font-size: 0.9rem; text-decoration: none; }
+  .box-link:hover { text-decoration: underline; }
+</style>

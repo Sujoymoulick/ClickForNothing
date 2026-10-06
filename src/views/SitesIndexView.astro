@@ -1,0 +1,273 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { websites } from '../data/websites';
+import { categories } from '../data/categories';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = "Directory of Useless Websites | ClickForNothing";
+const description = "Browse our full directory of 100+ useless, funny, weird, and interactive websites. Instant time-wasters and useless web treasures categorized for you.";
+const canonicalPath = "/sites/";
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+const homeUrl = getLocalizedPath('/', currentLocale);
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.sites') || 'Websites Directory', item: fullCanonicalUrl },
+  ],
+};
+
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Directory of Useless Websites',
+  description,
+  url: fullCanonicalUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: websites.length,
+    itemListElement: websites.map((site, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: site.name,
+      url: `${siteOrigin}${getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}`,
+    })),
+  },
+};
+---
+<SiteLayout {title} {description} {canonicalPath}>
+  <main class="directory-container">
+    <header class="directory-header">
+      <nav class="breadcrumbs" aria-label="Breadcrumbs">
+        <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span> <span aria-current="page">{t('nav.sites') || 'Websites Directory'}</span>
+      </nav>
+      <h1>Directory of Useless Websites</h1>
+      <p class="lead-text">
+        Explore {websites.length}+ hand-curated useless, weird, funny, and interactive websites.
+      </p>
+
+      <div class="category-pills" aria-label="Filter by Category">
+        <a href={getLocalizedPath('/sites/', currentLocale)} class="pill active">All ({websites.length})</a>
+        {categories.map((cat) => (
+          <a href={getLocalizedPath(`/categories/${cat.slug}/`, currentLocale)} class="pill">
+            {cat.emoji} {t(`categories.${cat.slug}`) || cat.name}
+          </a>
+        ))}
+      </div>
+    </header>
+
+    <section class="site-grid" aria-label="Useless Websites Grid">
+      {websites.map((site) => (
+        <article class="site-card">
+          <div class="card-header">
+            <a href={getLocalizedPath(`/categories/${site.categorySlug}/`, currentLocale)} class="category-tag">
+              {t(`categories.${site.categorySlug}`) || site.category}
+            </a>
+            {site.featured && <span class="featured-badge">Featured ★</span>}
+          </div>
+          <h2 class="card-title">
+            <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a>
+          </h2>
+          <p class="card-desc">{site.description}</p>
+
+          <div class="card-footer">
+            <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="details-btn">{t('search.details') || 'View Details →'}</a>
+            <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-direct-btn">
+              Visit Original ↗
+            </a>
+          </div>
+        </article>
+      ))}
+    </section>
+
+    <section class="cta-banner">
+      <h2>Feeling Lucky?</h2>
+      <p>Let our discovery engine take you to a random useless destination right now.</p>
+      <a href={discoverUrl} class="random-cta-btn">Take Me Somewhere Useless 🎲</a>
+    </section>
+  </main>
+
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+</SiteLayout>
+
+<style>
+  .directory-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-bottom: 16px;
+  }
+  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
+  .breadcrumbs a:hover { text-decoration: underline; }
+
+  .directory-header h1 {
+    font: 800 clamp(2.2rem, 5vw, 3.5rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+  .lead-text {
+    font: 500 1.2rem/1.5 'Baloo 2', system-ui, sans-serif;
+    color: #d4d4d8;
+    margin-bottom: 24px;
+  }
+
+  .category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  .pill {
+    background: #27272a;
+    color: #f4f4f5;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font: 600 0.92rem 'Baloo 2', system-ui, sans-serif;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .pill:hover, .pill.active {
+    background: #f20caf;
+    color: #ffffff;
+  }
+
+  .site-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+  .site-card {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 18px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .site-card:hover {
+    transform: translateY(-4px);
+    border-color: #f7fa27;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .category-tag {
+    background: #27272a;
+    color: #a855f7;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .category-tag:hover { text-decoration: underline; }
+  .featured-badge {
+    background: #f7fa27;
+    color: #09080c;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .card-title {
+    font: 700 1.5rem/1.2 'Lilita One', system-ui, sans-serif;
+    margin-bottom: 8px;
+  }
+  .card-title a { color: #ffffff; text-decoration: none; }
+  .card-title a:hover { color: #f20caf; }
+
+  .card-desc {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    margin-bottom: 20px;
+    flex-grow: 1;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #27272a;
+    padding-top: 14px;
+  }
+  .details-btn {
+    color: #f7fa27;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  .details-btn:hover { text-decoration: underline; }
+
+  .visit-direct-btn {
+    background: #f20caf;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+  .visit-direct-btn:hover { opacity: 0.9; }
+
+  .cta-banner {
+    background: linear-gradient(135deg, #7025ed, #f20caf);
+    border-radius: 24px;
+    padding: 48px 32px;
+    text-align: center;
+    box-shadow: 0 10px 0 #09080c;
+  }
+  .cta-banner h2 {
+    font: 800 clamp(1.8rem, 4vw, 2.8rem) 'Lilita One', system-ui, sans-serif;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+  .cta-banner p {
+    font-size: 1.15rem;
+    margin-bottom: 24px;
+    color: #fef08a;
+  }
+  .random-cta-btn {
+    display: inline-block;
+    background: #f7fa27;
+    color: #09080c;
+    font: 800 1.2rem 'Lilita One', system-ui, sans-serif;
+    padding: 14px 32px;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 5px 0 #09080c;
+    transition: transform 0.15s ease;
+  }
+  .random-cta-btn:hover {
+    transform: translateY(-3px);
+  }
+</style>

@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — 素晴らしく無駄なウェブサイトたち",
+    "description": "インターネット上の奇妙で無意味、そして素晴らしく無駄なウェブサイトを発見しましょう。"
+  },
+  "hero": {
+    "title_start": "ここをクリックして",
+    "title_end": "後悔しよう。",
+    "subtitle": "必要としたことはないけれど、なぜか忘れられないウェブサイトたち。",
+    "cta": "そこへ連れてって！",
+    "cta_aria": "発見ページへ移動"
+  },
+  "discover": {
+    "seo_title": "無駄なウェブサイトを発見する — ClickForNothing",
+    "seo_description": "無意味な目的地を選んで、ウェブの奇妙な片隅を探索し続けましょう。",
+    "kicker": "無駄への小さな寄り道",
+    "title": "次の後悔を選ぼう",
+    "intro": "1つずつ楽しむウェブサイト。新しいタブで開いて、戻ってきたら次へ。",
+    "visit_btn": "サイトを訪問する",
+    "visit_hint": "後悔し終わりましたか？次を探しましょう。読み込めない場合は戻って別のサイトを試してください。",
+    "btn_previous": "← 前へ",
+    "btn_next": "次の無駄なサイト →",
+    "btn_surprise": "おまかせ",
+    "scroll_hint": "スクロールして次の後悔へ",
+    "of": "/",
+    "empty_badge": "コレクション読み込み中",
+    "empty_title": "まだ後悔できるサイトがありません",
+    "empty_desc": "確認済みコレクションが空です。探索を開始するには目的地を追加してください。"
+  },
+  "lang_selector": {
+    "button_label": "言語を選択",
+    "search_placeholder": "言語を検索...",
+    "current_prefix": "言語:"
+  },
+  "footer": {
+    "brand_desc": "インターネット上の奇妙で無意味、そして素晴らしく無駄なウェブサイトを発見しましょう。",
+    "about": "サイトについて",
+    "contact": "お問い合わせ",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "disclaimer": "免責事項",
+    "cookie_policy": "クッキーポリシー",
+    "cookie_settings": "クッキー設定"
+  },
+  "categories": {
+    "useless-websites": "無駄なサイト",
+    "weird-websites": "奇妙なサイト",
+    "silly-animals": "おバカな動物",
+    "interactive": "インタラクティブ",
+    "mini-games": "ミニゲーム",
+    "creative": "クリエイティブ玩具",
+    "visual-oddities": "視覚的奇観",
+    "music-sounds": "音楽と効果音",
+    "internet-nostalgia": "ネットの懐かしさ",
+    "funny-websites": "面白いサイト",
+    "time-wasters": "暇つぶし",
+    "internet-experiments": "ネット実験室",
+    "food-for-thought": "考えさせられるもの"
+  },
+  "category_descriptions": {
+    "useless-websites": "実用性ゼロなのにクリックし続けてしまうサイト。",
+    "weird-websites": "不気味で奇妙なネットの遺物や珍妙なコンセプト。",
+    "silly-animals": "猫、犬、アヒル、そして踊る生き物たち。",
+    "interactive": "クリック、ドラッグ、引き伸ばし、触って遊ぶ画面。",
+    "mini-games": "あなたの10分を奪う小さなゲーム。",
+    "creative": "音のおもちゃ、お絵描きツール、デジタル砂場。",
+    "visual-oddities": "催眠的なループ、レトロ遺産、サイケデリック映像。",
+    "music-sounds": "サウンドボード、シンセ、予期せぬ音の驚き。",
+    "internet-nostalgia": "Web 1.0の空気感、ジオシティーズ風、名作ミーム。",
+    "funny-websites": "純粋なコメディ、くだらない悪ふざけ、ジョーク。",
+    "time-wasters": "先延ばしに最適な目的地。",
+    "internet-experiments": "奇妙なWebトイと実験的アイデア。",
+    "food-for-thought": "風変わりな考察、デジタルの禅、瞑想的空間。"
+  },
+  "nav": {
+    "home": "ホーム",
+    "discover": "発見",
+    "categories": "カテゴリー",
+    "collections": "コレクション",
+    "articles": "記事",
+    "sites": "サイト一覧",
+    "random": "ランダム",
+    "submit": "投稿",
+    "search": "検索"
+  },
+  "search": {
+    "title": "無駄なウェブサイトを検索",
+    "lead": "特定の暇つぶし、猫の物理演算、効果音、アートゲームを探そう。",
+    "placeholder": "キーワードを入力 (例: 猫, 音, ゲーム, レトロ)...",
+    "showing_all": "全 {count} 件のウェブサイトを表示中",
+    "no_results_title": "該当するサイトが見つかりませんでした 🔍",
+    "no_results_desc": "「猫」「ゲーム」「音」「アート」などのキーワードを試してください。",
+    "details": "詳細 →",
+    "visit": "サイトへ行く ↗"
+  },
+  "submit": {
+    "title": "無駄なサイトを投稿する",
+    "lead": "何の役にも立たない、笑える、脳が溶けるサイトを知っていますか？ぜひ教えてください！",
+    "btn": "審査に提出する 🚀",
+    "success": "投稿を受け付けました！共有ありがとうございます。"
+  },
+  "error_404": {
+    "kicker": "エラー 404",
+    "title_start": "ここには",
+    "title_end": "何もありません。",
+    "subtitle": "無意味なサイトを集めたここでも、このページは本当に存在しません。",
+    "back_home": "← 安全な場所に戻る",
+    "discover": "ランダムなサイトを探す →"
+  },
+  "about": {
+    "title": "ClickForNothing について — 無駄なインターネットを発見",
+    "description": "ClickForNothing の目的と、ネット上の無駄で面白いサイトに出会う方法をご紹介します。",
+    "heading": "ClickForNothing について",
+    "intro": "ClickForNothing は、ネット上の奇妙で無意味なサイトを発見できるエンタメサイトです。",
+    "what_is": "ClickForNothing とは？",
+    "what_is_body": "何の役にも立たないけれど、楽しませてくれる無駄なサイトのキュレーションです。",
+    "why_exist": "なぜ存在するのか？",
+    "why_exist_body": "インターネットの最大の魅力は、純粋な好奇心で作られた無意味で奇妙なサイトにあると信じているからです。"
+  }
+}

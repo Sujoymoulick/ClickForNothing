@@ -1,0 +1,21 @@
+---
+import CollectionDetailView from '../../../views/CollectionDetailView.astro';
+import { NON_DEFAULT_LOCALES } from '../../../i18n/config';
+import { collections, type WebsiteCollection } from '../../../data/collections';
+
+export function getStaticPaths() {
+  const paths = [];
+  for (const locale of NON_DEFAULT_LOCALES) {
+    for (const col of collections) {
+      paths.push({
+        params: { locale, slug: col.slug },
+        props: { collection: col },
+      });
+    }
+  }
+  return paths;
+}
+
+const { collection } = Astro.props as { collection: WebsiteCollection };
+---
+<CollectionDetailView collection={collection} />

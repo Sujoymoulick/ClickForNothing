@@ -1,0 +1,195 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { categories } from '../data/categories';
+import { websites } from '../data/websites';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = "Categories of Useless Websites | ClickForNothing";
+const description = "Browse useless websites by category: silly animals, weird experiments, funny web pranks, mini games, internet nostalgia, and interactive art.";
+const canonicalPath = "/categories/";
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+const homeUrl = getLocalizedPath('/', currentLocale);
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.categories') || 'Categories', item: fullCanonicalUrl },
+  ],
+};
+
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Categories of Useless Websites',
+  description,
+  url: fullCanonicalUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: categories.length,
+    itemListElement: categories.map((cat, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: t(`categories.${cat.slug}`) || cat.name,
+      url: `${siteOrigin}${getLocalizedPath(`/categories/${cat.slug}/`, currentLocale)}`,
+    })),
+  },
+};
+---
+<SiteLayout {title} {description} {canonicalPath}>
+  <main class="categories-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span> <span aria-current="page">{t('nav.categories') || 'Categories'}</span>
+    </nav>
+
+    <header class="header-section">
+      <h1>Explore Useless Websites by Category</h1>
+      <p class="lead">
+        Find exactly what kind of internet detour you are looking for today.
+      </p>
+    </header>
+
+    <section class="categories-grid">
+      {categories.map((cat) => {
+        const count = websites.filter(w => w.categorySlug === cat.slug).length;
+        const catName = t(`categories.${cat.slug}`) || cat.name;
+        const catDesc = t(`category_descriptions.${cat.slug}`) || cat.description;
+        const catUrl = getLocalizedPath(`/categories/${cat.slug}/`, currentLocale);
+        return (
+          <article class="category-card">
+            <div class="card-top">
+              <span class="emoji">{cat.emoji}</span>
+              <span class="count-badge">{count} websites</span>
+            </div>
+            <h2><a href={catUrl}>{catName}</a></h2>
+            <p>{catDesc}</p>
+            <a href={catUrl} class="explore-btn">Browse Category →</a>
+          </article>
+        );
+      })}
+    </section>
+  </main>
+
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+</SiteLayout>
+
+<style>
+  .categories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-bottom: 16px;
+  }
+  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
+
+  .header-section h1 {
+    font: 800 clamp(2rem, 4vw, 3rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 10px;
+  }
+  .lead {
+    font: 500 1.15rem/1.5 'Baloo 2', system-ui, sans-serif;
+    color: #d4d4d8;
+    margin-bottom: 36px;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .category-card {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .category-card:hover {
+    transform: translateY(-4px);
+    border-color: #f20caf;
+    box-shadow: 0 8px 24px rgba(242, 12, 175, 0.2);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .emoji {
+    font-size: 2.4rem;
+  }
+
+  .count-badge {
+    background: #27272a;
+    color: #f7fa27;
+    font: 700 0.85rem/1 'Baloo 2', system-ui, sans-serif;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #3f3f46;
+  }
+
+  .category-card h2 {
+    font: 700 1.4rem/1.2 'Lilita One', system-ui, sans-serif;
+    margin: 0 0 10px 0;
+  }
+
+  .category-card h2 a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .category-card h2 a:hover {
+    color: #f20caf;
+  }
+
+  .category-card p {
+    font: 400 0.95rem/1.5 'Baloo 2', system-ui, sans-serif;
+    color: #a1a1aa;
+    margin: 0 0 20px 0;
+    flex-grow: 1;
+  }
+
+  .explore-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #27272a;
+    color: #ffffff;
+    font: 700 0.95rem/1 'Baloo 2', system-ui, sans-serif;
+    padding: 12px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .explore-btn:hover {
+    background: #f20caf;
+    color: #ffffff;
+  }
+</style>

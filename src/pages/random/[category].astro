@@ -1,0 +1,14 @@
+---
+import RandomCategoryView from '../../views/RandomCategoryView.astro';
+import { categories } from '../../data/categories';
+
+export function getStaticPaths() {
+  return categories.map((cat) => ({
+    params: { category: cat.slug },
+    props: { categoryObj: cat },
+  }));
+}
+
+const { categoryObj } = Astro.props;
+---
+<RandomCategoryView categoryObj={categoryObj} />

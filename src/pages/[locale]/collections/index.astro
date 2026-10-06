@@ -1,0 +1,11 @@
+---
+import CollectionsIndexView from '../../../views/CollectionsIndexView.astro';
+import { NON_DEFAULT_LOCALES } from '../../../i18n/config';
+
+export function getStaticPaths() {
+  return NON_DEFAULT_LOCALES.map((locale) => ({
+    params: { locale },
+  }));
+}
+---
+<CollectionsIndexView />

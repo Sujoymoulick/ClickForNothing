@@ -1,0 +1,262 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { type WebsiteCategory } from '../data/categories';
+import { websites } from '../data/websites';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+interface Props {
+  category: WebsiteCategory;
+}
+
+const { category } = Astro.props;
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const catName = t(`categories.${category.slug}`) || category.name;
+const catDesc = t(`category_descriptions.${category.slug}`) || category.description;
+
+const rawTitle = category.seoTitle;
+const title = rawTitle.length <= 60 ? rawTitle : `${catName} Websites | ClickForNothing`;
+const description = category.seoDescription;
+const canonicalPath = `/categories/${category.slug}/`;
+
+const categoryWebsites = websites.filter(w => w.categorySlug === category.slug);
+
+const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
+const currentPath = getLocalizedPath(canonicalPath, currentLocale);
+const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
+const homeUrl = getLocalizedPath('/', currentLocale);
+const categoriesUrl = getLocalizedPath('/categories/', currentLocale);
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.categories') || 'Categories', item: `${siteOrigin}${categoriesUrl}` },
+    { '@type': 'ListItem', position: 3, name: catName, item: fullCanonicalUrl },
+  ],
+};
+
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: catName,
+  description: catDesc,
+  url: fullCanonicalUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: categoryWebsites.length,
+    itemListElement: categoryWebsites.map((site, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: site.name,
+      url: `${siteOrigin}${getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}`,
+    })),
+  },
+};
+---
+<SiteLayout {title} {description} {canonicalPath}>
+  <main class="category-detail-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
+      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span>
+      <a href={categoriesUrl}>{t('nav.categories') || 'Categories'}</a> <span>/</span>
+      <span aria-current="page">{catName}</span>
+    </nav>
+
+    <header class="category-header">
+      <span class="emoji-banner">{category.emoji}</span>
+      <h1>{catName}</h1>
+      <p class="intro-lead">{category.introText}</p>
+      <div class="why-box">
+        <strong>💡 Why Visit These Websites:</strong>
+        <p>{category.whyVisit}</p>
+      </div>
+    </header>
+
+    <section class="sites-section">
+      <h2>Found {categoryWebsites.length} Websites in {catName}</h2>
+      <div class="sites-grid">
+        {categoryWebsites.map((site) => (
+          <article class="site-card">
+            <h3><a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a></h3>
+            <p>{site.description}</p>
+            <div class="tags">
+              {site.tags.map(tag => <span class="tag">#{tag}</span>)}
+            </div>
+            <div class="card-actions">
+              <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-link">Details & Review →</a>
+              <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-link">Visit Site ↗</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="cta-box">
+      <h2>Explore Random Sites in {catName}</h2>
+      <p>Jump directly into random websites inside this specific category.</p>
+      <a href={getLocalizedPath(`/random/${category.slug}/`, currentLocale)} class="random-btn">Spin {catName} Randomizer 🎲</a>
+    </section>
+  </main>
+
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+</SiteLayout>
+
+<style>
+  .category-detail-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    color: #f4f4f5;
+  }
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    margin-bottom: 24px;
+  }
+  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
+
+  .category-header {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 20px;
+    padding: 36px 32px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .emoji-banner { font-size: 4rem; display: block; margin-bottom: 12px; }
+  .category-header h1 {
+    font: 800 clamp(2.2rem, 4.5vw, 3.2rem)/1.1 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 12px;
+  }
+  .intro-lead {
+    font: 500 1.15rem/1.6 'Baloo 2', system-ui, sans-serif;
+    color: #d4d4d8;
+    max-width: 750px;
+    margin: 0 auto 24px;
+  }
+  .why-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px 20px;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  .why-box strong { color: #f7fa27; font-size: 0.95rem; display: block; margin-bottom: 4px; }
+  .why-box p { color: #a1a1aa; font-size: 0.95rem; margin: 0; line-height: 1.5; }
+
+  .sites-section h2 {
+    font: 700 1.8rem/1.2 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 24px;
+  }
+
+  .sites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .site-card {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .site-card:hover {
+    transform: translateY(-3px);
+    border-color: #a855f7;
+  }
+
+  .site-card h3 {
+    font: 700 1.35rem/1.2 'Baloo 2', system-ui, sans-serif;
+    margin: 0 0 10px 0;
+  }
+  .site-card h3 a { color: #ffffff; text-decoration: none; }
+  .site-card h3 a:hover { color: #f7fa27; }
+
+  .site-card p {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    flex-grow: 1;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .tag {
+    font-size: 0.78rem;
+    color: #71717a;
+    background: #27272a;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #27272a;
+    padding-top: 16px;
+  }
+  .detail-link { color: #a855f7; font-weight: 700; font-size: 0.9rem; text-decoration: none; }
+  .detail-link:hover { text-decoration: underline; }
+  .visit-link {
+    background: #27272a;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+  }
+  .visit-link:hover { background: #3f3f46; }
+
+  .cta-box {
+    background: linear-gradient(135deg, #18181b 0%, #2e1065 100%);
+    border: 2px solid #7025ed;
+    border-radius: 20px;
+    padding: 36px;
+    text-align: center;
+  }
+  .cta-box h2 {
+    font: 800 1.8rem/1.2 'Lilita One', system-ui, sans-serif;
+    color: #f7fa27;
+    margin-bottom: 8px;
+  }
+  .cta-box p { color: #d4d4d8; font-size: 1.05rem; margin-bottom: 24px; }
+  .random-btn {
+    display: inline-flex;
+    background: #f20caf;
+    color: #ffffff;
+    font: 800 1.1rem/1 'Lilita One', system-ui, sans-serif;
+    padding: 14px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 4px 0 #09080c;
+  }
+  .random-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #09080c;
+  }
+</style>

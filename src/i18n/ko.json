@@ -1,0 +1,120 @@
+{
+  "site": {
+    "title": "ClickForNothing — 놀랍도록 쓸모없는 웹사이트들",
+    "description": "인터넷의 기괴하고 무의미하며 놀랍도록 쓸모없는 웹사이트들을 발견해 보세요."
+  },
+  "hero": {
+    "title_start": "여기를 클릭하고",
+    "title_end": "후회하세요.",
+    "subtitle": "필요한 적은 없지만 왠지 잊을 수 없는 웹사이트들을 발견해 보세요.",
+    "cta": "거기로 데려가 줘!",
+    "cta_aria": "탐색 페이지로 이동"
+  },
+  "discover": {
+    "seo_title": "쓸모없는 웹사이트 발견하기 — ClickForNothing",
+    "seo_description": "무의미한 목적지를 고르고 웹의 기괴한 구석들을 계속 탐험해 보세요.",
+    "kicker": "불필요한 세상으로의 작은 일탈",
+    "title": "다음 후회를 선택하세요",
+    "intro": "한 번에 하나의 웹사이트. 새 탭에서 둘러보고 다시 돌아와 또 다른 사이트를 만나보세요.",
+    "visit_btn": "웹사이트 방문하기",
+    "visit_hint": "후회가 끝났나요? 또 다른 곳을 찾아보세요. 로딩이 안 되면 돌아와서 다른 사이트를 시도하세요.",
+    "btn_previous": "← 이전",
+    "btn_next": "다음 쓸모없는 사이트 →",
+    "btn_surprise": "아무거나 추천",
+    "scroll_hint": "스크롤하여 다음 후회 보기",
+    "of": "/",
+    "empty_badge": "컬렉션 로딩 중",
+    "empty_title": "아직 준비된 후회가 없습니다",
+    "empty_desc": "검증된 웹사이트 컬렉션이 비어 있습니다. 탐색을 시작하려면 몇 군데를 추가해 주세요."
+  },
+  "lang_selector": {
+    "button_label": "언어 선택",
+    "search_placeholder": "언어 검색...",
+    "current_prefix": "언어:"
+  },
+  "footer": {
+    "brand_desc": "인터넷의 기괴하고 무의미하며 놀랍도록 쓸모없는 웹사이트들을 발견해 보세요.",
+    "about": "소개",
+    "contact": "문의하기",
+    "privacy": "개인정보처리방침",
+    "terms": "이용약관",
+    "disclaimer": "면책 조항",
+    "cookie_policy": "쿠키 정책",
+    "cookie_settings": "쿠키 설정"
+  },
+  "categories": {
+    "useless-websites": "쓸모없는 사이트",
+    "weird-websites": "기이한 사이트",
+    "silly-animals": "엉뚱한 동물들",
+    "interactive": "인터랙티브 재미",
+    "mini-games": "미니 게임",
+    "creative": "창의적인 장난감",
+    "visual-oddities": "시각적 기현상",
+    "music-sounds": "음악 및 소리",
+    "internet-nostalgia": "인터넷 노스탤지어",
+    "funny-websites": "웃긴 사이트",
+    "time-wasters": "시간 낭비",
+    "internet-experiments": "웹 실험실",
+    "food-for-thought": "생각거리"
+  },
+  "category_descriptions": {
+    "useless-websites": "실용성 제로지만 자꾸만 클릭하게 만드는 사이트들.",
+    "weird-websites": "인터넷의 기괴한 유물과 엉뚱한 콘셉트들.",
+    "silly-animals": "고양이, 개, 오리와 춤추는 동물들.",
+    "interactive": "클릭하고 당기고 늘리고 화면을 찔러보세요.",
+    "mini-games": "하루 중 10분을 훔쳐 가는 작은 게임들.",
+    "creative": "소리 장난감, 그리기 도구 및 디지털 샌드박스.",
+    "visual-oddities": "최면 루프, 레트로 유물과 사이키델릭 그래픽.",
+    "music-sounds": "사운드보드, 신시사이저, 엉뚱한 청각적 놀라움.",
+    "internet-nostalgia": "웹 1.0 감성, 지오시티 감성과 고전 밈.",
+    "funny-websites": "순수한 코미디, 바보 같은 장난과 유머.",
+    "time-wasters": "완벽한 시간 때우기 목적지.",
+    "internet-experiments": "이상한 웹 토이와 실험적인 아이디어들.",
+    "food-for-thought": "기발한 생각, 디지털 선(Zen)과 명상 공간."
+  },
+  "nav": {
+    "home": "홈",
+    "discover": "탐색",
+    "categories": "카테고리",
+    "collections": "컬렉션",
+    "articles": "아티클",
+    "sites": "사이트 목록",
+    "random": "랜덤",
+    "submit": "제출하기",
+    "search": "검색"
+  },
+  "search": {
+    "title": "쓸모없는 웹사이트 검색",
+    "lead": "시간 때우기, 고양이 물리 엔진, 사운드보드, 아트 게임을 찾아보세요.",
+    "placeholder": "키워드 입력 (예: cat, sound, game, retro)...",
+    "showing_all": "전체 {count}개 웹사이트 표시 중",
+    "no_results_title": "검색 결과가 없습니다 🔍",
+    "no_results_desc": "\"고양이\", \"게임\", \"소리\", \"아트\" 같은 넓은 단어로 검색해 보세요.",
+    "details": "자세히 보기 →",
+    "visit": "사이트 방문 ↗"
+  },
+  "submit": {
+    "title": "쓸모없는 웹사이트 제출하기",
+    "lead": "아무 목적도 없거나 웃음을 주는 사이트를 알고 계신가요? 제보해 주세요!",
+    "btn": "검토를 위해 제출하기 🚀",
+    "success": "제출되었습니다! 공유해 주셔서 감사합니다."
+  },
+  "error_404": {
+    "kicker": "오류 404",
+    "title_start": "여긴 볼 게",
+    "title_end": "전혀 없습니다.",
+    "subtitle": "쓸모없는 사이트를 모아둔 곳이지만, 이 페이지는 정말로 존재하지 않습니다.",
+    "back_home": "← 안전한 곳으로 돌아가기",
+    "discover": "랜덤 사이트 둘러보기 →"
+  },
+  "about": {
+    "title": "ClickForNothing 소개 — 쓸모없는 인터넷 탐험",
+    "description": "ClickForNothing이 무엇인지, 왜 존재하는지, 인터넷의 기괴한 사이트들을 어떻게 발견하는지 알아보세요.",
+    "heading": "ClickForNothing 소개",
+    "intro": "ClickForNothing은 인터넷의 엉뚱하고 쓸모없는 사이트를 발견할 수 있는 엔터테인먼트 사이트입니다.",
+    "what_is": "ClickForNothing이란?",
+    "what_is_body": "아무 실용적 목적이 없지만 당신을 유쾌하게 만드는 큐레이션 플랫폼입니다.",
+    "why_exist": "왜 만들었나요?",
+    "why_exist_body": "우리는 인터넷에서 가장 멋진 부분은 바로 이런 순수하고 무의미한 창작물들이라고 믿습니다."
+  }
+}

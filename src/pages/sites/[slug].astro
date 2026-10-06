@@ -1,0 +1,17 @@
+---
+import SiteDetailView from '../../views/SiteDetailView.astro';
+import { websites, type UselessWebsite } from '../../data/websites.ts';
+
+export function getStaticPaths() {
+  return websites.map((site) => {
+    const slug = site.slug || site.id;
+    return {
+      params: { slug },
+      props: { site: { ...site, slug } },
+    };
+  });
+}
+
+const { site } = Astro.props as { site: UselessWebsite };
+---
+<SiteDetailView site={site} />

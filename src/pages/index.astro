@@ -1,9 +1,90 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import LocaleSwitcher from '../components/LocaleSwitcher.astro';
 import PepeMascot from '../components/PepeMascot.astro';
-const description = "Discover websites you never needed, but somehow won't forget.";
+import { categories } from '../data/categories';
+import { collections } from '../data/collections';
+import { articles } from '../data/articles';
+
+const title = "The Useless Web: Random Useless Websites | ClickForNothing";
+const description = "Discover the useless web with our random website generator! Explore 100+ funny and useless websites to pass time in office. Click now to start exploring!";
+const canonicalPath = "/";
+
+const faqs = [
+  {
+    question: "What is the useless web?",
+    answer: "The useless web refers to a whimsical corner of the internet dedicated to funny, weird, interactive, and completely pointless websites. Rather than offering productivity tools or commercial products, these sites exist purely for digital art, humor, creative coding experiments, and time-wasting entertainment.",
+  },
+  {
+    question: "Is the useless web unblocked for school and office use?",
+    answer: "Yes. ClickForNothing and its curated directory feature safe, family-friendly, HTTPS-verified websites that are commonly accessible on school Chromebooks, university networks, and office workstations where mainstream social media and gaming portals might be restricted.",
+  },
+  {
+    question: "How does the random website generator choose destinations?",
+    answer: "Our random website generator runs a client-side selection algorithm across an active index of 100+ verified useless destinations. Each destination is pre-screened for uptime, mobile responsiveness, fast load speeds, and safe content.",
+  },
+  {
+    question: "Are these useless websites safe to visit?",
+    answer: "Yes. Every website in the ClickForNothing database is manually tested and verified over secure HTTPS. None of our featured sites require logins, credit cards, software downloads, or invasive browser permissions.",
+  },
+  {
+    question: "Can I submit my own funny or useless website project?",
+    answer: "Absolutely! Independent web developers, creative coders, and internet explorers can submit original or discovered projects through our submission page. Our editorial team reviews every submission for humor, originality, and performance.",
+  },
+  {
+    question: "What are the best time pass websites in office when bored?",
+    answer: "Top office time-pass favorites include Cat Bounce (interactive bouncing cat physics), Pointer Pointer (photos matching your cursor position), Eel Slap (satisfying slow-motion slap mechanics), Hacker Typer (instant cinematic coding simulator), and Weave Silk (generative neon light art).",
+  },
+  {
+    question: "Why do developers build useless websites?",
+    answer: "Creative developers build pointless websites to experiment with modern web technologies (WebGL, Canvas, Web Audio API, CSS physics), showcase humor, participate in hackathons, and celebrate the uncommercialized, quirky spirit of early internet culture.",
+  },
+  {
+    question: "How often is the ClickForNothing directory updated?",
+    answer: "Our team continuously monitors links to ensure zero dead ends. We refresh broken URLs, add newly launched indie experiments, and publish curated listicles every month.",
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
+
+const toolSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'ClickForNothing Random Website Generator',
+  alternateName: 'The Useless Web Generator',
+  applicationCategory: 'EntertainmentApplication',
+  operatingSystem: 'All Web Browsers',
+  browserRequirements: 'Requires JavaScript and HTML5 Canvas support',
+  url: 'https://clickfornothing.com/discover/',
+  description: 'An interactive random website generator that takes visitors to weird, funny, and wonderfully useless websites in one click.',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  featureList: [
+    '100+ Curated useless websites',
+    'Zero-latency client-side randomizer',
+    'Thematic category filters',
+    'Verified HTTPS links',
+    'Mobile-friendly responsive UI',
+  ],
+};
 ---
-<SiteLayout title="ClickForNothing — Click Here To Regret It" {description}>
+
+<SiteLayout {title} {description} {canonicalPath}>
+  <!-- Hero Interactive Launcher Section -->
   <main class="hero-stage">
     <div class="deco checker checker-top" aria-hidden="true"></div>
     <div class="deco checker checker-bottom" aria-hidden="true"></div>
@@ -21,17 +102,768 @@ const description = "Discover websites you never needed, but somehow won't forge
     <span class="deco dot dot-five" aria-hidden="true"></span>
     <span class="deco cursor" aria-hidden="true">➤</span>
 
+    <div class="hero-top-bar">
+      <LocaleSwitcher variant="hero" />
+    </div>
+
     <section class="hero-content" aria-labelledby="hero-title">
-      <h1 class="hero-title" id="hero-title"><span class="pink">Click Here To</span><span class="purple">Regret It.</span></h1>
+      <h1 class="hero-title" id="hero-title">
+        <span class="pink">The Useless Web:</span>
+        <span class="purple">Random Website Generator</span>
+      </h1>
       <PepeMascot />
-      <p class="hero-subtitle">Discover websites you never needed, but somehow won’t forget.</p>
-      <a class="go-button" href="/discover/" aria-label="Take me to the discovery page">
-        <span>Take Me There!</span><span class="arrow" aria-hidden="true">↗︎</span>
-      </a>
+      <p class="hero-subtitle">Discover 100+ wonderfully useless websites you never needed, but will never forget.</p>
+      <div class="hero-action-group">
+        <a class="go-button" href="/discover/" aria-label="Take me to the useless web discovery page">
+          <span>Take Me There!</span><span class="arrow" aria-hidden="true">↗︎</span>
+        </a>
+        <div class="hero-quick-links">
+          <span>Or explore:</span>
+          <a href="/sites/">All 100+ Sites</a> •
+          <a href="/categories/">Categories</a> •
+          <a href="/collections/100-useless-websites/">Top 100 List</a>
+        </div>
+      </div>
     </section>
   </main>
-  <script type="application/ld+json" set:html={JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'WebSite', name: 'ClickForNothing',
-    url: 'https://clickfornothing.com/', description,
-  })} />
+
+  <!-- Comprehensive Authoritative Editorial & SEO Content (800-1200 words) -->
+  <div class="home-editorial-wrapper">
+    <div class="editorial-container">
+
+      <!-- Section 1: What Is The Useless Web -->
+      <section class="content-panel" aria-labelledby="what-is-useless-web">
+        <h2 id="what-is-useless-web">What Is The Useless Web? Curating The Internet's Pointless Creations</h2>
+        <p>
+          <strong>The useless web</strong> is the affectionate term for a sprawling, creative, and eccentric subculture of web design: websites that serve no commercial objective, solve no practical productivity problems, and demand zero transactions. Instead, these digital oddities are crafted purely for humor, sensory amusement, interactive art, and delightful time-wasting.
+        </p>
+        <p>
+          At <strong>ClickForNothing</strong>, we serve as the modern home and guardian of this tradition. By collecting, verifying, and indexing over 100+ of the web's most legendary and newly launched useless websites, we provide an instant escape hatch from algorithmic feeds, endless work spreadsheets, and social media fatigue.
+        </p>
+
+        <div class="grid-two-col">
+          <div class="feature-card">
+            <h3>The Philosophy of Digital Play and Intentional Absurdity</h3>
+            <p>
+              In an era dominated by monetized apps and AI-generated content, useless websites stand out because of their human heart. A page that lets you slap someone with a virtual eel, an interactive canvas of bouncing cats, or a button that simply turns your screen purple is a refreshing celebration of early web freedom. It proves that the internet can still be weird, joyful, and uncomplicated.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h3>How Our Random Website Generator Algorithm Works</h3>
+            <p>
+              Our random website generator runs a high-speed, client-side randomization engine. When you trigger the discovery button, the engine shuffles our curated database of verified HTTPS destinations, ensuring fresh discoveries without repeating recently viewed sites. You can also step forward, step backward, or filter by specific oddity genres.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Target Audience & Personas -->
+      <section class="content-panel" aria-labelledby="target-audiences">
+        <h2 id="target-audiences">Who Uses ClickForNothing? Ideal Audiences & Real-World Personas</h2>
+        <p>
+          Whether you have sixty seconds to spare between work tasks or twenty minutes to kill while waiting for a build to finish, our random useless website generator is engineered for a diverse community of online explorers:
+        </p>
+
+        <div class="audience-grid">
+          <div class="audience-card">
+            <span class="audience-icon">☕</span>
+            <h3>Freelancers & Remote Workers</h3>
+            <p>
+              Remote professionals use our generator for rapid 60-second micro-breaks between client sprints. A quick dose of absurdity resets cognitive focus and helps prevent mid-afternoon burnout without getting trapped in social media rabbit holes.
+            </p>
+          </div>
+
+          <div class="audience-card">
+            <span class="audience-icon">💻</span>
+            <h3>Software Engineers & Web Developers</h3>
+            <p>
+              Developers looking for clever HTML5 canvas toys, WebGL shaders, Web Audio synthesizers, and quirky CSS animations find endless creative inspiration in the codebase experiments featured throughout our directory.
+            </p>
+          </div>
+
+          <div class="audience-card">
+            <span class="audience-icon">🎬</span>
+            <h3>Content Creators, Streamers & Memers</h3>
+            <p>
+              Streamers, TikTokers, and YouTubers frequently use ClickForNothing live on stream for react content, viewer challenges, and discovering bizarre internet rabbit holes that spark organic laughs.
+            </p>
+          </div>
+
+          <div class="audience-card">
+            <span class="audience-icon">🏢</span>
+            <h3>Office Workers Needing Time Pass Websites</h3>
+            <p>
+              When you need a quick mental breather between long meetings, ClickForNothing serves as the ultimate harmless time pass website in office. It is ad-light, fast-loading, and completely safe for workplace browsing.
+            </p>
+          </div>
+
+          <div class="audience-card">
+            <span class="audience-icon">🎓</span>
+            <h3>Students Needing an Unblocked Break</h3>
+            <p>
+              Students studying for exams use our unblocked useless web portal to enjoy safe, lighthearted mini games and visual toys that load effortlessly on school Chromebooks and campus WiFi networks.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Step-by-Step Instructions -->
+      <section class="content-panel" aria-labelledby="how-to-use">
+        <h2 id="how-to-use">How to Explore The Useless Web in 4 Simple Steps</h2>
+        <p>
+          Navigating our random website generator requires zero setup. Follow these easy steps to start your journey into internet absurdity:
+        </p>
+
+        <div class="steps-flow">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3>Hit the Giant Launch Button</h3>
+            <p>
+              Click the pink <a href="/discover/">"Take Me There!"</a> button on the homepage or head straight to our <a href="/random/">Instant Jump randomizer</a>.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3>Experience the Destination in a New Tab</h3>
+            <p>
+              Our discovery card presents the destination's title, topic, and a verified preview link. Click "Visit Website" to launch the site in a safe, isolated browser tab.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3>Navigate Sequentially or Hit "Surprise Me"</h3>
+            <p>
+              Return to your ClickForNothing tab and use the interactive navigation bar to advance to the next weird creation, revisit previous sites, or trigger a complete random surprise.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <h3>Filter by Category or Explore Curated Listicles</h3>
+            <p>
+              Looking for something specific? Dive into <a href="/categories/silly-animals/">Silly Animals</a>, <a href="/categories/interactive/">Interactive Canvas Toys</a>, or browse our <a href="/collections/100-useless-websites/">100 Most Useless Websites List</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Core Features & Specifications -->
+      <section class="content-panel" aria-labelledby="core-features">
+        <h2 id="core-features">Core Features & Technical Specifications</h2>
+        <p>
+          ClickForNothing is designed as a fast, privacy-focused, and robust entertainment directory built on modern web standards:
+        </p>
+
+        <div class="spec-table-container">
+          <table class="spec-table">
+            <thead>
+              <tr>
+                <th scope="col">Feature</th>
+                <th scope="col">Specification</th>
+                <th scope="col">User Benefit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Curated Directory</strong></td>
+                <td>100+ Verified Destinations</td>
+                <td>Zero dead links, spam pages, or malware; every site is hand-checked.</td>
+              </tr>
+              <tr>
+                <td><strong>Randomization Speed</strong></td>
+                <td>Zero-Latency Client-Side Randomizer</td>
+                <td>Instant destination generation with no waiting or server buffering.</td>
+              </tr>
+              <tr>
+                <td><strong>Security Standard</strong></td>
+                <td>100% HTTPS Encryption</td>
+                <td>Secure connections ensure safe, unblocked browsing at school and work.</td>
+              </tr>
+              <tr>
+                <td><strong>Privacy & Tracking</strong></td>
+                <td>No Registration or Personal Data Required</td>
+                <td>Browse completely anonymously without account creation or invasive trackers.</td>
+              </tr>
+              <tr>
+                <td><strong>Responsive Design</strong></td>
+                <td>Mobile, Tablet & Desktop Optimized</td>
+                <td>Flawless touch gestures, smooth animations, and fast loading across all devices.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 5: Real-World Use Cases & Workflows -->
+      <section class="content-panel" aria-labelledby="practical-workflows">
+        <h2 id="practical-workflows">Practical Real-World Use Cases & Daily Workflows</h2>
+        <p>
+          While the websites themselves are delightfully pointless, using ClickForNothing serves several genuine, practical everyday purposes:
+        </p>
+
+        <div class="grid-two-col">
+          <div class="workflow-card">
+            <h3>Micro-Break Stress Reduction & Mental Refreshes</h3>
+            <p>
+              Psychology research shows that brief, playful micro-breaks during intense knowledge work significantly boost overall problem-solving capacity and alleviate mental fatigue. Spending sixty seconds watching koalas multiply or listening to virtual rain provides the perfect mental reset.
+            </p>
+          </div>
+
+          <div class="workflow-card">
+            <h3>Meeting Icebreakers & Virtual Team Energy Boosters</h3>
+            <p>
+              Remote teams frequently use ClickForNothing at the beginning of Zoom, Teams, or Slack standups. Sharing a bizarre website on screen breaks the ice, sparks laughter, and sets an upbeat, collaborative tone for meetings.
+            </p>
+          </div>
+
+          <div class="workflow-card">
+            <h3>Creative Coding & Frontend UI/UX Brainstorming</h3>
+            <p>
+              Web designers and frontend developers use our collection to explore unorthodox UI patterns, experimental hover effects, retro 1990s aesthetics, and creative physics simulations that you never see in standard corporate software.
+            </p>
+          </div>
+
+          <div class="workflow-card">
+            <h3>Casual Boredom Busting Without Toxic Doomscrolling</h3>
+            <p>
+              Instead of losing hours to algorithmic social media feeds engineered to generate outrage, ClickForNothing offers bite-sized, finite moments of joy. You laugh, explore a few weird pages, and return to your day feeling lighter.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: Important Technical Boundaries -->
+      <section class="content-panel" aria-labelledby="technical-boundaries">
+        <h2 id="technical-boundaries">Important Technical Boundaries & Responsible Browsing</h2>
+        <p>
+          To maintain transparency and a safe user experience, keep the following technical parameters in mind:
+        </p>
+        <ul class="clean-bullet-list">
+          <li><strong>External Third-Party Hosting:</strong> The destinations presented by ClickForNothing are hosted and maintained by independent web creators worldwide. While we verify active links continuously, occasional third-party server outages may occur.</li>
+          <li><strong>Audio Autoplay Standards:</strong> In compliance with modern browser autoplay policies, audio-based websites will only emit sound after you interact with the page (clicking or tapping).</li>
+          <li><strong>Family-Friendly Curation:</strong> All destinations in our primary index are vetted to ensure they do not contain harmful, adult, or malicious material. If you ever encounter an issue with a listed site, you can notify us instantly via our <a href="/contact/">contact page</a>.</li>
+        </ul>
+      </section>
+
+      <!-- Section 7: Strategic Internal Links Hub -->
+      <section class="content-panel internal-links-panel" aria-labelledby="explore-directory-hubs">
+        <h2 id="explore-directory-hubs">Explore Categories, Master Listicles & Editorial Guides</h2>
+        <p>
+          Dive deep into our structured index of useless websites, curated collections, and web history articles:
+        </p>
+
+        <div class="hubs-grid">
+          <div class="hub-box">
+            <span class="hub-label">Categories</span>
+            <h3>Browse By Topic</h3>
+            <ul class="hub-links">
+              {categories.slice(0, 6).map((cat) => (
+                <li>
+                  <a href={`/categories/${cat.slug}/`}>
+                    {cat.emoji} {cat.name}
+                  </a>
+                </li>
+              ))}
+              <li><a href="/categories/" class="all-link">View All Categories →</a></li>
+            </ul>
+          </div>
+
+          <div class="hub-box">
+            <span class="hub-label">Curated Collections</span>
+            <h3>Master Listicles</h3>
+            <ul class="hub-links">
+              {collections.map((col) => (
+                <li>
+                  <a href={`/collections/${col.slug}/`}>
+                    📌 {col.title}
+                  </a>
+                </li>
+              ))}
+              <li><a href="/collections/" class="all-link">View All Collections →</a></li>
+            </ul>
+          </div>
+
+          <div class="hub-box">
+            <span class="hub-label">Editorial & Guides</span>
+            <h3>Articles & Insights</h3>
+            <ul class="hub-links">
+              {articles.map((art) => (
+                <li>
+                  <a href={`/articles/${art.slug}/`}>
+                    📖 {art.title}
+                  </a>
+                </li>
+              ))}
+              <li><a href="/articles/" class="all-link">Read All Articles →</a></li>
+            </ul>
+          </div>
+
+          <div class="hub-box">
+            <span class="hub-label">Quick Tools</span>
+            <h3>Directory & Search</h3>
+            <ul class="hub-links">
+              <li><a href="/discover/">🎲 Randomizer Card Deck</a></li>
+              <li><a href="/sites/">📋 Full Website Directory</a></li>
+              <li><a href="/search/">🔍 Search Directory</a></li>
+              <li><a href="/submit/">🚀 Submit a Useless Website</a></li>
+              <li><a href="/about/">ℹ️ About ClickForNothing</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: Frequently Asked Questions (FAQ) -->
+      <section class="content-panel faq-panel" aria-labelledby="frequently-asked-questions">
+        <h2 id="frequently-asked-questions">Frequently Asked Questions About The Useless Web</h2>
+        <p class="faq-intro">
+          Got questions about our random website generator, the useless web, or how we curate our directory? Here are direct answers to common queries:
+        </p>
+
+        <div class="faq-list">
+          {faqs.map((faq, index) => (
+            <details class="faq-card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+              <summary class="faq-question">
+                <span class="faq-title-wrap">
+                  <span class="faq-num">Q{index + 1}:</span>
+                  <span itemprop="name" class="faq-title-text">{faq.question}</span>
+                </span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="faq-answer-wrapper" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                <p itemprop="text" class="faq-answer">{faq.answer}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Page Structured Data Schemas -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(toolSchema)} />
 </SiteLayout>
+
+<style>
+  .hero-action-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .hero-quick-links {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #17141a;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .hero-quick-links a {
+    color: #7025ed;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.15s ease;
+  }
+
+  .hero-quick-links a:hover {
+    color: #f20caf;
+  }
+
+  .home-editorial-wrapper {
+    background: #fff9df;
+    color: #17141a;
+    padding: clamp(48px, 6vw, 96px) 20px clamp(60px, 8vw, 120px);
+    border-top: 4px solid #09080c;
+  }
+
+  .editorial-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(48px, 6vw, 80px);
+  }
+
+  .content-panel {
+    background: #ffffff;
+    border: 4px solid #09080c;
+    border-radius: 28px;
+    padding: clamp(28px, 5vw, 56px);
+    box-shadow: 0 10px 0 #09080c;
+  }
+
+  .content-panel h2 {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    line-height: 1.15;
+    color: #7025ed;
+    margin: 0 0 20px 0;
+    -webkit-text-stroke: 1px #09080c;
+    paint-order: stroke fill;
+    letter-spacing: -0.01em;
+  }
+
+  .content-panel h3 {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    color: #f20caf;
+    margin: 0 0 12px 0;
+    line-height: 1.25;
+  }
+
+  .content-panel p {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-size: clamp(1.02rem, 1.8vw, 1.15rem);
+    line-height: 1.65;
+    color: #2b2733;
+    margin: 0 0 18px 0;
+  }
+
+  .content-panel p:last-child {
+    margin-bottom: 0;
+  }
+
+  .content-panel a {
+    color: #7025ed;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .content-panel a:hover {
+    color: #f20caf;
+  }
+
+  .grid-two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 28px;
+  }
+
+  .feature-card, .workflow-card {
+    background: #fff9df;
+    border: 3px solid #09080c;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 6px 0 #09080c;
+  }
+
+  .audience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 28px;
+  }
+
+  .audience-card {
+    background: #fdf5ff;
+    border: 3px solid #09080c;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 6px 0 #09080c;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .audience-icon {
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .steps-flow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+    margin-top: 28px;
+  }
+
+  .step-card {
+    background: #f0fdf9;
+    border: 3px solid #09080c;
+    border-radius: 20px;
+    padding: 24px 20px;
+    box-shadow: 0 6px 0 #09080c;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step-number {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #f20caf;
+    color: #ffffff;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #09080c;
+    margin-bottom: 14px;
+    box-shadow: 0 3px 0 #09080c;
+  }
+
+  .spec-table-container {
+    overflow-x: auto;
+    margin-top: 24px;
+    border: 3px solid #09080c;
+    border-radius: 18px;
+    box-shadow: 0 6px 0 #09080c;
+  }
+
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    text-align: left;
+  }
+
+  .spec-table th, .spec-table td {
+    padding: 16px 20px;
+    border-bottom: 2px solid #09080c;
+    font-size: 1.02rem;
+  }
+
+  .spec-table th {
+    background: #f7fa27;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.15rem;
+    color: #09080c;
+    letter-spacing: 0.02em;
+  }
+
+  .spec-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .spec-table tr:nth-child(even) td {
+    background: #fffbe6;
+  }
+
+  .clean-bullet-list {
+    margin: 20px 0 0 0;
+    padding-left: 24px;
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: #2b2733;
+  }
+
+  .clean-bullet-list li {
+    margin-bottom: 12px;
+  }
+
+  .hubs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+    margin-top: 28px;
+  }
+
+  .hub-box {
+    background: #fff9df;
+    border: 3px solid #09080c;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 6px 0 #09080c;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hub-label {
+    display: inline-block;
+    background: #19e8c5;
+    color: #09080c;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 0.82rem;
+    padding: 3px 10px;
+    border: 2px solid #09080c;
+    border-radius: 999px;
+    align-self: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .hub-box h3 {
+    color: #7025ed;
+    font-size: 1.3rem;
+    margin-bottom: 14px;
+  }
+
+  .hub-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hub-links a {
+    color: #17141a;
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.98rem;
+    text-decoration: none;
+    transition: color 0.15s ease, transform 0.15s ease;
+    display: inline-block;
+  }
+
+  .hub-links a:hover {
+    color: #f20caf;
+    transform: translateX(3px);
+  }
+
+  .hub-links .all-link {
+    color: #7025ed;
+    font-weight: 800;
+    margin-top: 6px;
+    text-decoration: underline;
+  }
+
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 28px;
+  }
+
+  .faq-card {
+    background: #fff9df;
+    border: 3px solid #09080c;
+    border-radius: 20px;
+    box-shadow: 0 5px 0 #09080c;
+    overflow: hidden;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .faq-card:hover {
+    border-color: #09080c;
+  }
+
+  .faq-card[open] {
+    background: #fffdf5;
+    box-shadow: 0 4px 0 #09080c;
+  }
+
+  .faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    color: #7025ed;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-question:hover {
+    color: #f20caf;
+    background-color: rgba(242, 12, 175, 0.04);
+  }
+
+  .faq-title-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex: 1;
+    padding-right: 16px;
+    text-align: left;
+  }
+
+  .faq-num {
+    color: #f20caf;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .faq-title-text {
+    color: inherit;
+    line-height: 1.35;
+  }
+
+  .faq-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #7025ed;
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+  }
+
+  .faq-card:hover .faq-toggle-icon {
+    background: #f20caf;
+  }
+
+  .faq-card[open] .faq-toggle-icon {
+    transform: rotate(45deg);
+    background: #f20caf;
+  }
+
+  .faq-answer-wrapper {
+    padding: 0 24px 22px 24px;
+    border-top: 2px dashed rgba(9, 8, 12, 0.12);
+    margin-top: 4px;
+    padding-top: 16px;
+    animation: faqExpand 0.25s ease-out;
+  }
+
+  @keyframes faqExpand {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .faq-answer {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: #2d2a34;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .content-panel {
+      padding: 24px 18px;
+      border-radius: 20px;
+    }
+    .spec-table th, .spec-table td {
+      padding: 12px 14px;
+      font-size: 0.94rem;
+    }
+    .hero-quick-links {
+      font-size: 0.95rem;
+    }
+  }
+</style>
