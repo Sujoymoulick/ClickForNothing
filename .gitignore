@@ -19,6 +19,13 @@ pnpm-debug.log*
 .env*.local
 !.env.example
 
+# Wrangler configurations and Cloudflare cache
+wrangler.json
+wrangler.jsonc
+wrangler.toml
+.wrangler/
+
+
 # Certificates, keys, credentials
 *.pem
 *.key

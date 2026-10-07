@@ -257,10 +257,10 @@ Store these variables in `.env` for local development, and in `wrangler.json` (a
   "pages_build_output_dir": "dist",
   "compatibility_date": "2024-09-23",
   "vars": {
-    "DATABASE_URL": "postgresql://neondb_owner:npg_WEFsh0IgrkY9@ep-frosty-scene-b4awman7-pooler.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
-    "DATABASE_URL_UNPOOLED": "postgresql://neondb_owner:npg_WEFsh0IgrkY9@ep-frosty-scene-b4awman7.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
+    "DATABASE_URL": "postgresql://neondb_owner:YOUR_DATABASE_PASSWORD@ep-YOUR-ENDPOINT-pooler.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
+    "DATABASE_URL_UNPOOLED": "postgresql://neondb_owner:YOUR_DATABASE_PASSWORD@ep-YOUR-ENDPOINT.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
     "NEON_BRANCH": "main",
-    "PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuY2xpY2tmb3Jub3RoaW5nLmNvbSQ"
+    "PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_YOUR_CLERK_PUBLISHABLE_KEY"
   }
 }
 ```

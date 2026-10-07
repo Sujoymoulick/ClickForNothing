@@ -1,6 +1,0 @@
-name = "clickfornothing"
-pages_build_output_dir = "./dist"
-
-[vars]
-NEON_BRANCH = "main"
-PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuY2xpY2tmb3Jub3RoaW5nLmNvbSQ"
