@@ -1,8 +1,13 @@
 import { neon } from '@neondatabase/serverless';
 
+if (typeof window !== 'undefined') {
+  throw new Error('Security Error: Database client must never be executed or inspected in client-side code.');
+}
+
 const databaseUrl = import.meta.env.DATABASE_URL || process.env.DATABASE_URL;
 
 export const sql = neon(databaseUrl || '');
+
 
 export interface WebsiteSubmission {
   id?: number;

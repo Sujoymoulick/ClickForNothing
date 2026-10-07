@@ -95,7 +95,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     console.error('Error saving submission to Neon database:', error);
     return new Response(
       JSON.stringify({
-        error: error?.message || 'Internal server error while saving submission.',
+        error: 'An internal server error occurred while processing the submission.',
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );

@@ -55,7 +55,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
   } catch (error: any) {
     console.error('Error fetching user submissions:', error);
     return new Response(
-      JSON.stringify({ error: error?.message || 'Internal server error.' }),
+      JSON.stringify({ error: 'Failed to retrieve submissions. Please try again later.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -174,7 +174,7 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
   } catch (error: any) {
     console.error('Error updating submission status:', error);
     return new Response(
-      JSON.stringify({ error: error?.message || 'Internal server error.' }),
+      JSON.stringify({ error: 'Failed to update submission status.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

@@ -246,23 +246,31 @@ If your website follows our guidelines, it will be published within 24 hours.
 
 ---
 
-## 9. Environment Variables
+## 9. Environment Variables & Wrangler Configuration
 
-Store these variables in `.env` for local development, and in the **Cloudflare Pages Settings → Environment variables** for production:
+Store these variables in `.env` for local development, and in `wrangler.json` (and Cloudflare Pages Settings) for production deployments:
 
-```env
-# Clerk Authentication (Production)
-PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
-CLERK_SECRET_KEY=sk_live_...
-
-# Optional Admin Key (for administrative review actions)
-ADMIN_SECRET_KEY=super_secret_admin_key_here
-
-# Neon PostgreSQL (clickfornothing: rough-glitter-85555328)
-DATABASE_URL="postgresql://neondb_owner:npg_WEFsh0IgrkY9@ep-frosty-scene-b4awman7-pooler.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require"
-DATABASE_URL_UNPOOLED="postgresql://neondb_owner:npg_WEFsh0IgrkY9@ep-frosty-scene-b4awman7.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require"
-NEON_BRANCH=main
+```json
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "clickfornothing",
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2024-09-23",
+  "vars": {
+    "DATABASE_URL": "postgresql://neondb_owner:npg_WEFsh0IgrkY9@ep-frosty-scene-b4awman7-pooler.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
+    "DATABASE_URL_UNPOOLED": "postgresql://neondb_owner:npg_WEFsh0IgrkY9@ep-frosty-scene-b4awman7.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
+    "NEON_BRANCH": "main",
+    "PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuY2xpY2tmb3Jub3RoaW5nLmNvbSQ"
+  }
+}
 ```
+
+### Client-Side Variable Security:
+* `DATABASE_URL` and `DATABASE_URL_UNPOOLED` are server-only credentials used exclusively by Cloudflare Pages Functions (`functions/api/*`).
+* They are strictly guarded and never exposed to client-side bundles, HTML, or DevTools inspection.
+* Only `PUBLIC_CLERK_PUBLISHABLE_KEY` is public by design for browser client Clerk authentication.
+* Cloudflare Pages Functions sanitize all error messages returned to the client to prevent leaking internal database schemas or connection strings.
+
 
 ---
 

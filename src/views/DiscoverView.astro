@@ -112,7 +112,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
 
     const stateKey = 'clickfornothing:discovery:v2';
     const hintKey = 'clickfornothing:hint-seen';
-    const ANIMATION_DURATION = 380;
+    const ANIMATION_DURATION = 260;
     const EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
     const safeSites = websites.flatMap((site) => {
@@ -523,7 +523,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
 
       let accumulatedDeltaY = 0;
       let wheelResetTimeout: number | null = null;
-      const WHEEL_THRESHOLD = 40;
+      const WHEEL_THRESHOLD = 20;
 
       window.addEventListener(
         'wheel',
@@ -537,7 +537,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
           }
           wheelResetTimeout = window.setTimeout(() => {
             accumulatedDeltaY = 0;
-          }, 140);
+          }, 80);
 
           if (Math.abs(accumulatedDeltaY) >= WHEEL_THRESHOLD) {
             const isDownward = accumulatedDeltaY > 0;
@@ -553,7 +553,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
         { passive: true }
       );
 
-      const SWIPE_THRESHOLD_PX = 35;
+      const SWIPE_THRESHOLD_PX = 20;
       let touchStartY = 0;
       let touchStartX = 0;
       let touchStartTime = 0;

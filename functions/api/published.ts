@@ -40,7 +40,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
   } catch (error: any) {
     console.error('Error fetching published websites:', error);
     return new Response(
-      JSON.stringify({ error: error?.message || 'Internal server error.' }),
+      JSON.stringify({ error: 'Failed to retrieve published websites.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
