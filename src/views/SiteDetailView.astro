@@ -16,9 +16,8 @@ const { site } = Astro.props;
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const { t } = await useTranslations(currentLocale);
 
-const rawTitle = `${site.name} — Review & Guide | ClickForNothing`;
-const title = rawTitle.length <= 60 ? rawTitle : `${site.name} | ClickForNothing`;
-const baseDesc = `Explore ${site.name}: ${site.description} Learn why it is useless, what happens when you visit, and discover related weird websites to pass time.`;
+const title = t('site_detail.seo_title', { name: site.name });
+const baseDesc = t('site_detail.seo_desc_template', { name: site.name, desc: site.description });
 const description = baseDesc.length > 155 ? `${baseDesc.slice(0, 151)}...` : baseDesc;
 const canonicalPath = `/sites/${site.slug}/`;
 
@@ -42,8 +41,8 @@ const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
-    { '@type': 'ListItem', position: 2, name: t('nav.sites') || 'Websites Directory', item: `${siteOrigin}${directoryUrl}` },
+    { '@type': 'ListItem', position: 1, name: t('nav.home'), item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.sites'), item: `${siteOrigin}${directoryUrl}` },
     { '@type': 'ListItem', position: 3, name: catName, item: `${siteOrigin}${categoryUrl}` },
     { '@type': 'ListItem', position: 4, name: site.name, item: fullCanonicalUrl },
   ],
@@ -66,8 +65,8 @@ const itemPageSchema = {
 <SiteLayout {title} {description} {canonicalPath}>
   <main class="site-detail-container">
     <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
-      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span>
-      <a href={directoryUrl}>{t('nav.sites') || 'Directory'}</a> <span>/</span>
+      <a href={homeUrl}>{t('nav.home')}</a> <span>/</span>
+      <a href={directoryUrl}>{t('nav.sites')}</a> <span>/</span>
       <a href={categoryUrl}>{catName}</a> <span>/</span>
       <span aria-current="page">{site.name}</span>
     </nav>
@@ -78,35 +77,35 @@ const itemPageSchema = {
           <a href={categoryUrl} class="category-badge">
             {catName}
           </a>
-          <span class="verified-tag">✓ Verified Active Destination</span>
+          <span class="verified-tag">{t('site_detail.verified_badge')}</span>
         </div>
         <h1 class="site-h1">{site.name}</h1>
         <p class="summary-lead">{site.description}</p>
 
         <div class="action-bar">
           <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-primary-btn">
-            Visit Website Now ↗
+            {t('site_detail.visit_now')}
           </a>
           <a href={discoverUrl} class="discover-next-btn">
-            Try Another Random Site 🎲
+            {t('site_detail.try_random')}
           </a>
         </div>
       </header>
 
       <section class="content-body">
         <div class="info-block">
-          <h2>Why It Is Useless</h2>
-          <p>{site.whyItIsUseless || 'It serves no productivity purpose, solves zero real-world problems, and exists purely for entertaining boredom.'}</p>
+          <h2>{t('site_detail.why_useless_heading')}</h2>
+          <p>{site.whyItIsUseless || t('site_detail.why_useless_default')}</p>
         </div>
 
         <div class="info-block">
-          <h2>What Happens on the Website</h2>
+          <h2>{t('site_detail.what_happens_heading')}</h2>
           <p>{site.whatHappens || site.description}</p>
         </div>
 
         {(site.tags || []).length > 0 && (
           <div class="tags-block">
-            <h3>Tags & Topics</h3>
+            <h3>{t('site_detail.tags_heading')}</h3>
             <div class="tags-list">
               {(site.tags || []).map((tag) => (
                 <span class="tag-pill">#{tag}</span>
@@ -117,7 +116,7 @@ const itemPageSchema = {
 
         {matchingCollections.length > 0 && (
           <div class="collections-block">
-            <h3>Featured in Collections</h3>
+            <h3>{t('site_detail.collections_heading')}</h3>
             <ul class="collections-list">
               {matchingCollections.map((col) => (
                 <li>
@@ -129,37 +128,40 @@ const itemPageSchema = {
         )}
 
         <div class="share-block">
-          <h3>Share This Useless Treasure</h3>
-          <p>Send this to a friend who needs a 30-second distraction:</p>
-          <div class="share-buttons" data-share-container data-url={fullCanonicalUrl} data-title={site.name}>
-            <button class="share-btn copy-btn" type="button" data-copy-link>
-              📋 Copy Link
+          <h3>{t('site_detail.share_heading')}</h3>
+          <p>{t('site_detail.share_desc')}</p>
+          <div class="share-buttons" data-share-container data-url={fullCanonicalUrl} data-title={site.name} data-text={`Check out ${site.name}: ${site.description}`} data-copied-toast={t('common.link_copied_toast')}>
+            <button class="share-btn copy-btn" type="button" data-copy-link data-platform="copy" data-copied-text={t('common.copied')} data-copied-toast={t('common.link_copied_toast')}>
+              {t('common.copy_link')}
             </button>
-            <a class="share-btn twitter-btn" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out ${site.name}: ${site.description}`)}&url=${encodeURIComponent(fullCanonicalUrl)}`} target="_blank" rel="noopener noreferrer">
+            <a class="share-btn twitter-btn" data-platform="twitter" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out ${site.name}: ${site.description}`)}&url=${encodeURIComponent(fullCanonicalUrl)}`} target="_blank" rel="noopener noreferrer">
               🐦 X / Twitter
             </a>
-            <a class="share-btn whatsapp-btn" href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${site.name} - ${fullCanonicalUrl}`)}`} target="_blank" rel="noopener noreferrer">
+            <a class="share-btn facebook-btn" data-platform="facebook" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullCanonicalUrl)}`} target="_blank" rel="noopener noreferrer">
+              📘 Facebook
+            </a>
+            <a class="share-btn whatsapp-btn" data-platform="whatsapp" href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${site.name} - ${fullCanonicalUrl}`)}`} target="_blank" rel="noopener noreferrer">
               💬 WhatsApp
             </a>
-            <a class="share-btn reddit-btn" href={`https://reddit.com/submit?url=${encodeURIComponent(fullCanonicalUrl)}&title=${encodeURIComponent(site.name)}`} target="_blank" rel="noopener noreferrer">
+            <a class="share-btn reddit-btn" data-platform="reddit" href={`https://reddit.com/submit?url=${encodeURIComponent(fullCanonicalUrl)}&title=${encodeURIComponent(site.name)}`} target="_blank" rel="noopener noreferrer">
               🤖 Reddit
             </a>
           </div>
-          <p class="copy-toast" data-copy-toast style="display:none;">Link copied to clipboard! 🚀</p>
+          <p class="copy-toast" data-copy-toast style="display:none;">{t('common.link_copied_toast')}</p>
         </div>
       </section>
     </article>
 
     {relatedSites.length > 0 && (
       <section class="related-section">
-        <h2>Related Useless Destinations</h2>
+        <h2>{t('site_detail.related_heading')}</h2>
         <div class="related-grid">
           {relatedSites.map((rel) => (
             <div class="related-card">
               <span class="rel-category">{t(`categories.${rel.categorySlug}`) || rel.category}</span>
               <h3><a href={getLocalizedPath(`/sites/${rel.slug || rel.id}/`, currentLocale)}>{rel.name}</a></h3>
               <p>{rel.description}</p>
-              <a href={getLocalizedPath(`/sites/${rel.slug || rel.id}/`, currentLocale)} class="rel-link">Explore →</a>
+              <a href={getLocalizedPath(`/sites/${rel.slug || rel.id}/`, currentLocale)} class="rel-link">{t('site_detail.explore_link')}</a>
             </div>
           ))}
         </div>
@@ -171,22 +173,8 @@ const itemPageSchema = {
   <script type="application/ld+json" set:html={JSON.stringify(itemPageSchema)} />
 
   <script>
-    const copyBtn = document.querySelector('[data-copy-link]');
-    const copyToast = document.querySelector('[data-copy-toast]') as HTMLElement | null;
-
-    if (copyBtn) {
-      copyBtn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-          if (copyToast) {
-            copyToast.style.display = 'block';
-            setTimeout(() => { copyToast.style.display = 'none'; }, 2500);
-          }
-        } catch {
-          /* Fallback */
-        }
-      });
-    }
+    import { initSocialShareButtons } from '../scripts/socialShare.ts';
+    initSocialShareButtons();
   </script>
 </SiteLayout>
 
@@ -350,6 +338,7 @@ const itemPageSchema = {
   }
   .copy-btn { background: #3f3f46; color: #fff; }
   .twitter-btn { background: #1d9bf0; color: #fff; }
+  .facebook-btn { background: #1877f2; color: #fff; }
   .whatsapp-btn { background: #25d366; color: #fff; }
   .reddit-btn { background: #ff4500; color: #fff; }
   .copy-toast { color: #4ade80; font-weight: 700; font-size: 0.9rem; margin-top: 10px; }

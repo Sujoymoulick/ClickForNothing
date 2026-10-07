@@ -62,23 +62,23 @@ const collectionSchema = {
 <SiteLayout {title} {description} {canonicalPath}>
   <main class="category-detail-container">
     <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
-      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span>
-      <a href={categoriesUrl}>{t('nav.categories') || 'Categories'}</a> <span>/</span>
+      <a href={homeUrl}>{t('nav.home')}</a> <span>/</span>
+      <a href={categoriesUrl}>{t('nav.categories')}</a> <span>/</span>
       <span aria-current="page">{catName}</span>
     </nav>
 
     <header class="category-header">
       <span class="emoji-banner">{category.emoji}</span>
       <h1>{catName}</h1>
-      <p class="intro-lead">{category.introText}</p>
+      <p class="intro-lead">{catDesc || category.introText}</p>
       <div class="why-box">
-        <strong>💡 Why Visit These Websites:</strong>
+        <strong>{t('category_detail.why_visit_label')}</strong>
         <p>{category.whyVisit}</p>
       </div>
     </header>
 
     <section class="sites-section">
-      <h2>Found {categoryWebsites.length} Websites in {catName}</h2>
+      <h2>{t('category_detail.found_count', { count: categoryWebsites.length, name: catName })}</h2>
       <div class="sites-grid">
         {categoryWebsites.map((site) => (
           <article class="site-card">
@@ -88,8 +88,8 @@ const collectionSchema = {
               {site.tags.map(tag => <span class="tag">#{tag}</span>)}
             </div>
             <div class="card-actions">
-              <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-link">Details & Review →</a>
-              <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-link">Visit Site ↗</a>
+              <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-link">{t('category_detail.details_and_review')}</a>
+              <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-link">{t('category_detail.visit_site')}</a>
             </div>
           </article>
         ))}
@@ -97,9 +97,9 @@ const collectionSchema = {
     </section>
 
     <section class="cta-box">
-      <h2>Explore Random Sites in {catName}</h2>
-      <p>Jump directly into random websites inside this specific category.</p>
-      <a href={getLocalizedPath(`/random/${category.slug}/`, currentLocale)} class="random-btn">Spin {catName} Randomizer 🎲</a>
+      <h2>{t('category_detail.random_box_title', { name: catName })}</h2>
+      <p>{t('category_detail.random_box_desc')}</p>
+      <a href={getLocalizedPath(`/random/${category.slug}/`, currentLocale)} class="random-btn">{t('category_detail.random_box_btn', { name: catName })}</a>
     </section>
   </main>
 

@@ -1,15 +1,17 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import { articles } from '../data/articles';
+import EditorialHeader from '../components/EditorialHeader.astro';
+import { getLocalizedArticles } from '../data/articles';
 import { useTranslations } from '../i18n';
 import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
 import type { SupportedLocale } from '../i18n/config';
 
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const { t } = await useTranslations(currentLocale);
+const articles = getLocalizedArticles(currentLocale);
 
-const title = "Articles & Guides on Useless Websites | ClickForNothing";
-const description = "Read editorial articles about internet culture, useless website history, time-wasting science, and funny web pranks from the ClickForNothing team.";
+const title = t('articles_page.seo_title') || 'Articles & Guides on Useless Websites | ClickForNothing';
+const description = t('articles_page.seo_description') || 'Read editorial articles about internet culture, useless website history, time-wasting science, and funny web pranks from the ClickForNothing team.';
 const canonicalPath = "/articles/";
 
 const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
@@ -29,7 +31,7 @@ const breadcrumbSchema = {
 const collectionSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Articles & Guides — ClickForNothing Editorial',
+  name: t('articles_page.heading') || 'ClickForNothing Articles & Guides',
   description,
   url: fullCanonicalUrl,
   mainEntity: {
@@ -44,85 +46,302 @@ const collectionSchema = {
   },
 };
 ---
+
 <SiteLayout {title} {description} {canonicalPath}>
-  <main class="articles-container">
-    <nav class="breadcrumbs" aria-label="Breadcrumbs">
-      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span> <span aria-current="page">{t('nav.articles') || 'Articles'}</span>
-    </nav>
+  <div class="editorial-page-wrapper">
+    <EditorialHeader activeNav="articles" />
 
-    <header class="header-section">
-      <h1>ClickForNothing Articles & Editorial</h1>
-      <p class="lead">
-        Insights into internet culture, history of useless websites, and web design comedy.
-      </p>
-    </header>
+    <main class="articles-main-content">
+      <!-- Centered Hero Section -->
+      <header class="hero-section">
+        <span class="hero-label">{t('articles_page.heading_sub') || 'ARTICLES & GUIDES'}</span>
+        <h1 class="hero-title">{t('articles_page.heading') || 'ClickForNothing Articles & Guides'}</h1>
+        <p class="hero-subtitle">
+          {t('articles_page.lead') || 'Insights into internet culture, history of useless websites, and web design comedy.'}
+        </p>
+      </header>
 
-    <section class="articles-grid">
-      {articles.map((art) => (
-        <article class="article-card">
-          <div class="meta-row">
-            <span class="read-time">⏱ {art.readTime}</span>
-            <span class="date">{art.publishDate}</span>
-          </div>
-          <h2><a href={getLocalizedPath(`/articles/${art.slug}/`, currentLocale)}>{art.title}</a></h2>
-          <p class="subtitle">{art.subtitle}</p>
-          <p class="desc">{art.description}</p>
-          <a href={getLocalizedPath(`/articles/${art.slug}/`, currentLocale)} class="read-more-btn">Read Full Article →</a>
-        </article>
-      ))}
-    </section>
-  </main>
+      <!-- Stacked Article Cards -->
+      <section class="articles-stack" aria-label="Editorial Articles List">
+        {articles.map((art) => {
+          const articleUrl = getLocalizedPath(`/articles/${art.slug}/`, currentLocale);
+          return (
+            <article class="article-card">
+              <!-- Top Metadata Row -->
+              <div class="card-meta-row">
+                <span class="meta-dot" aria-hidden="true">●</span>
+                <span class="meta-read-time">{art.readTime}</span>
+                <span class="meta-divider" aria-hidden="true">|</span>
+                <time class="meta-date" datetime={art.publishDate}>{art.publishDate}</time>
+              </div>
+
+              <!-- Article Title -->
+              <h2 class="card-title">
+                <a href={articleUrl}>{art.title}</a>
+              </h2>
+
+              <!-- Subtitle / First Description -->
+              {art.subtitle && (
+                <p class="card-subtitle">{art.subtitle}</p>
+              )}
+
+              <!-- Description / Second Excerpt -->
+              {art.description && (
+                <p class="card-description">{art.description}</p>
+              )}
+
+              <!-- Read Full Article Link -->
+              <div class="card-action-row">
+                <a href={articleUrl} class="read-full-link" aria-label={`Read full article: ${art.title}`}>
+                  <span>{t('articles_page.read_full_article') || 'Read Full Article →'}</span>
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+    </main>
+  </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
 </SiteLayout>
 
 <style>
-  .articles-container {
-    max-width: 1000px;
+  /* ==========================================================================
+     PAGE LAYOUT & WARM OFF-WHITE PALETTE
+     ========================================================================== */
+  .editorial-page-wrapper {
+    background-color: #fffdfa;
+    min-height: 100vh;
+    color: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ==========================================================================
+     MAIN ARTICLE CONTENT CONTAINER
+     ========================================================================== */
+  .articles-main-content {
+    max-width: 860px;
     margin: 0 auto;
-    padding: 32px 20px 64px;
-    color: #f4f4f5;
-  }
-  .breadcrumbs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    color: #a1a1aa;
-    margin-bottom: 16px;
-  }
-  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
-
-  .header-section h1 {
-    font: 800 clamp(2rem, 4vw, 3rem)/1.1 'Lilita One', system-ui, sans-serif;
-    color: #ffffff;
-    margin-bottom: 10px;
-  }
-  .lead {
-    font: 500 1.15rem/1.5 'Baloo 2', system-ui, sans-serif;
-    color: #d4d4d8;
-    margin-bottom: 36px;
+    padding: 48px 20px 96px;
   }
 
-  .articles-grid {
+  /* ==========================================================================
+     HERO SECTION
+     ========================================================================== */
+  .hero-section {
+    text-align: center;
+    margin-bottom: 44px;
+  }
+
+  .hero-label {
+    display: inline-block;
+    color: #7c3aed;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-family: 'Lilita One', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: #0f172a;
+    margin: 0 0 14px;
+    letter-spacing: -0.02em;
+    -webkit-text-stroke: 0 !important;
+    filter: none !important;
+  }
+
+  .hero-subtitle {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: #64748b;
+    max-width: 620px;
+    margin: 0 auto;
+    font-weight: 400;
+  }
+
+  /* ==========================================================================
+     STACKED ARTICLE CARDS
+     ========================================================================== */
+  .articles-stack {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
   }
+
   .article-card {
-    background: #18181b;
-    border: 2px solid #27272a;
-    border-radius: 18px;
-    padding: 28px;
+    background-color: #ffffff;
+    border: 1px solid #eef0f3;
+    border-radius: 16px;
+    padding: 32px 36px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
-  .meta-row { display: flex; gap: 16px; font-size: 0.85rem; color: #a1a1aa; margin-bottom: 10px; }
-  .read-time { color: #a855f7; font-weight: 700; }
-  .article-card h2 { font: 700 1.6rem/1.2 'Lilita One', system-ui, sans-serif; margin-bottom: 8px; }
-  .article-card h2 a { color: #ffffff; text-decoration: none; }
-  .article-card h2 a:hover { color: #f7fa27; }
-  .subtitle { font-weight: 600; color: #d4d4d8; font-size: 1.05rem; margin-bottom: 10px; }
-  .desc { color: #a1a1aa; font-size: 0.96rem; line-height: 1.5; margin-bottom: 20px; }
-  .read-more-btn { color: #f20caf; font-weight: 700; font-size: 0.95rem; text-decoration: none; }
-  .read-more-btn:hover { text-decoration: underline; }
+
+  .article-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.05);
+    border-color: #ddd6fe;
+  }
+
+  /* Card Meta Row */
+  .card-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    margin-bottom: 14px;
+  }
+
+  .meta-dot {
+    color: #7c3aed;
+    font-size: 0.65rem;
+    line-height: 1;
+  }
+
+  .meta-read-time {
+    color: #7c3aed;
+    font-weight: 600;
+    font-size: 0.88rem;
+  }
+
+  .meta-divider {
+    color: #cbd5e1;
+    font-weight: 300;
+    font-size: 0.85rem;
+  }
+
+  .meta-date {
+    color: #64748b;
+    font-size: 0.88rem;
+  }
+
+  /* Card Title */
+  .card-title {
+    font-size: 1.38rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #0f172a;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .card-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .article-card:hover .card-title a,
+  .card-title a:hover {
+    color: #7c3aed;
+  }
+
+  .card-title a:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  /* Descriptions */
+  .card-subtitle {
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: #475569;
+    margin: 0 0 8px;
+    font-weight: 400;
+  }
+
+  .card-description {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: #64748b;
+    margin: 0 0 20px;
+    font-weight: 400;
+  }
+
+  /* Read Full Article Button Link */
+  .card-action-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .read-full-link {
+    display: inline-flex;
+    align-items: center;
+    color: #7c3aed;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .read-full-link:hover {
+    color: #6d28d9;
+    transform: translateX(3px);
+  }
+
+  .read-full-link:focus-visible {
+    outline: 2px solid #7c3aed;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  /* ==========================================================================
+     RESPONSIVE BREAKPOINTS
+     ========================================================================== */
+  @media (max-width: 768px) {
+    .articles-main-content {
+      padding: 36px 16px 72px;
+    }
+
+    .hero-section {
+      margin-bottom: 32px;
+    }
+
+    .hero-title {
+      font-size: 1.95rem;
+    }
+
+    .hero-subtitle {
+      font-size: 0.98rem;
+    }
+
+    .article-card {
+      padding: 22px 20px;
+      border-radius: 14px;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+    }
+
+    .card-subtitle,
+    .card-description {
+      font-size: 0.92rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title {
+      font-size: 1.7rem;
+    }
+
+    .card-meta-row {
+      flex-wrap: wrap;
+      gap: 6px 10px;
+    }
+
+    .article-card {
+      padding: 20px 16px;
+    }
+  }
 </style>

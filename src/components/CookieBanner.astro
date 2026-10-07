@@ -1,22 +1,28 @@
 ---
-// CookieBanner.astro — Ultra-fast, responsive cookie policy banner matching ClickForNothing's neo-brutalist theme
+import { useTranslations } from '../i18n';
+import { getLocalizedPath, getLocaleFromUrl } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+const cookiePolicyUrl = getLocalizedPath('/cookie-policy/', currentLocale);
 ---
 
 <div
   id="cookie-banner"
   class="cookie-banner"
   role="region"
-  aria-label="Cookie and privacy preferences"
+  aria-label={t('cookie_banner.aria_label')}
   hidden
 >
   <div class="cookie-banner-inner">
     <div class="cookie-main">
       <div class="cookie-icon" aria-hidden="true">🍪</div>
       <div class="cookie-info">
-        <h2 class="cookie-title">We Value Your Privacy</h2>
+        <h2 class="cookie-title">{t('cookie_banner.title')}</h2>
         <p class="cookie-text">
-          We use cookies and local storage to keep ClickForNothing fun, smooth, and functioning properly.
-          Read our <a href="/cookie-policy/" class="cookie-link">Cookie Policy</a> to learn more.
+          {t('cookie_banner.text')}
+          <a href={cookiePolicyUrl} class="cookie-link">{t('cookie_banner.cookie_policy')}</a>
         </p>
       </div>
     </div>
@@ -25,17 +31,17 @@
         type="button"
         id="cookie-decline-btn"
         class="cookie-btn cookie-btn-decline"
-        aria-label="Decline non-essential cookies"
+        aria-label={t('cookie_banner.decline_aria')}
       >
-        Decline
+        {t('cookie_banner.decline')}
       </button>
       <button
         type="button"
         id="cookie-accept-btn"
         class="cookie-btn cookie-btn-accept"
-        aria-label="Accept all cookies"
+        aria-label={t('cookie_banner.accept_aria')}
       >
-        Accept All
+        {t('cookie_banner.accept')}
       </button>
     </div>
   </div>

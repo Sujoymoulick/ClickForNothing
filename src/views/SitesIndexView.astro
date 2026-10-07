@@ -1,7 +1,9 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import { websites } from '../data/websites';
 import { categories } from '../data/categories';
+import { normalizeCategorySlug, getLikesForSite, categoryIcons, getSiteThumbnailSvg } from '../data/siteMeta';
 import { useTranslations } from '../i18n';
 import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
 import type { SupportedLocale } from '../i18n/config';
@@ -9,8 +11,8 @@ import type { SupportedLocale } from '../i18n/config';
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const { t } = await useTranslations(currentLocale);
 
-const title = "Directory of Useless Websites | ClickForNothing";
-const description = "Browse our full directory of 100+ useless, funny, weird, and interactive websites. Instant time-wasters and useless web treasures categorized for you.";
+const title = t('sites.seo_title');
+const description = t('sites.seo_description');
 const canonicalPath = "/sites/";
 
 const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
@@ -18,256 +20,1434 @@ const currentPath = getLocalizedPath(canonicalPath, currentLocale);
 const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
 const homeUrl = getLocalizedPath('/', currentLocale);
 const discoverUrl = getLocalizedPath('/discover/', currentLocale);
+const submitUrl = getLocalizedPath('/submit/', currentLocale);
+
+// Prepare enriched website list with slug, normalized category, and likes
+const enrichedWebsites = websites.map((site, index) => {
+  const slug = (site as any).slug || site.id;
+  const categorySlug = normalizeCategorySlug(site.category);
+  const likes = getLikesForSite(site.id);
+  const detailUrl = getLocalizedPath(`/sites/${slug}/`, currentLocale);
+  const thumbnailSvg = getSiteThumbnailSvg(site.id, site.name, categorySlug);
+  return {
+    ...site,
+    slug,
+    categorySlug,
+    likes,
+    detailUrl,
+    thumbnailSvg,
+    index,
+  };
+});
 
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
-    { '@type': 'ListItem', position: 2, name: t('nav.sites') || 'Websites Directory', item: fullCanonicalUrl },
+    { '@type': 'ListItem', position: 1, name: t('nav.home'), item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.sites'), item: fullCanonicalUrl },
   ],
 };
 
 const collectionSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Directory of Useless Websites',
+  name: t('sites.heading'),
   description,
   url: fullCanonicalUrl,
   mainEntity: {
     '@type': 'ItemList',
-    numberOfItems: websites.length,
-    itemListElement: websites.map((site, index) => ({
+    numberOfItems: enrichedWebsites.length,
+    itemListElement: enrichedWebsites.map((site, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: site.name,
-      url: `${siteOrigin}${getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}`,
+      url: `${siteOrigin}${site.detailUrl}`,
     })),
   },
 };
 ---
+
 <SiteLayout {title} {description} {canonicalPath}>
-  <main class="directory-container">
-    <header class="directory-header">
+  <!-- Top Navigation Bar -->
+  <SiteHeader activeNav="explore" />
+
+  <div class="directory-page-bg">
+    <main class="directory-container">
+      <!-- Breadcrumbs -->
       <nav class="breadcrumbs" aria-label="Breadcrumbs">
-        <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span> <span aria-current="page">{t('nav.sites') || 'Websites Directory'}</span>
+        <a href={homeUrl} class="breadcrumb-link">{t('nav.home')}</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current" aria-current="page">{t('sites.heading')}</span>
       </nav>
-      <h1>Directory of Useless Websites</h1>
-      <p class="lead-text">
-        Explore {websites.length}+ hand-curated useless, weird, funny, and interactive websites.
-      </p>
 
-      <div class="category-pills" aria-label="Filter by Category">
-        <a href={getLocalizedPath('/sites/', currentLocale)} class="pill active">All ({websites.length})</a>
-        {categories.map((cat) => (
-          <a href={getLocalizedPath(`/categories/${cat.slug}/`, currentLocale)} class="pill">
-            {cat.emoji} {t(`categories.${cat.slug}`) || cat.name}
-          </a>
-        ))}
+      <!-- Directory Hero Section -->
+      <header class="directory-hero">
+        <!-- Left Doodle Sticker -->
+        <div class="hero-sticker hero-sticker-left" aria-hidden="true">
+          <div class="doodle-card">
+            <span class="doodle-text">Waste time,</span>
+            <span class="doodle-text highlight">Discover ☺,</span>
+            <span class="doodle-text">Be happy</span>
+          </div>
+          <svg class="doodle-arrow" width="48" height="52" viewBox="0 0 48 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4 C 18 18, 38 24, 30 42" stroke="#f20caf" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <path d="M22 38 L 30 44 L 35 34" stroke="#f20caf" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+
+        <!-- Center Hero Content -->
+        <div class="directory-hero-center">
+          <h1 class="directory-hero-title">
+            <span class="directory-title-top">Directory of</span>
+            <span class="directory-title-bottom">
+              Useless Websites
+              <svg class="brush-stroke" viewBox="0 0 260 16" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                <path d="M6 11 Q 130 3 254 11" stroke="#facc15" stroke-width="9" stroke-linecap="round"/>
+              </svg>
+            </span>
+          </h1>
+          <p class="directory-hero-lead">
+            {t('sites.lead', { count: enrichedWebsites.length })}
+          </p>
+        </div>
+
+        <!-- Right Retro CRT Monitor Sticker -->
+        <div class="hero-sticker hero-sticker-right" aria-hidden="true">
+          <span class="sparkle sparkle-pink">✦</span>
+          <span class="sparkle sparkle-yellow">★</span>
+          <div class="crt-monitor">
+            <svg width="86" height="80" viewBox="0 0 90 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="5" width="80" height="60" rx="10" fill="#fdfbf7" stroke="#18181b" stroke-width="3"/>
+              <rect x="13" y="12" width="64" height="46" rx="6" fill="#14532d" stroke="#18181b" stroke-width="2"/>
+              <text x="45" y="38" font-family="monospace" font-size="16" font-weight="bold" fill="#4ade80" text-anchor="middle">^ _ ^</text>
+              <rect x="18" y="52" width="24" height="2" fill="#18181b"/>
+              <circle cx="68" cy="53" r="2.5" fill="#4ade80"/>
+              <rect x="33" y="65" width="24" height="8" fill="#e2d9cf" stroke="#18181b" stroke-width="2"/>
+              <rect x="22" y="73" width="46" height="6" rx="2" fill="#d6ccc2" stroke="#18181b" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- Category Filter Pills Bar -->
+      <nav class="category-filters-wrapper" aria-label={t('sites.filter_by_category')}>
+        <div class="category-pills-bar" id="category-pills-bar" role="tablist">
+          <button
+            type="button"
+            class="filter-pill is-active"
+            data-category="all"
+            role="tab"
+            aria-selected="true"
+          >
+            <span class="pill-icon" set:html={categoryIcons.all} />
+            <span class="pill-name">{t('sites.all_pill', { count: enrichedWebsites.length })}</span>
+          </button>
+
+          {categories.map((cat) => {
+            const count = enrichedWebsites.filter((s) => s.categorySlug === cat.slug).length;
+            const translatedName = t(`categories.${cat.slug}`) || cat.name;
+            const iconSvg = categoryIcons[cat.slug] || categoryIcons.all;
+            return (
+              <button
+                type="button"
+                class="filter-pill"
+                data-category={cat.slug}
+                role="tab"
+                aria-selected="false"
+              >
+                <span class="pill-icon" set:html={iconSvg} />
+                <span class="pill-name">{translatedName}</span>
+                {count > 0 && <span class="pill-count">({count})</span>}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <!-- Results Toolbar (Showing count, Sort, View Controls) -->
+      <div class="results-toolbar">
+        <div class="toolbar-left">
+          <p class="results-count-text">
+            Showing <strong id="visible-count">10</strong> of <strong id="total-count">{enrichedWebsites.length}</strong> websites
+          </p>
+        </div>
+        <div class="toolbar-right">
+          <!-- Sort Dropdown -->
+          <div class="sort-control">
+            <label for="sort-select" class="sort-label">Sort:</label>
+            <div class="select-wrapper">
+              <select id="sort-select" class="sort-select" aria-label="Sort websites">
+                <option value="newest">{t('sites.sort_newest')}</option>
+                <option value="popular">{t('sites.sort_popular')}</option>
+                <option value="name">{t('sites.sort_name')}</option>
+              </select>
+              <svg class="select-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+
+          <!-- View Toggle (Grid vs List) -->
+          <div class="view-toggle" role="group" aria-label="Layout view mode">
+            <button
+              type="button"
+              id="view-grid-btn"
+              class="view-btn is-active"
+              title={t('sites.view_grid')}
+              aria-label={t('sites.view_grid')}
+              aria-pressed="true"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              id="view-list-btn"
+              class="view-btn"
+              title={t('sites.view_list')}
+              aria-label={t('sites.view_list')}
+              aria-pressed="false"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/>
+                <line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
-    </header>
 
-    <section class="site-grid" aria-label="Useless Websites Grid">
-      {websites.map((site) => (
-        <article class="site-card">
-          <div class="card-header">
-            <a href={getLocalizedPath(`/categories/${site.categorySlug}/`, currentLocale)} class="category-tag">
-              {t(`categories.${site.categorySlug}`) || site.category}
+      <!-- Website Cards Container (5-Column Grid on Desktop) -->
+      <section
+        id="sites-container"
+        class="sites-container is-grid-mode"
+        aria-label="Directory of Useless Websites"
+      >
+        {enrichedWebsites.map((site, index) => {
+          const isInitialVisible = index < 10;
+          const translatedCategory = t(`categories.${site.categorySlug}`) || site.category;
+          const catIconSvg = categoryIcons[site.categorySlug] || categoryIcons.all;
+
+          return (
+            <article
+              class={`site-card ${isInitialVisible ? '' : 'is-hidden'}`}
+              data-site-id={site.id}
+              data-name={site.name}
+              data-category={site.categorySlug}
+              data-likes={site.likes.raw}
+              data-index={index}
+            >
+              <!-- Card Thumbnail / Visual Area -->
+              <div class="card-thumb-wrapper">
+                <a
+                  href={site.detailUrl}
+                  class="thumb-link"
+                  aria-label={`View details for ${site.name}`}
+                  tabindex="-1"
+                >
+                  <div class="thumb-media" set:html={site.thumbnailSvg} />
+                </a>
+
+                <!-- External Direct Visit Button -->
+                <a
+                  href={site.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="card-ext-btn"
+                  title={`Open ${site.name} directly ↗`}
+                  aria-label={`Open ${site.name} in a new tab`}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7"/>
+                    <polyline points="7 7 17 7 17 17"/>
+                  </svg>
+                </a>
+              </div>
+
+              <!-- Card Content Area -->
+              <div class="card-body">
+                <h2 class="card-title">
+                  <a href={site.detailUrl} class="card-title-link">{site.name}</a>
+                </h2>
+                <p class="card-description">{site.description}</p>
+
+                <!-- Category Pill Badge -->
+                <div class="card-meta">
+                  <button
+                    type="button"
+                    class="card-cat-badge"
+                    data-category-trigger={site.categorySlug}
+                    title={`Filter by ${translatedCategory}`}
+                  >
+                    <span class="cat-badge-icon" set:html={catIconSvg} />
+                    <span>{translatedCategory}</span>
+                  </button>
+                </div>
+
+                <!-- Card Footer (Likes & Detail Arrow) -->
+                <div class="card-footer">
+                  <button
+                    type="button"
+                    class="card-like-btn"
+                    data-like-target={site.id}
+                    aria-label={`Like ${site.name}`}
+                  >
+                    <svg class="heart-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <span class="like-number">{site.likes.formatted}</span>
+                  </button>
+
+                  <a
+                    href={site.detailUrl}
+                    class="card-arrow-btn"
+                    aria-label={`View details for ${site.name}`}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                      <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+
+      <!-- Empty State (When no results match) -->
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <div class="empty-emoji">🤷‍♂️</div>
+        <h3 class="empty-title">{t('sites.empty_title')}</h3>
+        <p class="empty-desc">{t('sites.empty_desc')}</p>
+        <button type="button" id="reset-filter-btn" class="reset-filter-btn">
+          {t('sites.reset_filters')}
+        </button>
+      </div>
+
+      <!-- Pagination / Load More Section -->
+      <div class="load-more-section">
+        <button type="button" id="load-more-btn" class="load-more-btn">
+          <svg class="load-more-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <polyline points="19 12 12 19 5 12"/>
+          </svg>
+          <span class="load-more-text">{t('sites.load_more', { count: 10 })}</span>
+        </button>
+
+        <div id="end-of-web" class="end-of-web-notice" style="display: none;">
+          🎉 {t('sites.end_of_web')}
+        </div>
+      </div>
+
+      <!-- Bottom Community Callout -->
+      <section class="directory-bottom-cta">
+        <div class="bottom-cta-inner">
+          <h2 class="bottom-cta-heading">Finished browsing?</h2>
+          <p class="bottom-cta-sub">Now go waste some time.</p>
+          <div class="bottom-cta-actions">
+            <a href={discoverUrl} class="bottom-btn bottom-btn-primary">
+              Take Me Somewhere Random 🎲
             </a>
-            {site.featured && <span class="featured-badge">Featured ★</span>}
-          </div>
-          <h2 class="card-title">
-            <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a>
-          </h2>
-          <p class="card-desc">{site.description}</p>
-
-          <div class="card-footer">
-            <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="details-btn">{t('search.details') || 'View Details →'}</a>
-            <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-direct-btn">
-              Visit Original ↗
+            <a href={submitUrl} class="bottom-btn bottom-btn-secondary">
+              Submit a Useless Website ↗
             </a>
           </div>
-        </article>
-      ))}
-    </section>
-
-    <section class="cta-banner">
-      <h2>Feeling Lucky?</h2>
-      <p>Let our discovery engine take you to a random useless destination right now.</p>
-      <a href={discoverUrl} class="random-cta-btn">Take Me Somewhere Useless 🎲</a>
-    </section>
-  </main>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
 </SiteLayout>
 
+<!-- Client Interactive Logic -->
+<script is:inline>
+  (function () {
+    const BATCH_SIZE = 10;
+    let currentCategory = 'all';
+    let currentSort = 'newest';
+    let visibleCount = BATCH_SIZE;
+
+    const container = document.getElementById('sites-container');
+    const pills = document.querySelectorAll('.filter-pill');
+    const sortSelect = document.getElementById('sort-select');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const endNotice = document.getElementById('end-of-web');
+    const emptyState = document.getElementById('empty-state');
+    const resetBtn = document.getElementById('reset-filter-btn');
+    const visibleCountEl = document.getElementById('visible-count');
+    const totalCountEl = document.getElementById('total-count');
+    const gridViewBtn = document.getElementById('view-grid-btn');
+    const listViewBtn = document.getElementById('view-list-btn');
+
+    if (!container) return;
+
+    const cards = Array.from(container.querySelectorAll('.site-card'));
+    const totalOriginalCount = cards.length;
+
+    // Likes state persisted in localStorage
+    const likedSites = new Set(JSON.parse(localStorage.getItem('cfn_liked_sites') || '[]'));
+
+    // Initialize like button states
+    cards.forEach((card) => {
+      const siteId = card.getAttribute('data-site-id');
+      const likeBtn = card.querySelector('.card-like-btn');
+      if (siteId && likeBtn && likedSites.has(siteId)) {
+        likeBtn.classList.add('is-liked');
+        const heartSvg = likeBtn.querySelector('.heart-icon');
+        if (heartSvg) heartSvg.setAttribute('fill', '#f43f5e');
+      }
+    });
+
+    // Delegate like button clicks
+    container.addEventListener('click', (e) => {
+      const likeBtn = e.target.closest('.card-like-btn');
+      if (likeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const siteId = likeBtn.getAttribute('data-like-target');
+        const numEl = likeBtn.querySelector('.like-number');
+        const heartSvg = likeBtn.querySelector('.heart-icon');
+        const card = likeBtn.closest('.site-card');
+
+        if (!siteId || !card) return;
+
+        let rawLikes = parseInt(card.getAttribute('data-likes') || '1000', 10);
+        const isLiked = likedSites.has(siteId);
+
+        if (isLiked) {
+          likedSites.delete(siteId);
+          likeBtn.classList.remove('is-liked');
+          if (heartSvg) heartSvg.setAttribute('fill', 'none');
+          rawLikes = Math.max(0, rawLikes - 1);
+        } else {
+          likedSites.add(siteId);
+          likeBtn.classList.add('is-liked');
+          if (heartSvg) heartSvg.setAttribute('fill', '#f43f5e');
+          rawLikes += 1;
+        }
+
+        card.setAttribute('data-likes', String(rawLikes));
+        if (numEl) {
+          numEl.textContent = (rawLikes / 1000).toFixed(1) + 'K';
+        }
+        localStorage.setItem('cfn_liked_sites', JSON.stringify(Array.from(likedSites)));
+        return;
+      }
+
+      // Delegate inline category badge clicks
+      const catBadge = e.target.closest('[data-category-trigger]');
+      if (catBadge) {
+        e.preventDefault();
+        e.stopPropagation();
+        const catSlug = catBadge.getAttribute('data-category-trigger');
+        if (catSlug) setCategory(catSlug);
+      }
+    });
+
+    function getMatchingCards() {
+      return cards.filter((card) => {
+        if (currentCategory === 'all') return true;
+        return card.getAttribute('data-category') === currentCategory;
+      });
+    }
+
+    function sortMatchingCards(list) {
+      if (currentSort === 'newest') {
+        return list.sort((a, b) => {
+          return parseInt(a.getAttribute('data-index') || '0', 10) - parseInt(b.getAttribute('data-index') || '0', 10);
+        });
+      } else if (currentSort === 'popular') {
+        return list.sort((a, b) => {
+          return parseInt(b.getAttribute('data-likes') || '0', 10) - parseInt(a.getAttribute('data-likes') || '0', 10);
+        });
+      } else if (currentSort === 'name') {
+        return list.sort((a, b) => {
+          const nameA = (a.getAttribute('data-name') || '').toLowerCase();
+          const nameB = (b.getAttribute('data-name') || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+      }
+      return list;
+    }
+
+    function renderCards() {
+      const matching = getMatchingCards();
+      const sorted = sortMatchingCards(matching);
+      const totalMatching = sorted.length;
+
+      // Reorder cards in DOM based on sort
+      sorted.forEach((card) => {
+        container.appendChild(card);
+      });
+
+      // Show/Hide based on visibility threshold
+      let currentVisible = 0;
+      cards.forEach((card) => {
+        const isMatch = matching.includes(card);
+        if (isMatch) {
+          const matchIndex = sorted.indexOf(card);
+          if (matchIndex < visibleCount) {
+            card.classList.remove('is-hidden');
+            currentVisible++;
+          } else {
+            card.classList.add('is-hidden');
+          }
+        } else {
+          card.classList.add('is-hidden');
+        }
+      });
+
+      // Update Toolbar Counts
+      if (visibleCountEl) visibleCountEl.textContent = String(currentVisible);
+      if (totalCountEl) totalCountEl.textContent = String(totalMatching);
+
+      // Handle Empty State
+      if (totalMatching === 0) {
+        if (emptyState) emptyState.style.display = 'block';
+        if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+        if (endNotice) endNotice.style.display = 'none';
+      } else {
+        if (emptyState) emptyState.style.display = 'none';
+
+        // Handle Load More vs End of Web
+        if (currentVisible >= totalMatching) {
+          if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+          if (endNotice) endNotice.style.display = 'block';
+        } else {
+          if (loadMoreBtn) loadMoreBtn.style.display = 'inline-flex';
+          if (endNotice) endNotice.style.display = 'none';
+        }
+      }
+    }
+
+    function setCategory(categorySlug) {
+      currentCategory = categorySlug;
+      visibleCount = BATCH_SIZE;
+
+      pills.forEach((pill) => {
+        const isSelected = pill.getAttribute('data-category') === categorySlug;
+        pill.classList.toggle('is-active', isSelected);
+        pill.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        if (isSelected) {
+          pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      });
+
+      renderCards();
+    }
+
+    // Category Pill Click Listeners
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const slug = pill.getAttribute('data-category') || 'all';
+        setCategory(slug);
+      });
+    });
+
+    // Sort Dropdown Change Listener
+    if (sortSelect) {
+      sortSelect.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderCards();
+      });
+    }
+
+    // Load More Button Listener
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        loadMoreBtn.classList.add('is-loading');
+        setTimeout(() => {
+          visibleCount += BATCH_SIZE;
+          renderCards();
+          loadMoreBtn.classList.remove('is-loading');
+        }, 150);
+      });
+    }
+
+    // Reset Filter Button Listener
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        setCategory('all');
+      });
+    }
+
+    // View Toggle Listeners
+    if (gridViewBtn && listViewBtn) {
+      gridViewBtn.addEventListener('click', () => {
+        container.classList.remove('is-list-mode');
+        container.classList.add('is-grid-mode');
+        gridViewBtn.classList.add('is-active');
+        gridViewBtn.setAttribute('aria-pressed', 'true');
+        listViewBtn.classList.remove('is-active');
+        listViewBtn.setAttribute('aria-pressed', 'false');
+      });
+
+      listViewBtn.addEventListener('click', () => {
+        container.classList.remove('is-grid-mode');
+        container.classList.add('is-list-mode');
+        listViewBtn.classList.add('is-active');
+        listViewBtn.setAttribute('aria-pressed', 'true');
+        gridViewBtn.classList.remove('is-active');
+        gridViewBtn.setAttribute('aria-pressed', 'false');
+      });
+    }
+
+    // Initial render
+    renderCards();
+  })();
+</script>
+
 <style>
-  .directory-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 20px 64px;
-    color: #f4f4f5;
+  /* ==========================================================================
+     PAGE CONTAINER & WARM CREAM THEME
+     ========================================================================== */
+  .directory-page-bg {
+    background-color: #faf7f2;
+    background-image: radial-gradient(#e5e0d8 1px, transparent 1px);
+    background-size: 24px 24px;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    color: #18181b;
   }
+
+  .directory-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 24px 64px;
+  }
+
+  /* Breadcrumbs */
   .breadcrumbs {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.9rem;
-    color: #a1a1aa;
-    margin-bottom: 16px;
-  }
-  .breadcrumbs a { color: #f7fa27; text-decoration: none; }
-  .breadcrumbs a:hover { text-decoration: underline; }
-
-  .directory-header h1 {
-    font: 800 clamp(2.2rem, 5vw, 3.5rem)/1.1 'Lilita One', system-ui, sans-serif;
-    color: #ffffff;
-    margin-bottom: 8px;
-  }
-  .lead-text {
-    font: 500 1.2rem/1.5 'Baloo 2', system-ui, sans-serif;
-    color: #d4d4d8;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #71717a;
     margin-bottom: 24px;
   }
 
-  .category-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 40px;
-  }
-  .pill {
-    background: #27272a;
-    color: #f4f4f5;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font: 600 0.92rem 'Baloo 2', system-ui, sans-serif;
+  .breadcrumb-link {
+    color: #71717a;
     text-decoration: none;
-    transition: background 0.15s ease, color 0.15s ease;
-  }
-  .pill:hover, .pill.active {
-    background: #f20caf;
-    color: #ffffff;
+    transition: color 0.15s ease;
   }
 
-  .site-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
-    margin-bottom: 64px;
-  }
-  .site-card {
-    background: #18181b;
-    border: 2px solid #27272a;
-    border-radius: 18px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-  }
-  .site-card:hover {
-    transform: translateY(-4px);
-    border-color: #f7fa27;
+  .breadcrumb-link:hover {
+    color: #f20caf;
   }
 
-  .card-header {
+  .breadcrumb-sep {
+    color: #d4d4d8;
+  }
+
+  .breadcrumb-current {
+    color: #18181b;
+    font-weight: 600;
+  }
+
+  /* ==========================================================================
+     HERO SECTION
+     ========================================================================== */
+  .directory-hero {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    position: relative;
+    padding: 20px 0 36px;
     margin-bottom: 12px;
   }
-  .category-tag {
-    background: #27272a;
-    color: #a855f7;
+
+  .directory-hero-center {
+    flex: 1;
+    text-align: center;
+    max-width: 860px;
+    margin: 0 auto;
+    z-index: 2;
+  }
+
+  .directory-hero-title {
+    font-family: 'Lilita One', system-ui, -apple-system, sans-serif;
+    font-size: clamp(2.8rem, 6.2vw, 4.4rem);
+    line-height: 1.1;
+    color: #18181b;
+    margin: 0 0 16px;
+    letter-spacing: -0.02em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-wrap: balance;
+    -webkit-text-stroke: 0 !important;
+    filter: none !important;
+  }
+
+  .directory-title-top {
+    display: block;
+    color: #18181b;
+    font-weight: 900;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none;
+    white-space: normal;
+  }
+
+  .directory-title-bottom {
+    display: inline-block;
+    color: #f20caf;
+    position: relative;
+    padding: 0 6px 8px;
+    font-weight: 900;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none;
+    white-space: normal;
+  }
+
+  .brush-stroke {
+    position: absolute;
+    bottom: -6px;
+    left: 2%;
+    width: 96%;
+    height: 16px;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.95;
+    filter: drop-shadow(0 2px 4px rgba(250, 204, 21, 0.45));
+  }
+
+  .directory-hero-lead {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-size: clamp(1.15rem, 2.2vw, 1.35rem);
+    font-weight: 600;
+    color: #3f3f46;
+    line-height: 1.55;
+    margin: 0 auto;
+    max-width: 660px;
+    text-wrap: balance;
+  }
+
+  /* Left Sticker */
+  .hero-sticker-left {
+    position: relative;
+    width: 160px;
+    transform: rotate(-3deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .doodle-card {
+    background: #ffffff;
+    border: 2px solid #18181b;
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 3px 3px 0 #18181b;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .doodle-text {
+    font-family: 'Baloo 2', cursive, sans-serif;
+    font-size: 0.95rem;
     font-weight: 700;
-    font-size: 0.82rem;
-    padding: 4px 10px;
-    border-radius: 999px;
+    color: #18181b;
+    line-height: 1.2;
+  }
+
+  .doodle-text.highlight {
+    color: #f20caf;
+  }
+
+  .doodle-arrow {
+    margin-top: 4px;
+    transform: rotate(-5deg);
+  }
+
+  /* Right Sticker */
+  .hero-sticker-right {
+    position: relative;
+    width: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .crt-monitor {
+    transform: rotate(4deg);
+    filter: drop-shadow(3px 4px 0 rgba(0, 0, 0, 0.15));
+    transition: transform 0.25s ease;
+  }
+
+  .crt-monitor:hover {
+    transform: rotate(1deg) scale(1.05);
+  }
+
+  .sparkle {
+    position: absolute;
+    font-size: 1.3rem;
+    pointer-events: none;
+    animation: floatSparkle 3s ease-in-out infinite alternate;
+  }
+
+  .sparkle-pink {
+    top: -8px;
+    left: 10px;
+    color: #f20caf;
+  }
+
+  .sparkle-yellow {
+    bottom: -6px;
+    right: 15px;
+    color: #facc15;
+    font-size: 1.5rem;
+    animation-delay: 1.5s;
+  }
+
+  @keyframes floatSparkle {
+    from { transform: translateY(0) scale(0.9); }
+    to { transform: translateY(-5px) scale(1.1); }
+  }
+
+  /* Responsive Hero */
+  @media (max-width: 1150px) {
+    .hero-sticker-left,
+    .hero-sticker-right {
+      display: none;
+    }
+  }
+
+  /* ==========================================================================
+     CATEGORY FILTERS
+     ========================================================================== */
+  .category-filters-wrapper {
+    margin-bottom: 28px;
+    width: 100%;
+  }
+
+  .category-pills-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1.5px solid #e4e4e7;
+    border-radius: 9999px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #27272a;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .filter-pill:hover {
+    border-color: #f20caf;
+    color: #18181b;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .filter-pill.is-active {
+    background: #f20caf;
+    border-color: #f20caf;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(242, 12, 175, 0.25);
+  }
+
+  .pill-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pill-count {
+    font-size: 0.8rem;
+    opacity: 0.85;
+  }
+
+  /* ==========================================================================
+     RESULTS TOOLBAR
+     ========================================================================== */
+  .results-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid #e4e4e7;
+  }
+
+  .results-count-text {
+    font-size: 0.925rem;
+    color: #52525b;
+    margin: 0;
+  }
+
+  .results-count-text strong {
+    color: #18181b;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .sort-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sort-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #71717a;
+  }
+
+  .select-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .sort-select {
+    appearance: none;
+    background: #ffffff;
+    border: 1.5px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 6px 30px 6px 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #18181b;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .sort-select:focus {
+    border-color: #f20caf;
+  }
+
+  .select-caret {
+    position: absolute;
+    right: 10px;
+    pointer-events: none;
+    color: #71717a;
+  }
+
+  .view-toggle {
+    display: flex;
+    background: #f4f4f5;
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: #71717a;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .view-btn.is-active {
+    background: #f20caf;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ==========================================================================
+     CARD GRID (5 COLUMNS ON DESKTOP)
+     ========================================================================== */
+  .sites-container.is-grid-mode {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 1300px) {
+    .sites-container.is-grid-mode {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 1050px) {
+    .sites-container.is-grid-mode {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .sites-container.is-grid-mode {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .sites-container.is-grid-mode {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* List Mode */
+  .sites-container.is-list-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .sites-container.is-list-mode .site-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .sites-container.is-list-mode .card-thumb-wrapper {
+    width: 200px;
+    min-width: 200px;
+    aspect-ratio: 16 / 10;
+    border-radius: 14px 0 0 14px;
+    border-bottom: none;
+    border-right: 1.5px solid #f4f4f5;
+  }
+
+  .sites-container.is-list-mode .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* ==========================================================================
+     SITE CARD COMPONENT
+     ========================================================================== */
+  .site-card {
+    background: #ffffff;
+    border: 1.5px solid #e4e4e7;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .site-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    border-color: #cbd5e1;
+  }
+
+  .site-card.is-hidden {
+    display: none !important;
+  }
+
+  /* Thumbnail Area */
+  .card-thumb-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: #f4f4f5;
+    border-bottom: 1.5px solid #f4f4f5;
+  }
+
+  .thumb-link {
+    display: block;
+    width: 100%;
+    height: 100%;
     text-decoration: none;
   }
-  .category-tag:hover { text-decoration: underline; }
-  .featured-badge {
-    background: #f7fa27;
-    color: #09080c;
-    font-weight: 800;
-    font-size: 0.78rem;
-    padding: 2px 8px;
-    border-radius: 999px;
+
+  .thumb-media {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :global(.card-thumb-svg) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .site-card:hover :global(.card-thumb-svg) {
+    transform: scale(1.03);
+  }
+
+  /* Top-Right External Direct Button */
+  .card-ext-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #18181b;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    transition: all 0.15s ease;
+    z-index: 3;
+  }
+
+  .card-ext-btn:hover {
+    background: #f20caf;
+    color: #ffffff;
+    border-color: #f20caf;
+    transform: scale(1.1);
+  }
+
+  /* Card Body */
+  .card-body {
+    padding: 12px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
   }
 
   .card-title {
-    font: 700 1.5rem/1.2 'Lilita One', system-ui, sans-serif;
-    margin-bottom: 8px;
-  }
-  .card-title a { color: #ffffff; text-decoration: none; }
-  .card-title a:hover { color: #f20caf; }
-
-  .card-desc {
-    color: #a1a1aa;
-    font-size: 0.95rem;
-    line-height: 1.45;
-    margin-bottom: 20px;
-    flex-grow: 1;
+    font-size: 0.975rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 4px;
   }
 
+  .card-title-link {
+    color: #09090b;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .card-title-link:hover {
+    color: #f20caf;
+  }
+
+  .card-description {
+    font-size: 0.8rem;
+    color: #52525b;
+    line-height: 1.4;
+    margin: 0 0 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.25em;
+  }
+
+  /* Category Tag */
+  .card-meta {
+    margin-bottom: 10px;
+  }
+
+  .card-cat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 9999px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #3f3f46;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .card-cat-badge:hover {
+    background: #e4e4e7;
+    color: #18181b;
+    border-color: #d4d4d8;
+  }
+
+  .cat-badge-icon {
+    display: flex;
+    align-items: center;
+  }
+
+  .cat-badge-icon :global(svg) {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Card Footer */
   .card-footer {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #27272a;
-    padding-top: 14px;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid #f4f4f5;
+    margin-top: auto;
   }
-  .details-btn {
-    color: #f7fa27;
-    font-weight: 700;
-    font-size: 0.9rem;
-    text-decoration: none;
-  }
-  .details-btn:hover { text-decoration: underline; }
 
-  .visit-direct-btn {
+  .card-like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #71717a;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+  }
+
+  .card-like-btn:hover {
+    color: #f43f5e;
+  }
+
+  .card-like-btn.is-liked {
+    color: #f43f5e;
+  }
+
+  .heart-icon {
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .card-like-btn:hover .heart-icon,
+  .card-like-btn.is-liked .heart-icon {
+    transform: scale(1.2);
+  }
+
+  .card-arrow-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #f4f4f5;
+    color: #18181b;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .card-arrow-btn:hover {
+    background: #18181b;
+    color: #ffffff;
+    transform: translateX(2px);
+  }
+
+  /* ==========================================================================
+     LOAD MORE / END OF WEB
+     ========================================================================== */
+  .load-more-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0 60px;
+  }
+
+  .load-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 2px solid #18181b;
+    border-radius: 9999px;
+    padding: 12px 32px;
+    font-family: inherit;
+    font-size: 0.975rem;
+    font-weight: 700;
+    color: #18181b;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #18181b;
+    transition: all 0.15s ease;
+  }
+
+  .load-more-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #18181b;
+    background: #fffdfa;
+  }
+
+  .load-more-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #18181b;
+  }
+
+  .load-more-btn.is-loading .load-more-icon {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .end-of-web-notice {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #71717a;
+    padding: 16px 24px;
+    background: #ffffff;
+    border: 1.5px solid #e4e4e7;
+    border-radius: 9999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #ffffff;
+    border: 2px dashed #d4d4d8;
+    border-radius: 20px;
+    margin-bottom: 40px;
+  }
+
+  .empty-emoji {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+
+  .empty-title {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.6rem;
+    color: #18181b;
+    margin: 0 0 8px;
+  }
+
+  .empty-desc {
+    font-size: 0.95rem;
+    color: #71717a;
+    margin: 0 0 20px;
+  }
+
+  .reset-filter-btn {
     background: #f20caf;
     color: #ffffff;
-    padding: 6px 14px;
-    border-radius: 999px;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 9999px;
     font-weight: 700;
-    font-size: 0.85rem;
-    text-decoration: none;
-    transition: opacity 0.15s ease;
-  }
-  .visit-direct-btn:hover { opacity: 0.9; }
-
-  .cta-banner {
-    background: linear-gradient(135deg, #7025ed, #f20caf);
-    border-radius: 24px;
-    padding: 48px 32px;
-    text-align: center;
-    box-shadow: 0 10px 0 #09080c;
-  }
-  .cta-banner h2 {
-    font: 800 clamp(1.8rem, 4vw, 2.8rem) 'Lilita One', system-ui, sans-serif;
-    margin-bottom: 8px;
-    color: #fff;
-  }
-  .cta-banner p {
-    font-size: 1.15rem;
-    margin-bottom: 24px;
-    color: #fef08a;
-  }
-  .random-cta-btn {
-    display: inline-block;
-    background: #f7fa27;
-    color: #09080c;
-    font: 800 1.2rem 'Lilita One', system-ui, sans-serif;
-    padding: 14px 32px;
-    border-radius: 999px;
-    text-decoration: none;
-    box-shadow: 0 5px 0 #09080c;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(242, 12, 175, 0.25);
     transition: transform 0.15s ease;
   }
-  .random-cta-btn:hover {
-    transform: translateY(-3px);
+
+  .reset-filter-btn:hover {
+    transform: scale(1.05);
+  }
+
+  /* ==========================================================================
+     BOTTOM CTA BANNER
+     ========================================================================== */
+  .directory-bottom-cta {
+    background: #ffffff;
+    border: 2.5px solid #18181b;
+    border-radius: 24px;
+    padding: 40px 24px;
+    text-align: center;
+    box-shadow: 6px 6px 0 #18181b;
+    margin-top: 20px;
+  }
+
+  .bottom-cta-heading {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    color: #18181b;
+    margin: 0 0 6px;
+  }
+
+  .bottom-cta-sub {
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    font-size: 1.15rem;
+    color: #71717a;
+    margin: 0 0 24px;
+  }
+
+  .bottom-cta-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .bottom-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .bottom-btn-primary {
+    background: #f20caf;
+    color: #ffffff;
+    border: 2px solid #18181b;
+    box-shadow: 3px 3px 0 #18181b;
+  }
+
+  .bottom-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 #18181b;
+  }
+
+  .bottom-btn-secondary {
+    background: #facc15;
+    color: #18181b;
+    border: 2px solid #18181b;
+    box-shadow: 3px 3px 0 #18181b;
+  }
+
+  .bottom-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 #18181b;
   }
 </style>

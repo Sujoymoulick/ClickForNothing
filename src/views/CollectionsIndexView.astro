@@ -8,8 +8,8 @@ import type { SupportedLocale } from '../i18n/config';
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const { t } = await useTranslations(currentLocale);
 
-const title = "Curated Collections of Useless Websites | ClickForNothing";
-const description = "Explore curated lists of useless websites: 100 Useless Websites, Websites to Visit When Bored, and weird internet creations to kill boredom online.";
+const title = t('collections_page.seo_title');
+const description = t('collections_page.seo_description');
 const canonicalPath = "/collections/";
 
 const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
@@ -21,15 +21,15 @@ const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
-    { '@type': 'ListItem', position: 2, name: t('nav.collections') || 'Collections', item: fullCanonicalUrl },
+    { '@type': 'ListItem', position: 1, name: t('nav.home'), item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.collections'), item: fullCanonicalUrl },
   ],
 };
 
 const collectionSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Curated Collections of Useless Websites',
+  name: t('collections_page.heading'),
   description,
   url: fullCanonicalUrl,
   mainEntity: {
@@ -47,24 +47,24 @@ const collectionSchema = {
 <SiteLayout {title} {description} {canonicalPath}>
   <main class="collections-container">
     <nav class="breadcrumbs" aria-label="Breadcrumbs">
-      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span> <span aria-current="page">{t('nav.collections') || 'Collections'}</span>
+      <a href={homeUrl}>{t('nav.home')}</a> <span>/</span> <span aria-current="page">{t('nav.collections')}</span>
     </nav>
 
     <header class="header-section">
-      <h1>Curated Collections & Listicles</h1>
+      <h1>{t('collections_page.heading')}</h1>
       <p class="lead">
-        Hand-curated collections of internet time-wasters, weird sites, and useless gems.
+        {t('collections_page.lead')}
       </p>
     </header>
 
     <section class="collections-grid">
       {collections.map((col) => (
         <article class="collection-card">
-          <div class="card-badge">Listicle • {col.siteIds.length} Items</div>
+          <div class="card-badge">{t('collections_page.listicle_badge', { count: col.siteIds.length })}</div>
           <h2><a href={getLocalizedPath(`/collections/${col.slug}/`, currentLocale)}>{col.title}</a></h2>
           <p class="subtitle">{col.subtitle}</p>
           <p class="desc">{col.description}</p>
-          <a href={getLocalizedPath(`/collections/${col.slug}/`, currentLocale)} class="view-collection-btn">Explore Full List →</a>
+          <a href={getLocalizedPath(`/collections/${col.slug}/`, currentLocale)} class="view-collection-btn">{t('collections_page.explore_list_btn')}</a>
         </article>
       ))}
     </section>

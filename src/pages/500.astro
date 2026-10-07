@@ -1,13 +1,21 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
 
 interface Props {
   error?: unknown;
 }
 
 const { error } = Astro.props;
-const title = '500: Server Error — ClickForNothing';
-const description = 'Something unexpected happened behind the scenes. Even pointless websites need a reboot sometimes!';
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = `${t('error_500.kicker')}: ${t('error_500.title_start')} ${t('error_500.title_end')} — ClickForNothing`;
+const description = t('error_500.subtitle');
+const homeUrl = getLocalizedPath('/', currentLocale);
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
 ---
 <SiteLayout {title} {description} canonicalPath="/500" noindex={true}>
   <main class="hero-stage">
@@ -22,13 +30,13 @@ const description = 'Something unexpected happened behind the scenes. Even point
     <span class="deco twinkle twinkle-right" aria-hidden="true">✦</span>
 
     <section class="hero-content" aria-labelledby="server-error-title" style="max-width: 680px;">
-      <p class="discover-kicker" style="color: var(--pink); font-size: 1.2rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 8px;">Error 500</p>
+      <p class="discover-kicker" style="color: var(--pink); font-size: 1.2rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 8px;">{t('error_500.kicker')}</p>
       <h1 class="hero-title" id="server-error-title">
-        <span class="pink">Server</span>
-        <span class="purple">Hiccup.</span>
+        <span class="pink">{t('error_500.title_start')}</span>
+        <span class="purple">{t('error_500.title_end')}</span>
       </h1>
       <p class="hero-subtitle" style="margin: 20px 0 28px;">
-        Something broke behind the scenes. We're already shaking things up to get it working again.
+        {t('error_500.subtitle')}
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center;">
         <button
@@ -37,13 +45,13 @@ const description = 'Something unexpected happened behind the scenes. Even point
           onclick="window.location.reload()"
           style="cursor: pointer; border: 3px solid var(--ink); font-family: inherit; padding: 14px 28px; font-size: 1.15rem;"
         >
-          Try Again ↺
+          {t('error_500.try_again')}
         </button>
-        <a class="visit-button" href="/" style="text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
-          ← Back to Safety
+        <a class="visit-button" href={homeUrl} style="text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
+          {t('error_500.back_home')}
         </a>
-        <a class="visit-button" href="/discover/" style="background: var(--purple); text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
-          Discover Random Sites →
+        <a class="visit-button" href={discoverUrl} style="background: var(--purple); text-decoration: none; padding: 14px 28px; font-size: 1.15rem;">
+          {t('error_500.discover')}
         </a>
       </div>
     </section>

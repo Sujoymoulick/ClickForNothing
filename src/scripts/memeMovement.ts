@@ -6,7 +6,7 @@
  * - Smooth lerp interpolation + delta time
  * - Mouse proximity influence (repulsion/attraction)
  * - Bounce and rotation variations
- * - Respects prefers-reduced-motion & document.hidden
+ * - Respects prefers-reduced-motion, document.hidden & IntersectionObserver viewport visibility
  * - Re-clamps boundaries on window resize
  */
 
@@ -49,14 +49,13 @@ export function initMemeMovement() {
   let animFrameId = 0;
   let lastTimestamp = 0;
   let isRunning = false;
+  let inView = true;
 
   // Track viewport dimensions to dynamically calculate wander bounds
   let stageWidth = window.innerWidth;
-  let stageHeight = window.innerHeight;
 
   function updateStageDimensions() {
     stageWidth = window.innerWidth;
-    stageHeight = window.innerHeight;
   }
 
   // Create entity state wrappers
@@ -130,6 +129,7 @@ export function initMemeMovement() {
 
   // Pointer tracking for subtle proximity repulsion
   function onPointerMove(evt: MouseEvent | PointerEvent) {
+    if (!inView || !isRunning) return;
     mouseX = evt.clientX;
     mouseY = evt.clientY;
     isMouseActive = true;
@@ -156,7 +156,7 @@ export function initMemeMovement() {
 
   // Main animation physics tick
   function tick(timestamp: number) {
-    if (!isRunning) return;
+    if (!isRunning || !inView || document.visibilityState === 'hidden') return;
 
     if (!lastTimestamp) lastTimestamp = timestamp;
     const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.1); // Clamp to avoid huge jumps on tab switch
@@ -213,7 +213,7 @@ export function initMemeMovement() {
   }
 
   function start() {
-    if (isRunning) return;
+    if (isRunning || !inView || reducedMotionQuery.matches || document.visibilityState === 'hidden') return;
     isRunning = true;
     lastTimestamp = 0;
     animFrameId = window.requestAnimationFrame(tick);
@@ -225,6 +225,25 @@ export function initMemeMovement() {
       window.cancelAnimationFrame(animFrameId);
       animFrameId = 0;
     }
+  }
+
+  // IntersectionObserver to pause loop when scrolled out of view
+  let observer: IntersectionObserver | null = null;
+  if ('IntersectionObserver' in window) {
+    observer = new IntersectionObserver(
+      (entries) => {
+        inView = entries.some((entry) => entry.isIntersecting);
+        if (inView) {
+          start();
+        } else {
+          stop();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(container);
+  } else {
+    start();
   }
 
   // Lifecycle listeners
@@ -239,7 +258,7 @@ export function initMemeMovement() {
   document.addEventListener('visibilitychange', onVisibilityChange);
 
   // Reduced motion dynamic listener
-  reducedMotionQuery.addEventListener('change', (evt) => {
+  const onMotionChange = (evt: MediaQueryListEvent) => {
     if (evt.matches) {
       stop();
       for (const e of entities) {
@@ -248,15 +267,15 @@ export function initMemeMovement() {
     } else {
       start();
     }
-  });
-
-  // Start the engine
-  start();
+  };
+  reducedMotionQuery.addEventListener('change', onMotionChange);
 
   // Return cleanup handle
   return () => {
     stop();
+    observer?.disconnect();
     document.removeEventListener('visibilitychange', onVisibilityChange);
+    reducedMotionQuery.removeEventListener('change', onMotionChange);
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('resize', onResize);
   };

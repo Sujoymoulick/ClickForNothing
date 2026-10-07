@@ -25,11 +25,11 @@ const contactUrl = getLocalizedPath('/contact/', currentLocale);
         <nav class="breadcrumbs" aria-label="Breadcrumbs" style="margin-bottom: 20px; font-size: 0.95rem; font-weight: 700;">
           <a href={homeUrl} style="color: #7025ed; text-decoration: none;">{t('nav.home')}</a> <span style="color: #a1a1aa;">/</span> <span style="color: #17141a;" aria-current="page">{t('nav.about')}</span>
         </nav>
-        <h1 id="about-title">{t('about.heading') || 'About ClickForNothing'}</h1>
+        <h1 id="about-title">{t('about.heading')}</h1>
 
         <div class="about-intro">
           <p class="intro-text">
-            ClickForNothing is an entertainment website that helps people discover funny, weird, random and completely unnecessary websites from around the internet. Its core experience is simple: click a button, get sent somewhere unexpected, and waste a little time on something you absolutely did not need.
+            {t('about.intro')}
           </p>
         </div>
       </div>
@@ -39,176 +39,160 @@ const contactUrl = getLocalizedPath('/contact/', currentLocale);
       <div class="about-container">
 
         <article class="about-section">
-          <h2 id="what-is">What Is ClickForNothing?</h2>
+          <h2 id="what-is">{t('about.what_is_title')}</h2>
           <p>
-            ClickForNothing is a curated discovery platform for useless websites—the wonderfully weird, pointless, and completely unnecessary corners of the internet that serve no practical purpose but somehow entertain, surprise, or confuse you in the best way possible.
+            {t('about.what_is_p1')}
           </p>
           <p>
-            The website features a constantly updated collection of strange and funny websites that have been verified and categorized. Each website in our collection is a small adventure into the internet's most creative, absurd, and intentionally pointless projects.
-          </p>
-        </article>
-
-        <article class="about-section">
-          <h2>Why Does ClickForNothing Exist?</h2>
-          <p>
-            The internet is vast and filled with amazing creations that serve no practical purpose whatsoever. Most of these sites would never show up in traditional search results because they don't sell anything, they don't provide information, and they're designed purely for entertainment or artistic expression.
-          </p>
-          <p>
-            ClickForNothing exists to celebrate these websites. We believe the best parts of the internet are the weird, pointless, and unnecessary ones. They represent creativity, humor, and the pure joy of making something just because you can. Our mission is to help you discover these hidden gems and spend some quality time regretting clicking that button—in the best way possible.
+            {t('about.what_is_p2')}
           </p>
         </article>
 
         <article class="about-section">
-          <h2>How ClickForNothing Works</h2>
+          <h2>{t('about.why_exist_title')}</h2>
           <p>
-            Using ClickForNothing is straightforward:
+            {t('about.why_exist_p1')}
+          </p>
+          <p>
+            {t('about.why_exist_p2')}
+          </p>
+        </article>
+
+        <article class="about-section">
+          <h2>{t('about.how_works_title')}</h2>
+          <p>
+            {t('about.how_works_intro')}
           </p>
           <ol class="about-list">
-            <li><strong>Visit the discovery page</strong> at <a href={discoverUrl}>ClickForNothing/discover</a></li>
-            <li><strong>See a website</strong> with its name, category, and brief description</li>
-            <li><strong>Click "Visit Website"</strong> to open it in a new tab</li>
-            <li><strong>Return and repeat</strong> to discover more useless websites</li>
-            <li><strong>Use navigation buttons</strong> to go forward, backward, or surprise yourself with a random site</li>
+            <li><strong>{t('about.step1')}</strong></li>
+            <li><strong>{t('about.step2')}</strong></li>
+            <li><strong>{t('about.step3')}</strong></li>
+            <li><strong>{t('about.step4')}</strong></li>
+            <li><strong>{t('about.step5')}</strong></li>
           </ol>
           <p>
-            Every website is verified to ensure it loads correctly and remains active. If a site breaks, we remove it and add new discoveries.
+            {t('about.verify_note')}
           </p>
         </article>
 
         <article class="about-section">
-          <h2>What You'll Find Here</h2>
+          <h2>{t('about.what_find_title')}</h2>
           <p>
-            Our collection includes websites that are:
+            {t('about.what_find_intro')}
           </p>
           <ul class="about-list">
-            <li><strong>Funny</strong> — comedy projects, pranks, and jokes</li>
-            <li><strong>Strange</strong> — bizarre and surreal experiences</li>
-            <li><strong>Interactive</strong> — games, experiments, and interactive art</li>
-            <li><strong>Pointless</strong> — sites with no practical purpose</li>
-            <li><strong>Surprising</strong> — unexpectedly creative or confusing</li>
-            <li><strong>Visually unusual</strong> — interesting design and artistic expression</li>
-            <li><strong>Entertaining</strong> — just plain fun to waste time on</li>
-            <li><strong>Intentionally unnecessary</strong> — made just because the creator could</li>
+            <li>{t('about.item_funny')}</li>
+            <li>{t('about.item_strange')}</li>
+            <li>{t('about.item_interactive')}</li>
+            <li>{t('about.item_pointless')}</li>
+            <li>{t('about.item_surprising')}</li>
+            <li>{t('about.item_visual')}</li>
+            <li>{t('about.item_entertaining')}</li>
+            <li>{t('about.item_unnecessary')}</li>
           </ul>
           <p>
-            These websites are organized by category to help you explore different types of useless internet experiences.
+            {t('about.what_find_footer')}
           </p>
         </article>
 
         <article class="about-section">
-          <h2>Why We Call It ClickForNothing</h2>
+          <h2>{t('about.why_name_title')}</h2>
           <p>
-            Our tagline is simple: <strong>"Click Here To Regret It."</strong>
+            <strong>"{t('about.tagline')}"</strong>
           </p>
           <p>
-            This perfectly captures the spirit of what we do. You click knowing you don't need to visit these websites. There's no practical benefit. No information to gain. No productivity boost. Just pure, unnecessary entertainment. The "regret" is playful—you spent 5 minutes looking at something completely pointless, and somehow you don't regret it at all.
+            {t('about.why_name_p1')}
           </p>
           <p>
-            ClickForNothing celebrates the joy of doing something completely unnecessary and loving it anyway.
+            {t('about.why_name_p2')}
           </p>
         </article>
 
         <article class="about-section">
-          <h2>Our Approach to Curating the Useless Internet</h2>
+          <h2>{t('about.curating_title')}</h2>
           <p>
-            We carefully select and verify each website in our collection. When we add a site, we ensure:
+            {t('about.curating_intro')}
           </p>
           <ul class="about-list">
-            <li>The website loads and works as intended</li>
-            <li>It fits our definition of "useless" entertainment</li>
-            <li>It's appropriate and safe to click on</li>
-            <li>The content doesn't become broken or irrelevant over time</li>
+            <li>{t('about.crit1')}</li>
+            <li>{t('about.crit2')}</li>
+            <li>{t('about.crit3')}</li>
+            <li>{t('about.crit4')}</li>
           </ul>
           <p>
-            Websites may be removed if they become unsafe, malicious, broken, or no longer serve our community's entertainment value. We regularly review our collection to keep the experience fresh and reliable.
+            {t('about.curating_footer')}
           </p>
         </article>
 
         <article class="about-section">
-          <h2>Explore ClickForNothing</h2>
+          <h2>{t('about.explore_title')}</h2>
           <p>
-            Ready to discover something wonderfully useless?
+            {t('about.explore_intro')}
           </p>
           <ul class="about-list">
-            <li><a href={discoverUrl}>Start discovering random websites</a></li>
-            <li><a href={sitesUrl}>Browse our full website directory</a></li>
-            <li><a href={categoriesUrl}>Explore websites by category</a></li>
+            <li><a href={discoverUrl}>{t('about.link_discover')}</a></li>
+            <li><a href={sitesUrl}>{t('about.link_directory')}</a></li>
+            <li><a href={categoriesUrl}>{t('about.link_categories')}</a></li>
           </ul>
         </article>
 
         <article class="about-section faq-section">
-          <h2>Frequently Asked Questions</h2>
+          <h2>{t('about.faq_title')}</h2>
 
           <div class="faq-item">
-            <h3>What is ClickForNothing?</h3>
-            <p>
-              ClickForNothing is an entertainment website that helps you discover funny, weird, random and completely unnecessary websites from around the internet. Our mission is to celebrate the joy of clicking on something pointless and actually enjoying it.
-            </p>
+            <h3>{t('about.q1')}</h3>
+            <p>{t('about.a1')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>What is the purpose of ClickForNothing?</h3>
-            <p>
-              ClickForNothing exists to help you discover the wonderfully weird and intentionally useless websites that the internet has to offer. We believe these sites represent the most creative and entertaining parts of the web—projects made purely for fun, art, or absurdity.
-            </p>
+            <h3>{t('about.q2')}</h3>
+            <p>{t('about.a2')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>How does ClickForNothing choose websites?</h3>
-            <p>
-              We carefully curate our collection by selecting websites that fit our criteria: they must be entertaining, unusual, interactive, pointless, surprising, or just plain fun. Each site is verified to ensure it loads correctly and remains active.
-            </p>
+            <h3>{t('about.q3')}</h3>
+            <p>{t('about.a3')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>Is ClickForNothing free?</h3>
-            <p>
-              Yes, ClickForNothing is completely free. There are no ads, paywalls, or hidden charges. We believe discovering useless websites should be accessible to everyone.
-            </p>
+            <h3>{t('about.q4')}</h3>
+            <p>{t('about.a4')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>Do I need an account?</h3>
-            <p>
-              No, you don't need an account to use ClickForNothing. Just visit the discovery page and start exploring. No registration or login required.
-            </p>
+            <h3>{t('about.q5')}</h3>
+            <p>{t('about.a5')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>What kind of websites can I discover?</h3>
-            <p>
-              You can discover funny websites, strange interactive experiments, artistic projects, pranks, games, pointless tools, surreal experiences, and all sorts of wonderfully unnecessary creations. Each site is categorized to help you explore different types of useless internet experiences.
-            </p>
+            <h3>{t('about.q6')}</h3>
+            <p>{t('about.a6')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>How does the random website feature work?</h3>
-            <p>
-              Click the "Surprise Me" button on the discovery page to jump to a random website from our collection. Use "Next" to browse sequentially, "Previous" to go back, or "Surprise Me" to jump anywhere in the collection.
-            </p>
+            <h3>{t('about.q7')}</h3>
+            <p>{t('about.a7')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>Can I submit a website?</h3>
-            <p>
-              We're always looking for new useless websites to feature. Please <a href={contactUrl}>contact us</a> with your suggestions. Tell us about the website, why you think it's worthy of ClickForNothing, and include a link.
-            </p>
+            <h3>{t('about.q8')}</h3>
+            <p>{t('about.a8')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>What if a website doesn't load?</h3>
-            <p>
-              We regularly verify that all websites in our collection work correctly. If you encounter a broken link, it helps us improve the experience. Let us know by <a href={contactUrl}>contacting us</a> and we'll investigate or remove it from our collection.
-            </p>
+            <h3>{t('about.q9')}</h3>
+            <p>{t('about.a9')}</p>
           </div>
 
           <div class="faq-item">
-            <h3>Is ClickForNothing safe?</h3>
-            <p>
-              We verify each website to ensure it's safe to visit. However, because we link to external websites we don't control, we recommend using common sense when clicking. If you encounter anything inappropriate or unsafe, please <a href={contactUrl}>let us know</a>.
-            </p>
+            <h3>{t('about.q10')}</h3>
+            <p>{t('about.a10')}</p>
           </div>
         </article>
+
+      </div>
+    </section>
+  </main>
 
       </div>
     </section>

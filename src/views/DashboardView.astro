@@ -1,0 +1,1279 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+import { UserButton, SignInButton, SignUpButton } from '@clerk/astro/components';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = "My Submissions | ClickForNothing";
+const description = "Track the review and publishing status of your submitted useless websites.";
+
+const submitUrl = getLocalizedPath('/submit/', currentLocale);
+const discoverUrl = getLocalizedPath('/discover/', currentLocale);
+const homeUrl = getLocalizedPath('/', currentLocale);
+---
+
+<SiteLayout {title} {description} canonicalPath="/dashboard/">
+  <SiteHeader activeNav="none" />
+
+  <div class="dashboard-body">
+    <!-- Top Hero Header -->
+    <header class="dash-hero">
+      <div class="dash-hero-inner">
+        <div class="dash-pill-badge">
+          <span class="badge-dot" aria-hidden="true"></span>
+          <span>USER DASHBOARD</span>
+        </div>
+        <h1 class="dash-title">My Submissions</h1>
+        <p class="dash-subtitle">
+          Track your submitted websites as they move through our review and publishing pipeline.
+        </p>
+      </div>
+    </header>
+
+    <main class="dash-container" id="dash-main">
+      <!-- Signed-out state prompt -->
+      <section class="dash-card auth-needed-card" id="dash-signed-out-view">
+        <div class="auth-icon-wrap" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7025ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h2 class="auth-title">Sign in to view your submissions</h2>
+        <p class="auth-desc">
+          Your submissions are securely linked to your authenticated Clerk account. Please sign in to track review and publishing status.
+        </p>
+        <div class="auth-btn-row">
+          <SignInButton mode="modal" class="dash-primary-btn">
+            <span>Sign In</span>
+          </SignInButton>
+          <SignUpButton mode="modal" class="dash-secondary-btn">
+            <span>Create Account</span>
+          </SignUpButton>
+        </div>
+      </section>
+
+      <!-- Signed-in Dashboard View -->
+      <section class="dash-content-wrap" id="dash-signed-in-view" style="display: none;">
+        <!-- User Profile & Action Bar -->
+        <div class="dash-top-bar">
+          <div class="user-meta-summary">
+            <div class="user-avatar-slot">
+              <UserButton />
+            </div>
+            <div class="user-info-text">
+              <span class="greeting-kicker">Welcome back,</span>
+              <h2 class="user-heading" id="dash-user-name">Explorer</h2>
+            </div>
+          </div>
+
+          <div class="dash-actions-group">
+            <button type="button" class="dash-refresh-btn" id="dash-refresh-btn" title="Refresh submissions">
+              <span class="refresh-icon" aria-hidden="true">↻</span>
+              <span class="refresh-label">Refresh</span>
+            </button>
+            <a href={submitUrl} class="dash-primary-btn compact">
+              <span>+ Submit Website</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Filter / Stats Bar -->
+        <div class="stats-counter-strip">
+          <div class="stat-bubble active" data-filter="all" id="filter-all">
+            <span class="stat-label">Total</span>
+            <span class="stat-count" id="count-total">0</span>
+          </div>
+          <div class="stat-bubble status-review" data-filter="pending_review" id="filter-review">
+            <span class="stat-dot dot-amber"></span>
+            <span class="stat-label">Under Review</span>
+            <span class="stat-count" id="count-review">0</span>
+          </div>
+          <div class="stat-bubble status-approved" data-filter="approved" id="filter-approved">
+            <span class="stat-dot dot-blue"></span>
+            <span class="stat-label">Approved</span>
+            <span class="stat-count" id="count-approved">0</span>
+          </div>
+          <div class="stat-bubble status-published" data-filter="published" id="filter-published">
+            <span class="stat-dot dot-green"></span>
+            <span class="stat-label">Published</span>
+            <span class="stat-count" id="count-published">0</span>
+          </div>
+          <div class="stat-bubble status-rejected" data-filter="rejected" id="filter-rejected">
+            <span class="stat-dot dot-red"></span>
+            <span class="stat-label">Rejected</span>
+            <span class="stat-count" id="count-rejected">0</span>
+          </div>
+        </div>
+
+        <!-- Live Status / Polling Indicator -->
+        <div class="live-sync-indicator" id="live-sync-indicator">
+          <span class="sync-dot" aria-hidden="true"></span>
+          <span class="sync-text">Live updates enabled • Checking Neon for changes</span>
+        </div>
+
+        <!-- Loading / Skeleton state -->
+        <div class="cards-grid skeleton-grid" id="dash-skeleton" style="display: none;">
+          <div class="card-skeleton">
+            <div class="sk-preview"></div>
+            <div class="sk-body">
+              <div class="sk-line sk-title"></div>
+              <div class="sk-line sk-desc"></div>
+              <div class="sk-line sk-badge"></div>
+            </div>
+          </div>
+          <div class="card-skeleton">
+            <div class="sk-preview"></div>
+            <div class="sk-body">
+              <div class="sk-line sk-title"></div>
+              <div class="sk-line sk-desc"></div>
+              <div class="sk-line sk-badge"></div>
+            </div>
+          </div>
+          <div class="card-skeleton">
+            <div class="sk-preview"></div>
+            <div class="sk-body">
+              <div class="sk-line sk-title"></div>
+              <div class="sk-line sk-desc"></div>
+              <div class="sk-line sk-badge"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div class="dash-card error-card" id="dash-error-view" style="display: none;">
+          <div class="err-icon">⚠️</div>
+          <h3 class="err-title">Failed to load submissions</h3>
+          <p class="err-msg" id="dash-error-msg">Could not reach the database. Please try again.</p>
+          <button type="button" class="dash-secondary-btn compact" id="dash-retry-btn">
+            Retry Connection
+          </button>
+        </div>
+
+        <!-- Empty state (Requirement 13) -->
+        <div class="dash-card empty-submissions-card" id="dash-empty-view" style="display: none;">
+          <div class="empty-emoji-art" aria-hidden="true">🛸</div>
+          <h2 class="empty-title">No submissions yet</h2>
+          <p class="empty-description">
+            Submit your first website and track its review and publishing status here.
+          </p>
+          <a href={submitUrl} class="dash-primary-btn">
+            <span>Submit a Website →</span>
+          </a>
+        </div>
+
+        <!-- Submissions Cards Grid (Requirement 5 & 6) -->
+        <div class="cards-grid" id="submissions-grid" style="display: none;"></div>
+      </section>
+    </main>
+
+    <!-- Rejection Reason Modal -->
+    <div class="reason-modal-backdrop" id="reason-modal" role="dialog" aria-modal="true" style="display: none;">
+      <div class="reason-modal-card">
+        <div class="reason-modal-header">
+          <div class="reason-title-wrap">
+            <span class="reason-icon">ℹ️</span>
+            <h3 class="reason-title">Submission Review Details</h3>
+          </div>
+          <button type="button" class="modal-close-icon-btn" id="reason-modal-close" aria-label="Close">✕</button>
+        </div>
+        <div class="reason-modal-body">
+          <p class="reason-site-name" id="reason-site-name">Website Title</p>
+          <div class="reason-box">
+            <span class="reason-kicker">Reviewer feedback:</span>
+            <p class="reason-text" id="reason-text">No details provided.</p>
+          </div>
+          <p class="reason-help-note">
+            Feel free to review our submission guidelines and submit an updated or alternative website anytime!
+          </p>
+        </div>
+        <div class="reason-modal-actions">
+          <button type="button" class="dash-secondary-btn compact" id="reason-close-btn">Close</button>
+          <a href={submitUrl} class="dash-primary-btn compact">Submit Another Site</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</SiteLayout>
+
+<style>
+  .dashboard-body {
+    min-height: calc(100svh - 140px);
+    background: #fff9df;
+    padding-bottom: 80px;
+  }
+
+  .dash-hero {
+    background: radial-gradient(ellipse at 51% 47%, #ffff61 0%, var(--lime) 68%, #eff52a 100%);
+    border-bottom: 4px solid var(--ink);
+    padding: clamp(32px, 6vw, 56px) 20px;
+    text-align: center;
+  }
+
+  .dash-hero-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dash-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 2.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    box-shadow: 2.5px 2.5px 0 var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--pink);
+    border-radius: 50%;
+  }
+
+  .dash-title {
+    margin: 0;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    color: var(--purple);
+    -webkit-text-stroke: 1.8px var(--ink);
+    filter: drop-shadow(4px 4px 0 var(--ink));
+    line-height: 1;
+  }
+
+  .dash-subtitle {
+    margin: 14px 0 0;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 700;
+    max-width: 600px;
+    color: var(--ink);
+  }
+
+  .dash-container {
+    max-width: 1200px;
+    margin: 32px auto 0;
+    padding: 0 20px;
+  }
+
+  .dash-card {
+    background: #ffffff;
+    border: 3.5px solid var(--ink);
+    border-radius: 18px;
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: clamp(24px, 4vw, 40px);
+    text-align: center;
+  }
+
+  .auth-needed-card, .empty-submissions-card, .error-card {
+    max-width: 640px;
+    margin: 40px auto;
+  }
+
+  .auth-icon-wrap, .empty-emoji-art, .err-icon {
+    font-size: 52px;
+    margin-bottom: 16px;
+  }
+
+  .auth-title, .empty-title, .err-title {
+    margin: 0 0 12px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    color: var(--purple);
+  }
+
+  .auth-desc, .empty-description, .err-msg {
+    margin: 0 0 24px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #4b5563;
+  }
+
+  .auth-btn-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .dash-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: #ffffff;
+    border: 3.5px solid var(--ink);
+    border-radius: 18px;
+    padding: 18px 24px;
+    box-shadow: 6px 6px 0 var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .user-meta-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .greeting-kicker {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .user-heading {
+    margin: 0;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.6rem;
+    color: var(--ink);
+  }
+
+  .dash-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dash-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f415b5, #ed08a8);
+    color: #ffffff;
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 12px 28px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.15rem;
+    text-decoration: none;
+    box-shadow: 4px 4px 0 var(--ink);
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+
+  .dash-primary-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  .dash-primary-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .dash-primary-btn.compact {
+    padding: 9px 20px;
+    font-size: 1rem;
+  }
+
+  .dash-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 12px 28px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.15rem;
+    text-decoration: none;
+    box-shadow: 4px 4px 0 var(--ink);
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+
+  .dash-secondary-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  .dash-secondary-btn.compact {
+    padding: 9px 20px;
+    font-size: 1rem;
+  }
+
+  .dash-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 2.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform 100ms ease;
+  }
+
+  .dash-refresh-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .refresh-icon {
+    font-size: 1.1rem;
+    transition: transform 300ms ease;
+  }
+
+  .dash-refresh-btn.spinning .refresh-icon {
+    animation: spin 700ms linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .stats-counter-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-bubble {
+    background: #ffffff;
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 3.5px 3.5px 0 var(--ink);
+    cursor: pointer;
+    transition: transform 120ms ease;
+  }
+
+  .stat-bubble:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-bubble.active {
+    background: #fffae0;
+    border-color: var(--purple);
+  }
+
+  .stat-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-bottom: 4px;
+  }
+
+  .dot-amber { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+  .dot-blue { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
+  .dot-green { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+  .dot-red { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+  .stat-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #4b5563;
+  }
+
+  .stat-count {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.5rem;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+
+  .live-sync-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #4b5563;
+  }
+
+  .sync-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  /* Submissions Cards Grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 26px;
+  }
+
+  .sub-preview-card {
+    background: #ffffff;
+    border: 3.5px solid var(--ink);
+    border-radius: 18px;
+    box-shadow: 6px 6px 0 var(--ink);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 140ms ease, box-shadow 140ms ease;
+  }
+
+  .sub-preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+
+  /* Safe Preview Container (Requirement 6) */
+  .card-preview-window {
+    background: #f3f4f6;
+    border-bottom: 3px solid var(--ink);
+    position: relative;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .browser-mock-header {
+    height: 30px;
+    background: #e5e7eb;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 6px;
+  }
+
+  .mock-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .m-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+  }
+  .m-dot.red { background: #ef4444; }
+  .m-dot.yellow { background: #f59e0b; }
+  .m-dot.green { background: #22c55e; }
+
+  .mock-url-bar {
+    margin-left: 8px;
+    background: #ffffff;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 1px 10px;
+    font-size: 0.7rem;
+    font-family: monospace;
+    color: #4b5563;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .preview-content-box {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fdf8e6 0%, #fffae8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sandboxed-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    pointer-events: none; /* Prevents iframe interaction breaking card */
+  }
+
+  .fallback-preview-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .fallback-icon {
+    font-size: 38px;
+    margin-bottom: 6px;
+    filter: drop-shadow(2px 2px 0 var(--ink));
+  }
+
+  .fallback-label {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.05rem;
+    color: var(--purple);
+    margin: 0;
+  }
+
+  .card-body-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+  }
+
+  .category-pill {
+    background: #fef08a;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-weight: 800;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .date-text {
+    font-weight: 700;
+    color: #6b7280;
+  }
+
+  .card-site-title {
+    margin: 0 0 6px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  .card-site-url {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--purple);
+    text-decoration: none;
+    margin-bottom: 12px;
+    word-break: break-all;
+  }
+
+  .card-site-url:hover {
+    text-decoration: underline;
+  }
+
+  .card-site-desc {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: #374151;
+    margin: 0 0 20px;
+    flex: 1;
+  }
+
+  /* Status Badges */
+  .card-status-footer {
+    border-top: 2px dashed #e5e7eb;
+    padding-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .status-badge-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+  }
+
+  .status-badge-pill.under-review {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-badge-pill.approved {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-badge-pill.published {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .status-badge-pill.rejected {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .status-subtext {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #6b7280;
+  }
+
+  .action-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--purple);
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .action-link-btn:hover {
+    text-decoration: underline;
+  }
+
+  /* Skeletons */
+  .card-skeleton {
+    background: #ffffff;
+    border: 3.5px solid var(--ink);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .sk-preview {
+    height: 180px;
+    background: #e5e7eb;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .sk-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sk-line {
+    background: #e5e7eb;
+    border-radius: 6px;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .sk-title { height: 24px; width: 65%; }
+  .sk-desc { height: 40px; width: 90%; }
+  .sk-badge { height: 28px; width: 45%; }
+
+  @keyframes shimmer {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+
+  /* Rejection Modal */
+  .reason-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(9, 8, 12, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .reason-modal-card {
+    background: #ffffff;
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: 8px 8px 0 var(--ink);
+    max-width: 500px;
+    width: 100%;
+    padding: 28px;
+  }
+
+  .reason-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .reason-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .reason-title {
+    margin: 0;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.5rem;
+    color: var(--ink);
+  }
+
+  .modal-close-icon-btn {
+    background: none;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .reason-site-name {
+    margin: 0 0 12px;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--purple);
+  }
+
+  .reason-box {
+    background: #fef2f2;
+    border: 2px solid #ef4444;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+
+  .reason-kicker {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #991b1b;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .reason-text {
+    margin: 0;
+    font-weight: 600;
+    color: #7f1d1d;
+    line-height: 1.4;
+  }
+
+  .reason-help-note {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #6b7280;
+    line-height: 1.4;
+    margin-bottom: 24px;
+  }
+
+  .reason-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+</style>
+
+<script>
+  import { $authStore, $userStore } from '@clerk/astro/client';
+
+  let pollTimer: any = null;
+  let cachedSubmissions: any[] = [];
+  let currentFilter = 'all';
+
+  function initDashboard() {
+    const signedOutView = document.getElementById('dash-signed-out-view');
+    const signedInView = document.getElementById('dash-signed-in-view');
+    const userNameEl = document.getElementById('dash-user-name');
+    const refreshBtn = document.getElementById('dash-refresh-btn');
+    const retryBtn = document.getElementById('dash-retry-btn');
+    const skeletonGrid = document.getElementById('dash-skeleton');
+    const errorCard = document.getElementById('dash-error-view');
+    const emptyCard = document.getElementById('dash-empty-view');
+    const grid = document.getElementById('submissions-grid');
+    const errorMsg = document.getElementById('dash-error-msg');
+
+    // Stats count elements
+    const countTotal = document.getElementById('count-total');
+    const countReview = document.getElementById('count-review');
+    const countApproved = document.getElementById('count-approved');
+    const countPublished = document.getElementById('count-published');
+    const countRejected = document.getElementById('count-rejected');
+
+    // Modal elements
+    const reasonModal = document.getElementById('reason-modal');
+    const reasonSiteName = document.getElementById('reason-site-name');
+    const reasonText = document.getElementById('reason-text');
+    const reasonCloseBtn = document.getElementById('reason-close-btn');
+    const reasonModalClose = document.getElementById('reason-modal-close');
+
+    if (reasonCloseBtn && reasonModal) {
+      reasonCloseBtn.addEventListener('click', () => { reasonModal.style.display = 'none'; });
+    }
+    if (reasonModalClose && reasonModal) {
+      reasonModalClose.addEventListener('click', () => { reasonModal.style.display = 'none'; });
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && reasonModal) {
+        reasonModal.style.display = 'none';
+      }
+    });
+
+    // Filter clicks
+    const filters = ['all', 'pending_review', 'approved', 'published', 'rejected'];
+    filters.forEach((f) => {
+      const el = document.querySelector(`[data-filter="${f}"]`);
+      if (el) {
+        el.addEventListener('click', () => {
+          document.querySelectorAll('.stat-bubble').forEach((b) => b.classList.remove('active'));
+          el.classList.add('active');
+          currentFilter = f;
+          renderCards();
+        });
+      }
+    });
+
+    async function getAuthToken() {
+      if (window.Clerk && window.Clerk.session) {
+        try {
+          return await window.Clerk.session.getToken();
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    async function fetchSubmissions(isInitial = false) {
+      const state = $authStore.get();
+      if (!state?.userId) {
+        return;
+      }
+
+      if (isInitial && skeletonGrid && (!cachedSubmissions || cachedSubmissions.length === 0)) {
+        skeletonGrid.style.display = 'grid';
+        if (grid) grid.style.display = 'none';
+        if (emptyCard) emptyCard.style.display = 'none';
+        if (errorCard) errorCard.style.display = 'none';
+      }
+
+      if (refreshBtn) refreshBtn.classList.add('spinning');
+
+      try {
+        const token = await getAuthToken();
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch('/api/submissions', {
+          method: 'GET',
+          headers,
+          credentials: 'include',
+        });
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            // Not signed in
+            return;
+          }
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP error ${res.status}`);
+        }
+
+        const data = await res.json();
+        cachedSubmissions = Array.isArray(data.submissions) ? data.submissions : [];
+
+        if (errorCard) errorCard.style.display = 'none';
+        updateStats();
+        renderCards();
+      } catch (err: any) {
+        console.error('Failed to fetch submissions:', err);
+        if (isInitial && (!cachedSubmissions || cachedSubmissions.length === 0)) {
+          if (skeletonGrid) skeletonGrid.style.display = 'none';
+          if (grid) grid.style.display = 'none';
+          if (emptyCard) emptyCard.style.display = 'none';
+          if (errorCard) {
+            errorCard.style.display = 'block';
+            if (errorMsg) errorMsg.textContent = err?.message || 'Could not reach database.';
+          }
+        }
+      } finally {
+        if (skeletonGrid) skeletonGrid.style.display = 'none';
+        if (refreshBtn) refreshBtn.classList.remove('spinning');
+      }
+    }
+
+    function updateStats() {
+      const total = cachedSubmissions.length;
+      const review = cachedSubmissions.filter((s) => s.status === 'pending_review' || s.status === 'pending').length;
+      const approved = cachedSubmissions.filter((s) => s.status === 'approved').length;
+      const published = cachedSubmissions.filter((s) => s.status === 'published').length;
+      const rejected = cachedSubmissions.filter((s) => s.status === 'rejected').length;
+
+      if (countTotal) countTotal.textContent = String(total);
+      if (countReview) countReview.textContent = String(review);
+      if (countApproved) countApproved.textContent = String(approved);
+      if (countPublished) countPublished.textContent = String(published);
+      if (countRejected) countRejected.textContent = String(rejected);
+    }
+
+    function formatDate(raw: string) {
+      if (!raw) return 'Recently';
+      try {
+        const d = new Date(raw);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch {
+        return 'Recently';
+      }
+    }
+
+    function renderCards() {
+      if (!grid || !emptyCard) return;
+
+      let items = cachedSubmissions;
+      if (currentFilter !== 'all') {
+        if (currentFilter === 'pending_review') {
+          items = items.filter((s) => s.status === 'pending_review' || s.status === 'pending');
+        } else {
+          items = items.filter((s) => s.status === currentFilter);
+        }
+      }
+
+      if (cachedSubmissions.length === 0) {
+        grid.style.display = 'none';
+        emptyCard.style.display = 'block';
+        return;
+      }
+
+      emptyCard.style.display = 'none';
+      grid.style.display = 'grid';
+
+      if (items.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; font-weight: 700; color: #6b7280;">
+            No submissions in this status category.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = items.map((sub) => {
+        const status = sub.status || 'pending_review';
+        const dateStr = formatDate(sub.submitted_at || sub.created_at);
+
+        let statusBadgeHtml = '';
+        if (status === 'pending_review' || status === 'pending') {
+          statusBadgeHtml = `
+            <div class="status-badge-wrap">
+              <span class="status-badge-pill under-review">
+                <span class="stat-dot dot-amber" style="margin:0;width:7px;height:7px;"></span>
+                <span>Under Review</span>
+              </span>
+            </div>
+            <span class="status-subtext">Submitted ${dateStr}</span>
+          `;
+        } else if (status === 'approved') {
+          statusBadgeHtml = `
+            <div class="status-badge-wrap">
+              <span class="status-badge-pill approved">
+                <span class="stat-dot dot-blue" style="margin:0;width:7px;height:7px;"></span>
+                <span>Approved</span>
+              </span>
+            </div>
+            <span class="status-subtext">Publishing soon</span>
+          `;
+        } else if (status === 'published') {
+          statusBadgeHtml = `
+            <div class="status-badge-wrap">
+              <span class="status-badge-pill published">
+                <span class="stat-dot dot-green" style="margin:0;width:7px;height:7px;"></span>
+                <span>Published</span>
+              </span>
+            </div>
+            <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="action-link-btn">
+              View Site →
+            </a>
+          `;
+        } else if (status === 'rejected') {
+          statusBadgeHtml = `
+            <div class="status-badge-wrap">
+              <span class="status-badge-pill rejected">
+                <span class="stat-dot dot-red" style="margin:0;width:7px;height:7px;"></span>
+                <span>Rejected</span>
+              </span>
+            </div>
+            <button type="button" class="action-link-btn view-reason-trigger" data-id="${sub.id}">
+              View reason
+            </button>
+          `;
+        }
+
+        let hostname = 'website';
+        try {
+          hostname = new URL(sub.url).hostname;
+        } catch {}
+
+        return `
+          <article class="sub-preview-card" data-sub-id="${sub.id}">
+            <!-- Website Preview (Requirement 6) -->
+            <div class="card-preview-window">
+              <div class="browser-mock-header">
+                <div class="mock-dots">
+                  <span class="m-dot red"></span>
+                  <span class="m-dot yellow"></span>
+                  <span class="m-dot green"></span>
+                </div>
+                <span class="mock-url-bar">${escapeHtml(hostname)}</span>
+              </div>
+              <div class="preview-content-box">
+                <div class="fallback-preview-view">
+                  <span class="fallback-icon">🌐</span>
+                  <h4 class="fallback-label">${escapeHtml(sub.name)}</h4>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Body Content -->
+            <div class="card-body-content">
+              <div class="card-meta-row">
+                <span class="category-pill">${escapeHtml(sub.category || 'General')}</span>
+                <span class="date-text">${dateStr}</span>
+              </div>
+              <h3 class="card-site-title">${escapeHtml(sub.name)}</h3>
+              <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="card-site-url">
+                ${escapeHtml(sub.url)} ↗
+              </a>
+              <p class="card-site-desc">${escapeHtml(sub.description)}</p>
+              <div class="card-status-footer">
+                ${statusBadgeHtml}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      // Wire up view reason buttons
+      grid.querySelectorAll('.view-reason-trigger').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.getAttribute('data-id'));
+          const found = cachedSubmissions.find((s) => s.id === id);
+          if (found && reasonModal && reasonSiteName && reasonText) {
+            reasonSiteName.textContent = found.name;
+            reasonText.textContent = found.rejection_reason || 'This website did not meet our community guidelines.';
+            reasonModal.style.display = 'flex';
+          }
+        });
+      });
+    }
+
+    function escapeHtml(str: string) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function updateAuth() {
+      const state = $authStore.get();
+      const user = $userStore.get();
+      const isLoggedIn = Boolean(state?.userId);
+
+      if (isLoggedIn) {
+        if (signedOutView) signedOutView.style.display = 'none';
+        if (signedInView) signedInView.style.display = 'block';
+
+        if (userNameEl && user) {
+          const name = user.username || user.firstName || (user.primaryEmailAddress ? user.primaryEmailAddress.emailAddress.split('@')[0] : 'Explorer');
+          userNameEl.textContent = name;
+        }
+
+        fetchSubmissions(true);
+
+        // Realtime Polling (Requirement 11) - Every 12 seconds
+        if (!pollTimer) {
+          pollTimer = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+              fetchSubmissions(false);
+            }
+          }, 12000);
+        }
+      } else {
+        if (signedOutView) signedOutView.style.display = 'block';
+        if (signedInView) signedInView.style.display = 'none';
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+      }
+    }
+
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => fetchSubmissions(false));
+    }
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => fetchSubmissions(true));
+    }
+
+    // Revalidate on visibility change & window focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && $authStore.get()?.userId) {
+        fetchSubmissions(false);
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      if ($authStore.get()?.userId) {
+        fetchSubmissions(false);
+      }
+    });
+
+    $authStore.subscribe(updateAuth);
+    $userStore.subscribe(updateAuth);
+    updateAuth();
+  }
+
+  // Mount
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  } else {
+    initDashboard();
+  }
+</script>

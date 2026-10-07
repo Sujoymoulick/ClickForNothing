@@ -7,8 +7,8 @@ import type { SupportedLocale } from '../i18n/config';
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const { t } = await useTranslations(currentLocale);
 
-const title = '404: Page Not Found — ClickForNothing';
-const description = 'You clicked into the void. This page does not exist, but plenty of useless websites do!';
+const title = `${t('error_404.kicker')}: ${t('error_404.title_start')} ${t('error_404.title_end')} — ClickForNothing`;
+const description = t('error_404.subtitle');
 const homeUrl = getLocalizedPath('/', currentLocale);
 const discoverUrl = getLocalizedPath('/discover/', currentLocale);
 ---

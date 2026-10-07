@@ -8,17 +8,17 @@ import type { SupportedLocale } from '../i18n/config';
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const { t } = await useTranslations(currentLocale);
 
-const title = "Random Useless Website Generator | ClickForNothing";
-const description = "Instantly jump to a random useless website with one click! Discover weird, funny, and pointless web experiments to kill boredom anytime. Try it now.";
+const title = t('random_page.seo_title');
+const description = t('random_page.seo_description');
 const discoverUrl = getLocalizedPath('/discover/', currentLocale);
 ---
 <SiteLayout {title} {description} canonicalPath="/random/">
   <main class="random-landing-container">
     <div class="card-box">
       <span class="dice">🎲</span>
-      <h1>Redirecting You to Something Useless...</h1>
-      <p class="status-msg">Spinning the random useless website selector.</p>
-      <a href={discoverUrl} class="fallback-link" id="manual-btn">Click here if not redirected automatically</a>
+      <h1>{t('random_page.redirecting_title')}</h1>
+      <p class="status-msg">{t('random_page.spinning_status')}</p>
+      <a href={discoverUrl} class="fallback-link" id="manual-btn">{t('random_page.manual_btn')}</a>
     </div>
   </main>
 

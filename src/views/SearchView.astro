@@ -27,12 +27,19 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     </header>
 
     <section class="results-section">
-      <div id="results-count" class="results-count">{t('search.showing_all', { count: String(websites.length) })}</div>
+      <div
+        id="results-count"
+        class="results-count"
+        data-template-all={t('search.showing_all', { count: '{count}' })}
+        data-template-found={t('search.found_results', { count: '{count}' })}
+      >
+        {t('search.showing_all', { count: String(websites.length) })}
+      </div>
       <div id="results-grid" class="sites-grid">
         {websites.map((site) => (
-          <article class="site-card" data-name={site.name.toLowerCase()} data-desc={site.description.toLowerCase()} data-category={site.category.toLowerCase()} data-tags={(site.tags || []).join(' ').toLowerCase()}>
+          <article class="site-card" data-name={site.name.toLowerCase()} data-desc={site.description.toLowerCase()} data-category={(t(`categories.${site.categorySlug || 'useless-websites'}`) || site.category).toLowerCase()} data-tags={(site.tags || []).join(' ').toLowerCase()}>
             <div class="meta">
-              <a href={getLocalizedPath(`/categories/${site.categorySlug || 'useless-websites'}/`, currentLocale)} class="category-tag">{site.category}</a>
+              <a href={getLocalizedPath(`/categories/${site.categorySlug || 'useless-websites'}/`, currentLocale)} class="category-tag">{t(`categories.${site.categorySlug || 'useless-websites'}`) || site.category}</a>
             </div>
             <h2><a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a></h2>
             <p>{site.description}</p>
@@ -56,6 +63,9 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     const countNode = document.getElementById('results-count');
     const noResultsNode = document.getElementById('no-results');
 
+    const templateAll = countNode?.getAttribute('data-template-all') || 'Showing all {count} websites';
+    const templateFound = countNode?.getAttribute('data-template-found') || 'Found {count} matching websites';
+
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
@@ -77,7 +87,11 @@ const homeUrl = getLocalizedPath('/', currentLocale);
           }
         });
 
-        if (countNode) countNode.textContent = query ? `Found ${visibleCount} matching website${visibleCount === 1 ? '' : 's'}` : `Showing all ${cards.length} websites`;
+        if (countNode) {
+          countNode.textContent = query
+            ? templateFound.replace('{count}', String(visibleCount))
+            : templateAll.replace('{count}', String(cards.length));
+        }
         if (noResultsNode) noResultsNode.style.display = visibleCount === 0 ? 'block' : 'none';
       });
     }

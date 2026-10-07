@@ -1,0 +1,546 @@
+---
+import LocaleSwitcher from './LocaleSwitcher.astro';
+import { useTranslations } from '../i18n';
+import { getLocalizedPath, getLocaleFromUrl } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+import { Show, UserButton, SignInButton } from '@clerk/astro/components';
+
+interface Props {
+  activeNav?: 'explore' | 'random' | 'submit' | 'community' | 'none';
+}
+
+const { activeNav = 'submit' } = Astro.props;
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const homeUrl = getLocalizedPath('/', currentLocale);
+const exploreUrl = getLocalizedPath('/sites/', currentLocale);
+const randomUrl = getLocalizedPath('/discover/', currentLocale);
+const submitUrl = getLocalizedPath('/submit/', currentLocale);
+const communityUrl = getLocalizedPath('/about/', currentLocale);
+const searchUrl = getLocalizedPath('/search/', currentLocale);
+const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
+---
+
+<header class="site-nav-header" id="site-nav-header">
+  <div class="header-inner">
+    <!-- Brand / Logo -->
+    <a href={homeUrl} class="brand-logo" aria-label={t('nav.logo_aria')}>
+      <span class="dice-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="24" height="24" rx="7" fill="#f20caf" stroke="#09080c" stroke-width="2.5"/>
+          <circle cx="8" cy="8" r="2" fill="#ffffff"/>
+          <circle cx="20" cy="8" r="2" fill="#ffffff"/>
+          <circle cx="14" cy="14" r="2" fill="#ffffff"/>
+          <circle cx="8" cy="20" r="2" fill="#ffffff"/>
+          <circle cx="20" cy="20" r="2" fill="#ffffff"/>
+        </svg>
+      </span>
+      <span class="brand-text">ClickForNothing</span>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav" aria-label="Primary navigation">
+      <a href={exploreUrl} class={`nav-item ${activeNav === 'explore' ? 'is-active' : ''}`}>{t('nav.explore')}</a>
+      <a href={randomUrl} class={`nav-item ${activeNav === 'random' ? 'is-active' : ''}`}>{t('nav.random')}</a>
+      <a href={submitUrl} class={`nav-item ${activeNav === 'submit' ? 'is-active' : ''}`}>{t('nav.submit')}</a>
+      <a href={communityUrl} class={`nav-item ${activeNav === 'community' ? 'is-active' : ''}`}>{t('nav.community')}</a>
+    </nav>
+
+    <!-- Search Bar -->
+    <form action={searchUrl} method="get" class="nav-search-form" role="search">
+      <span class="search-icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" x2="16.65" y1="21" y2="16.65"/>
+        </svg>
+      </span>
+      <input
+        type="search"
+        name="q"
+        placeholder={t('nav.search_placeholder')}
+        aria-label={t('nav.search_placeholder')}
+        autocomplete="off"
+      />
+    </form>
+
+    <!-- Header Actions (Locale + Theme + Clerk Auth + Mobile Toggle) -->
+    <div class="header-actions">
+      <div class="desktop-locale">
+        <LocaleSwitcher variant="hero" />
+      </div>
+
+      <div class="theme-toggle-btn" aria-label="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+      </div>
+
+      <div class="auth-box">
+        <Show when="signed-out">
+          <SignInButton mode="modal" class="header-signin-btn">
+            <span>{t('nav.sign_in')}</span>
+          </SignInButton>
+        </Show>
+        <Show when="signed-in">
+          <div class="user-avatar-wrap">
+            <a href={dashboardUrl} class="header-dash-btn" title="View My Submissions">
+              <span>Dashboard</span>
+            </a>
+            <UserButton />
+          </div>
+        </Show>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button
+        type="button"
+        class="mobile-menu-toggle"
+        id="mobile-menu-btn"
+        aria-label={t('nav.toggle_menu')}
+        aria-expanded="false"
+        aria-controls="mobile-nav-drawer"
+      >
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer" id="mobile-nav-drawer" aria-hidden="true">
+    <div class="mobile-drawer-inner">
+      <form action={searchUrl} method="get" class="mobile-search-form" role="search">
+        <span class="search-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" x2="16.65" y1="21" y2="16.65"/>
+          </svg>
+        </span>
+        <input
+          type="search"
+          name="q"
+          placeholder={t('nav.search_placeholder')}
+          aria-label={t('nav.search_placeholder')}
+          autocomplete="off"
+        />
+      </form>
+
+      <nav class="mobile-nav-links" aria-label="Mobile navigation">
+        <a href={exploreUrl} class={`mobile-nav-item ${activeNav === 'explore' ? 'is-active' : ''}`}>{t('nav.explore')}</a>
+        <a href={randomUrl} class={`mobile-nav-item ${activeNav === 'random' ? 'is-active' : ''}`}>{t('nav.random')}</a>
+        <a href={submitUrl} class={`mobile-nav-item ${activeNav === 'submit' ? 'is-active' : ''}`}>{t('nav.submit')}</a>
+        <a href={communityUrl} class={`mobile-nav-item ${activeNav === 'community' ? 'is-active' : ''}`}>{t('nav.community')}</a>
+        <a href={dashboardUrl} class="mobile-nav-item">Dashboard</a>
+      </nav>
+
+      <div class="mobile-extra-actions">
+        <LocaleSwitcher variant="hero" />
+        <div class="mobile-auth-row">
+          <Show when="signed-out">
+            <SignInButton mode="modal" class="header-signin-btn full-width">
+              <span>{t('nav.sign_in_to_submit')}</span>
+            </SignInButton>
+          </Show>
+          <Show when="signed-in">
+            <div class="signed-in-indicator">
+              <a href={dashboardUrl} class="mobile-dash-link">
+                <span>My Submissions</span>
+              </a>
+              <UserButton />
+            </div>
+          </Show>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  function setupSiteHeader() {
+    const btn = document.getElementById('mobile-menu-btn');
+    const drawer = document.getElementById('mobile-nav-drawer');
+
+    if (!btn || !drawer) return;
+
+    btn.addEventListener('click', () => {
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!isExpanded));
+      btn.classList.toggle('is-active', !isExpanded);
+      drawer.setAttribute('aria-hidden', String(isExpanded));
+      drawer.classList.toggle('is-open', !isExpanded);
+    });
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+        btn.setAttribute('aria-expanded', 'false');
+        btn.classList.remove('is-active');
+        drawer.setAttribute('aria-hidden', 'true');
+        drawer.classList.remove('is-open');
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupSiteHeader);
+  } else {
+    setupSiteHeader();
+  }
+  document.addEventListener('astro:page-load', setupSiteHeader);
+</script>
+
+<style>
+  .site-nav-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #ffffff;
+    border-bottom: 3px solid #09080c;
+    box-shadow: 0 4px 0 rgba(9, 8, 12, 0.08);
+    font-family: 'Baloo 2', system-ui, sans-serif;
+  }
+
+  .header-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  /* Brand Logo */
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #09080c;
+    flex-shrink: 0;
+  }
+
+  .dice-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .brand-logo:hover .dice-icon {
+    transform: rotate(15deg) scale(1.08);
+  }
+
+  .brand-text {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.45rem;
+    color: #09080c;
+    letter-spacing: -0.02em;
+  }
+
+  /* Desktop Nav */
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-item {
+    padding: 7px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #18181b;
+    transition: all 0.15s ease;
+  }
+
+  .nav-item:hover {
+    background: #f4f4f5;
+    color: #f20caf;
+  }
+
+  .nav-item.is-active {
+    background: #f20caf;
+    color: #ffffff;
+    box-shadow: 0 2px 0 #09080c;
+  }
+
+  /* Nav Search Form */
+  .nav-search-form {
+    display: flex;
+    align-items: center;
+    position: relative;
+    max-width: 280px;
+    width: 100%;
+    margin: 0 8px;
+  }
+
+  .nav-search-form .search-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 0.95rem;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .nav-search-form input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border-radius: 999px;
+    border: 2px solid #09080c;
+    background: #fafafa;
+    color: #18181b;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: 'Baloo 2', system-ui, sans-serif;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .nav-search-form input:focus {
+    background: #ffffff;
+    border-color: #f20caf;
+    box-shadow: 0 0 0 3px rgba(242, 12, 175, 0.2);
+  }
+
+  /* Header Actions */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .desktop-locale {
+    display: flex;
+    align-items: center;
+  }
+
+  .theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #18181b;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .theme-toggle-btn:hover {
+    background: #f4f4f5;
+    transform: rotate(15deg);
+  }
+
+  .header-signin-btn {
+    background: #f20caf;
+    color: #ffffff;
+    border: 2px solid #09080c;
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #09080c;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header-signin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #09080c;
+    background: #e006a0;
+  }
+
+  .header-signin-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #09080c;
+  }
+
+  .header-signin-btn.full-width {
+    width: 100%;
+    padding: 12px 20px;
+  }
+
+  .user-avatar-wrap {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Mobile Hamburger Button */
+  .mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 38px;
+    height: 38px;
+    background: #fafafa;
+    border: 2px solid #09080c;
+    border-radius: 10px;
+    padding: 9px 7px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 #09080c;
+  }
+
+  .hamburger-line {
+    width: 100%;
+    height: 3px;
+    background: #09080c;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-menu-toggle.is-active .hamburger-line:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .mobile-menu-toggle.is-active .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+  .mobile-menu-toggle.is-active .hamburger-line:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* Mobile Drawer */
+  .mobile-drawer {
+    display: none;
+    border-top: 2px solid #09080c;
+    background: #ffffff;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+
+  .mobile-drawer.is-open {
+    max-height: 480px;
+    display: block;
+  }
+
+  .mobile-drawer-inner {
+    padding: 18px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mobile-search-form {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+  }
+
+  .mobile-search-form .search-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 0.95rem;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .mobile-search-form input {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    border-radius: 999px;
+    border: 2px solid #09080c;
+    background: #fafafa;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-nav-item {
+    padding: 10px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #18181b;
+    border: 2px solid transparent;
+  }
+
+  .mobile-nav-item.is-active {
+    background: #f20caf;
+    color: #ffffff;
+    border-color: #09080c;
+    box-shadow: 0 3px 0 #09080c;
+  }
+
+  .mobile-extra-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 10px;
+    border-top: 1px solid #e4e4e7;
+  }
+
+  .signed-in-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: #f4f4f5;
+    border-radius: 12px;
+    border: 2px solid #09080c;
+    font-weight: 700;
+  }
+
+  .header-dash-btn {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: 2px 2px 0 var(--ink);
+    margin-right: 6px;
+    transition: transform 100ms ease;
+  }
+
+  .header-dash-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .mobile-dash-link {
+    display: inline-flex;
+    font-weight: 800;
+    color: var(--purple);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 900px) {
+    .nav-search-form {
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .desktop-nav,
+    .desktop-locale {
+      display: none;
+    }
+
+    .mobile-menu-toggle {
+      display: flex;
+    }
+  }
+</style>

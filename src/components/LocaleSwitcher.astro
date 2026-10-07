@@ -1,6 +1,7 @@
 ---
 import { SUPPORTED_LOCALES, LOCALES_META, DEFAULT_LOCALE, type SupportedLocale } from '../i18n/config';
 import { getLocalizedPath, getLocaleFromUrl } from '../i18n/routing';
+import { useTranslations } from '../i18n';
 
 interface Props {
   variant?: 'hero' | 'footer' | 'discover' | 'inline';
@@ -11,6 +12,7 @@ const { variant = 'inline', class: extraClass = '' } = Astro.props;
 
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const currentMeta = LOCALES_META[currentLocale] || LOCALES_META[DEFAULT_LOCALE];
+const { t } = await useTranslations(currentLocale);
 const pathname = Astro.url.pathname;
 
 const localeLinks = SUPPORTED_LOCALES.map((code) => {
@@ -31,7 +33,7 @@ const localeLinks = SUPPORTED_LOCALES.map((code) => {
     class="lang-switcher-btn"
     aria-expanded="false"
     aria-haspopup="listbox"
-    aria-label={`Select language. Current: ${currentMeta.name}`}
+    aria-label={`${t('common.select_language')}: ${currentMeta.name}`}
     data-switcher-toggle
   >
     <span class="btn-flag" aria-hidden="true">{currentMeta.flag}</span>
@@ -41,9 +43,9 @@ const localeLinks = SUPPORTED_LOCALES.map((code) => {
     </svg>
   </button>
 
-  <div class="lang-dropdown" role="listbox" aria-label="Languages" data-switcher-menu>
+  <div class="lang-dropdown" role="listbox" aria-label={t('common.language')} data-switcher-menu>
     <div class="lang-dropdown-header">
-      <span>Select Language</span>
+      <span>{t('common.select_language')}</span>
     </div>
     <div class="lang-dropdown-scroll">
       {localeLinks.map((loc) => (

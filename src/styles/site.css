@@ -1,7 +1,7 @@
 :root { color-scheme: light; --lime: #f7fa27; --pink: #f20caf; --purple: #7025ed; --cyan: #19e8c5; --ink: #09080c; }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body { background: #fff9df; color: var(--ink); font-family: 'Baloo 2', system-ui, sans-serif; }
+body { background: #fff9df; color: var(--ink); font-family: 'Baloo 2', 'Noto Sans Bengali', 'Noto Sans Devanagari', 'Noto Sans Arabic', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC', system-ui, sans-serif; }
 a { color: inherit; }
 .hero-stage { position: relative; isolation: isolate; display: grid; min-height: max(560px, calc(100svh - 140px)); place-items: center; overflow: hidden; background: radial-gradient(ellipse at 51% 47%, #ffff61 0%, var(--lime) 68%, #eff52a 100%); }
 .hero-content { position: static; z-index: 2; display: flex; width: min(100% - 36px, 1000px); flex-direction: column; align-items: center; margin-top: -13px; text-align: center; }
@@ -701,20 +701,23 @@ a { color: inherit; }
   gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
 }
 
 .share-button {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--ink, #101014);
   background: white;
+  color: var(--ink, #101014);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0;
 }
 
 .share-button:hover {
@@ -727,25 +730,73 @@ a { color: inherit; }
 }
 
 .share-button svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
-/* Platform-specific colors */
+/* Platform-specific colors on hover */
 .share-button[data-platform="twitter"]:hover {
   background: #1DA1F2;
+  border-color: #1DA1F2;
+  color: #ffffff;
 }
 
 .share-button[data-platform="facebook"]:hover {
   background: #1877F2;
+  border-color: #1877F2;
+  color: #ffffff;
 }
 
 .share-button[data-platform="whatsapp"]:hover {
   background: #25D366;
+  border-color: #25D366;
+  color: #ffffff;
+}
+
+.share-button[data-platform="reddit"]:hover {
+  background: #FF4500;
+  border-color: #FF4500;
+  color: #ffffff;
 }
 
 .share-button[data-platform="copy"]:hover {
-  background: #f0f0f0;
+  background: #f7fa27;
+  border-color: var(--ink, #101014);
+  color: var(--ink, #101014);
+}
+
+.share-button.copied {
+  background: #22c55e !important;
+  border-color: #16a34a !important;
+  color: #ffffff !important;
+  transform: scale(1.08);
+}
+
+/* Global Toast Notification */
+.cfn-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px) scale(0.95);
+  background: #18181b;
+  color: #4ade80;
+  border: 2px solid #4ade80;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-family: 'Baloo 2', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.cfn-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 
 /* Responsive adjustments */
@@ -771,6 +822,81 @@ a { color: inherit; }
 }
 
 /* ==========================================================================
+   Multi-Script Typography Rules
+   ========================================================================== */
+[lang="ar"] {
+  font-family: 'Noto Sans Arabic', 'Baloo 2', system-ui, sans-serif;
+}
+[lang="ar"] .hero-title,
+[lang="ar"] .discover-title,
+[lang="ar"] h1,
+[lang="ar"] h2,
+[lang="ar"] h3 {
+  font-family: 'Noto Sans Arabic', 'Lilita One', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+[lang="bn"] {
+  font-family: 'Noto Sans Bengali', 'Baloo 2', system-ui, sans-serif;
+}
+[lang="bn"] .hero-title,
+[lang="bn"] .discover-title,
+[lang="bn"] h1,
+[lang="bn"] h2,
+[lang="bn"] h3 {
+  font-family: 'Noto Sans Bengali', 'Lilita One', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+[lang="hi"] {
+  font-family: 'Noto Sans Devanagari', 'Baloo 2', system-ui, sans-serif;
+}
+[lang="hi"] .hero-title,
+[lang="hi"] .discover-title,
+[lang="hi"] h1,
+[lang="hi"] h2,
+[lang="hi"] h3 {
+  font-family: 'Noto Sans Devanagari', 'Lilita One', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+[lang="ja"] {
+  font-family: 'Noto Sans JP', 'Baloo 2', system-ui, sans-serif;
+}
+[lang="ja"] .hero-title,
+[lang="ja"] .discover-title,
+[lang="ja"] h1,
+[lang="ja"] h2,
+[lang="ja"] h3 {
+  font-family: 'Noto Sans JP', 'Lilita One', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+[lang="ko"] {
+  font-family: 'Noto Sans KR', 'Baloo 2', system-ui, sans-serif;
+}
+[lang="ko"] .hero-title,
+[lang="ko"] .discover-title,
+[lang="ko"] h1,
+[lang="ko"] h2,
+[lang="ko"] h3 {
+  font-family: 'Noto Sans KR', 'Lilita One', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+[lang="zh"] {
+  font-family: 'Noto Sans SC', 'Baloo 2', system-ui, sans-serif;
+}
+[lang="zh"] .hero-title,
+[lang="zh"] .discover-title,
+[lang="zh"] h1,
+[lang="zh"] h2,
+[lang="zh"] h3 {
+  font-family: 'Noto Sans SC', 'Lilita One', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+/* ==========================================================================
    RTL (Arabic) Layout & Typography Styles
    ========================================================================== */
 [dir="rtl"] {
@@ -791,7 +917,8 @@ a { color: inherit; }
 [dir="rtl"] .article-card,
 [dir="rtl"] .detail-card,
 [dir="rtl"] .policy-page,
-[dir="rtl"] .about-section {
+[dir="rtl"] .about-section,
+[dir="rtl"] .faq-details {
   text-align: right;
 }
 
@@ -803,4 +930,17 @@ a { color: inherit; }
 [dir="rtl"] .site-feature-box {
   border-left: none;
   border-right: 4px solid #f20caf;
+}
+
+[dir="rtl"] .go-button::before {
+  left: auto;
+  right: 22px;
+  transform: rotate(38deg);
+}
+
+@media (max-width: 768px) {
+  [dir="rtl"] .go-button::before {
+    left: auto;
+    right: 16px;
+  }
 }

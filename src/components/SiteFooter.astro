@@ -35,29 +35,29 @@ const cookiePolicyUrl = getLocalizedPath('/cookie-policy/', currentLocale);
 
     <div class="footer-nav-groups">
       <div class="footer-nav-col">
-        <span class="footer-heading">Explore</span>
-        <nav aria-label="Explore navigation">
-          <a href={discoverUrl}>Randomizer</a>
-          <a href={sitesUrl}>All Websites</a>
-          <a href={categoriesUrl}>Categories</a>
-          <a href={collectionsUrl}>Collections</a>
-          <a href={randomUrl}>Instant Jump</a>
+        <span class="footer-heading">{t('footer.explore_heading')}</span>
+        <nav aria-label={t('footer.explore_heading')}>
+          <a href={discoverUrl}>{t('footer.randomizer')}</a>
+          <a href={sitesUrl}>{t('footer.all_websites')}</a>
+          <a href={categoriesUrl}>{t('footer.categories')}</a>
+          <a href={collectionsUrl}>{t('footer.collections')}</a>
+          <a href={randomUrl}>{t('footer.instant_jump')}</a>
         </nav>
       </div>
 
       <div class="footer-nav-col">
-        <span class="footer-heading">Discover</span>
-        <nav aria-label="Discover navigation">
-          <a href={articlesUrl}>Articles & Guides</a>
-          <a href={searchUrl}>Search Directory</a>
-          <a href={submitUrl}>Submit a Site</a>
+        <span class="footer-heading">{t('footer.discover_heading')}</span>
+        <nav aria-label={t('footer.discover_heading')}>
+          <a href={articlesUrl}>{t('footer.articles_guides')}</a>
+          <a href={searchUrl}>{t('footer.search_directory')}</a>
+          <a href={submitUrl}>{t('footer.submit_site')}</a>
           <a href={aboutUrl}>{t('footer.about')}</a>
         </nav>
       </div>
 
       <div class="footer-nav-col">
-        <span class="footer-heading">Legal</span>
-        <nav aria-label="Legal navigation">
+        <span class="footer-heading">{t('footer.legal_heading')}</span>
+        <nav aria-label={t('footer.legal_heading')}>
           <a href={contactUrl}>{t('footer.contact')}</a>
           <a href={privacyUrl}>{t('footer.privacy')}</a>
           <a href={termsUrl}>{t('footer.terms')}</a>
@@ -74,7 +74,7 @@ const cookiePolicyUrl = getLocalizedPath('/cookie-policy/', currentLocale);
     </div>
 
     <div class="footer-legal-bar">
-      <p class="copyright">© 2026 ClickForNothing. Built for discovering the useless web.</p>
+      <p class="copyright">{t('footer.copyright')}</p>
       <button type="button" class="cookie-settings-btn" id="footer-cookie-settings-btn">
         {t('footer.cookie_settings')}
       </button>

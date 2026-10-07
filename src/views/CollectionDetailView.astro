@@ -60,13 +60,13 @@ const collectionSchema = {
 <SiteLayout {title} {description} {canonicalPath}>
   <main class="collection-detail-container">
     <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
-      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span>
-      <a href={collectionsUrl}>{t('nav.collections') || 'Collections'}</a> <span>/</span>
+      <a href={homeUrl}>{t('nav.home')}</a> <span>/</span>
+      <a href={collectionsUrl}>{t('nav.collections')}</a> <span>/</span>
       <span aria-current="page">{collection.title}</span>
     </nav>
 
     <header class="collection-header">
-      <span class="collection-tag">Curated List • {listWebsites.length} Items</span>
+      <span class="collection-tag">{t('collection_detail.curated_list_badge', { count: listWebsites.length })}</span>
       <h1>{collection.title}</h1>
       <p class="subtitle">{collection.subtitle}</p>
       <p class="desc">{collection.description}</p>
@@ -76,7 +76,7 @@ const collectionSchema = {
       <div class="list-grid">
         {listWebsites.map((site, index) => (
           <article class="list-item-card">
-            <div class="item-number">#{index + 1}</div>
+            <div class="item-number">{t('collection_detail.item_prefix', { number: index + 1 })}</div>
             <div class="item-content">
               <div class="meta-row">
                 <a href={getLocalizedPath(`/categories/${site.categorySlug}/`, currentLocale)} class="category">
@@ -86,11 +86,11 @@ const collectionSchema = {
               <h2><a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a></h2>
               <p class="item-desc">{site.description}</p>
               <div class="why-useless">
-                <strong>Why it’s on this list:</strong> {site.whyItIsUseless}
+                <strong>{t('collection_detail.why_on_list')}</strong> {site.whyItIsUseless}
               </div>
               <div class="item-actions">
-                <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-btn">Read Full Review & Details →</a>
-                <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-btn">Visit Website ↗</a>
+                <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-btn">{t('collection_detail.read_review_btn')}</a>
+                <a href={site.url} target="_blank" rel="noopener noreferrer" class="visit-btn">{t('collection_detail.visit_website')}</a>
               </div>
             </div>
           </article>
@@ -98,15 +98,42 @@ const collectionSchema = {
       </div>
     </section>
 
+    <div class="share-block">
+      <h3>{t('collection_detail.share_heading')}</h3>
+      <p>{t('collection_detail.share_desc')}</p>
+      <div class="share-buttons" data-share-container data-url={fullCanonicalUrl} data-title={collection.title} data-text={`Check out "${collection.title}" on ClickForNothing`} data-copied-toast={t('common.link_copied_toast')}>
+        <button class="share-btn copy-btn" type="button" data-copy-link data-platform="copy" data-copied-text={t('common.copied')} data-copied-toast={t('common.link_copied_toast')}>
+          {t('common.copy_link')}
+        </button>
+        <a class="share-btn twitter-btn" data-platform="twitter" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out "${collection.title}" on ClickForNothing`)}&url=${encodeURIComponent(fullCanonicalUrl)}`} target="_blank" rel="noopener noreferrer">
+          🐦 X / Twitter
+        </a>
+        <a class="share-btn facebook-btn" data-platform="facebook" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullCanonicalUrl)}`} target="_blank" rel="noopener noreferrer">
+          📘 Facebook
+        </a>
+        <a class="share-btn whatsapp-btn" data-platform="whatsapp" href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${collection.title} - ${fullCanonicalUrl}`)}`} target="_blank" rel="noopener noreferrer">
+          💬 WhatsApp
+        </a>
+        <a class="share-btn reddit-btn" data-platform="reddit" href={`https://reddit.com/submit?url=${encodeURIComponent(fullCanonicalUrl)}&title=${encodeURIComponent(collection.title)}`} target="_blank" rel="noopener noreferrer">
+          🤖 Reddit
+        </a>
+      </div>
+    </div>
+
     <section class="random-cta">
-      <h2>Looking for Instant Random Discovery?</h2>
-      <p>Use our real-time website discovery engine to jump between random websites smoothly.</p>
-      <a href={discoverUrl} class="cta-btn">Launch Random Engine 🎲</a>
+      <h2>{t('collection_detail.random_cta_title')}</h2>
+      <p>{t('collection_detail.random_cta_desc')}</p>
+      <a href={discoverUrl} class="cta-btn">{t('collection_detail.random_cta_btn')}</a>
     </section>
   </main>
 
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+
+  <script>
+    import { initSocialShareButtons } from '../scripts/socialShare.ts';
+    initSocialShareButtons();
+  </script>
 </SiteLayout>
 
 <style>
@@ -191,6 +218,41 @@ const collectionSchema = {
   .detail-btn { color: #f20caf; font-weight: 700; font-size: 0.92rem; text-decoration: none; }
   .visit-btn { background: #27272a; color: #fff; font-weight: 600; font-size: 0.88rem; padding: 6px 14px; border-radius: 8px; text-decoration: none; }
   .visit-btn:hover { background: #3f3f46; color: #f7fa27; }
+
+  .share-block {
+    background: #18181b;
+    border: 2px solid #27272a;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 40px;
+  }
+  .share-block h3 {
+    font: 700 1.3rem/1.2 'Lilita One', system-ui, sans-serif;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+  .share-block p { font-size: 0.95rem; color: #a1a1aa; margin-bottom: 16px; }
+  .share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .share-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+  .copy-btn { background: #3f3f46; color: #fff; }
+  .twitter-btn { background: #1d9bf0; color: #fff; }
+  .facebook-btn { background: #1877f2; color: #fff; }
+  .whatsapp-btn { background: #25d366; color: #fff; }
+  .reddit-btn { background: #ff4500; color: #fff; }
 
   .random-cta {
     background: linear-gradient(135deg, #7025ed 0%, #f20caf 100%);

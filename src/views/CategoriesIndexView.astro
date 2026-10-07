@@ -9,8 +9,8 @@ import type { SupportedLocale } from '../i18n/config';
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
 const { t } = await useTranslations(currentLocale);
 
-const title = "Categories of Useless Websites | ClickForNothing";
-const description = "Browse useless websites by category: silly animals, weird experiments, funny web pranks, mini games, internet nostalgia, and interactive art.";
+const title = t('categories_page.seo_title');
+const description = t('categories_page.seo_description');
 const canonicalPath = "/categories/";
 
 const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
@@ -22,15 +22,15 @@ const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
-    { '@type': 'ListItem', position: 2, name: t('nav.categories') || 'Categories', item: fullCanonicalUrl },
+    { '@type': 'ListItem', position: 1, name: t('nav.home'), item: `${siteOrigin}${homeUrl}` },
+    { '@type': 'ListItem', position: 2, name: t('nav.categories'), item: fullCanonicalUrl },
   ],
 };
 
 const collectionSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Categories of Useless Websites',
+  name: t('categories_page.heading'),
   description,
   url: fullCanonicalUrl,
   mainEntity: {
@@ -48,13 +48,13 @@ const collectionSchema = {
 <SiteLayout {title} {description} {canonicalPath}>
   <main class="categories-container">
     <nav class="breadcrumbs" aria-label="Breadcrumbs">
-      <a href={homeUrl}>{t('nav.home') || 'Home'}</a> <span>/</span> <span aria-current="page">{t('nav.categories') || 'Categories'}</span>
+      <a href={homeUrl}>{t('nav.home')}</a> <span>/</span> <span aria-current="page">{t('nav.categories')}</span>
     </nav>
 
     <header class="header-section">
-      <h1>Explore Useless Websites by Category</h1>
+      <h1>{t('categories_page.heading')}</h1>
       <p class="lead">
-        Find exactly what kind of internet detour you are looking for today.
+        {t('categories_page.lead')}
       </p>
     </header>
 
@@ -68,11 +68,11 @@ const collectionSchema = {
           <article class="category-card">
             <div class="card-top">
               <span class="emoji">{cat.emoji}</span>
-              <span class="count-badge">{count} websites</span>
+              <span class="count-badge">{t('categories_page.websites_count', { count })}</span>
             </div>
             <h2><a href={catUrl}>{catName}</a></h2>
             <p>{catDesc}</p>
-            <a href={catUrl} class="explore-btn">Browse Category →</a>
+            <a href={catUrl} class="explore-btn">{t('categories_page.browse_btn')}</a>
           </article>
         );
       })}
