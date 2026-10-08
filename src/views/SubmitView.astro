@@ -364,7 +364,7 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
 
               <!-- Primary Auth Action -->
               <div class="auth-primary-action">
-                <SignInButton mode="modal" class="clerk-auth-btn primary-auth-btn" id="clerk-signin-btn">
+                <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} class="clerk-auth-btn primary-auth-btn" id="clerk-signin-btn">
                   <span>Click here to Login or Sign up</span>
                 </SignInButton>
               </div>

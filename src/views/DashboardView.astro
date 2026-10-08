@@ -49,10 +49,10 @@ const homeUrl = getLocalizedPath('/', currentLocale);
           Your submissions are securely linked to your authenticated Clerk account. Please sign in to track review and publishing status.
         </p>
         <div class="auth-btn-row">
-          <SignInButton mode="modal" class="dash-primary-btn">
+          <SignInButton mode="modal" forceRedirectUrl={getLocalizedPath('/dashboard/', currentLocale)} class="dash-primary-btn">
             <span>Sign In</span>
           </SignInButton>
-          <SignUpButton mode="modal" class="dash-secondary-btn">
+          <SignUpButton mode="modal" forceRedirectUrl={getLocalizedPath('/dashboard/', currentLocale)} class="dash-secondary-btn">
             <span>Create Account</span>
           </SignUpButton>
         </div>

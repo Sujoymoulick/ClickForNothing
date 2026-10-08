@@ -17,6 +17,12 @@ a { color: inherit; }
 .go-button:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 0 var(--ink); filter: saturate(1.12); }
 .go-button:active { transform: translateY(9px) scale(.985); box-shadow: 0 4px 0 var(--ink); }
 .go-button:focus-visible { outline: 4px dashed var(--purple); outline-offset: 8px; }
+.hero-account-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; width: 100%; }
+.hero-account-link { display: inline-flex; min-height: 56px; align-items: center; justify-content: center; gap: 9px; padding: 12px 22px; border: 3px solid var(--ink); border-radius: 16px; box-shadow: 0 5px 0 var(--ink); font: 800 1.15rem/1.1 'Baloo 2', system-ui, sans-serif; text-align: center; text-decoration: none; transition: transform 150ms ease, box-shadow 150ms ease; }
+.hero-submit-link { background: var(--purple); color: #fff; }
+.hero-dashboard-link { background: #fff; color: var(--ink); }
+.hero-account-link:hover { transform: translateY(-3px); box-shadow: 0 8px 0 var(--ink); }
+.hero-account-link:focus-visible { outline: 4px dashed var(--pink); outline-offset: 5px; }
 .empty-list { animation: wobble .4s ease; }
 .arrow { font-size: .72em; }
 .deco { position: absolute; z-index: 1; pointer-events: none; user-select: none; }

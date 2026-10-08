@@ -2,6 +2,7 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import LocaleSwitcher from '../components/LocaleSwitcher.astro';
 import PepeMascot from '../components/PepeMascot.astro';
+import { Show } from '@clerk/astro/components';
 import { categories } from '../data/categories';
 import { collections } from '../data/collections';
 import { articles } from '../data/articles';
@@ -122,6 +123,12 @@ const toolSchema = {
           <a href="/sites/">All 100+ Sites</a> •
           <a href="/categories/">Categories</a> •
           <a href="/collections/100-useless-websites/">Top 100 List</a>
+        </div>
+        <div class="hero-account-actions">
+          <a class="hero-account-link hero-submit-link" href="/submit/">Submit Your Useless Project <span aria-hidden="true">↗</span></a>
+          <Show when="signed-in">
+            <a class="hero-account-link hero-dashboard-link" href="/dashboard/">Dashboard <span aria-hidden="true">→</span></a>
+          </Show>
         </div>
       </div>
     </section>

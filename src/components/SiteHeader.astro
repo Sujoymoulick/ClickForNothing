@@ -79,7 +79,7 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
 
       <div class="auth-box">
         <Show when="signed-out">
-          <SignInButton mode="modal" class="header-signin-btn">
+          <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} class="header-signin-btn">
             <span>{t('nav.sign_in')}</span>
           </SignInButton>
         </Show>
@@ -140,7 +140,7 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
         <LocaleSwitcher variant="hero" />
         <div class="mobile-auth-row">
           <Show when="signed-out">
-            <SignInButton mode="modal" class="header-signin-btn full-width">
+            <SignInButton mode="modal" forceRedirectUrl={dashboardUrl} class="header-signin-btn full-width">
               <span>{t('nav.sign_in_to_submit')}</span>
             </SignInButton>
           </Show>
