@@ -1,4 +1,4 @@
-import { getDb } from './_db';
+import { getDb, logServerError } from './_db';
 
 interface Env {
   DATABASE_URL?: string;
@@ -38,7 +38,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       }
     );
   } catch (error: any) {
-    console.error('Error fetching published websites:', error);
+    logServerError('Error fetching published websites.', error);
     return new Response(
       JSON.stringify({ error: 'Failed to retrieve published websites.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

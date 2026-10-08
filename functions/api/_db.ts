@@ -1,11 +1,19 @@
 import { neon } from '@neondatabase/serverless';
 
 export function getDb(env: { DATABASE_URL?: string }) {
-  const databaseUrl = env.DATABASE_URL;
+  // Cloudflare secrets are plain strings, but operators sometimes paste a URL
+  // with line breaks or surrounding whitespace from the Neon dashboard.
+  const databaseUrl = env.DATABASE_URL?.replace(/\s+/g, '');
   if (!databaseUrl) {
     throw new Error('DATABASE_URL is not configured.');
   }
   return neon(databaseUrl);
+}
+
+/** Log only the error type; database driver errors can include credentials. */
+export function logServerError(context: string, error: unknown): void {
+  const errorType = error instanceof Error ? error.name : 'UnknownError';
+  console.error(context, { errorType });
 }
 
 /**

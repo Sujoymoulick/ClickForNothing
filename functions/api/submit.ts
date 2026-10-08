@@ -1,4 +1,4 @@
-import { getDb, sanitizeText, validateUrl } from './_db';
+import { getDb, logServerError, sanitizeText, validateUrl } from './_db';
 import { getAuthenticatedUser } from './_auth';
 
 interface Env {
@@ -89,7 +89,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('Error saving submission to Neon database:', error);
+    logServerError('Error saving submission to Neon database.', error);
     return new Response(
       JSON.stringify({
         error: 'An internal server error occurred while processing the submission.',
