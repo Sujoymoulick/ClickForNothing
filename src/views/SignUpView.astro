@@ -1,0 +1,176 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { SignUp } from '@clerk/astro/components';
+import { useTranslations } from '../i18n';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const { t } = await useTranslations(currentLocale);
+
+const title = "Sign Up | ClickForNothing";
+const description = "Create your account on ClickForNothing to share and submit useless websites with the world.";
+const canonicalPath = '/sign-up/';
+
+const homeUrl = getLocalizedPath('/', currentLocale);
+const signInUrl = getLocalizedPath('/sign-in/', currentLocale);
+const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
+---
+
+<SiteLayout {title} {description} {canonicalPath}>
+  <SiteHeader activeNav="none" />
+
+  <main class="auth-page-wrapper">
+    <div class="auth-page-container">
+      <nav class="auth-breadcrumbs" aria-label="Breadcrumbs">
+        <a href={homeUrl} class="crumb-link">{t('nav.home') || 'Home'}</a>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-current">Sign Up</span>
+      </nav>
+
+      <div class="auth-hero-header">
+        <div class="auth-badge">
+          <span class="badge-dot"></span>
+          <span>JOIN THE MOVEMENT</span>
+        </div>
+        <h1 class="auth-main-title">Create Your Explorer Account</h1>
+        <p class="auth-main-subtitle">
+          Join thousands discovering and preserving the weirdest corners of the web.
+        </p>
+      </div>
+
+      <div class="clerk-auth-container">
+        <SignUp
+          routing="path"
+          path="/sign-up"
+          signInUrl={signInUrl}
+          fallbackRedirectUrl={dashboardUrl}
+        />
+      </div>
+
+      <div class="auth-alternate-box">
+        <p>Already have an account? <a href={signInUrl} class="auth-alt-link">Log in here →</a></p>
+      </div>
+    </div>
+  </main>
+</SiteLayout>
+
+<style>
+  .auth-page-wrapper {
+    min-height: calc(100vh - 200px);
+    background: #fffdf0;
+    padding: 40px 20px 80px;
+    font-family: 'Baloo 2', system-ui, sans-serif;
+  }
+
+  .auth-page-container {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .auth-breadcrumbs {
+    align-self: flex-start;
+    margin-bottom: 24px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .crumb-link {
+    color: #7025ed;
+    text-decoration: none;
+  }
+
+  .crumb-link:hover {
+    text-decoration: underline;
+  }
+
+  .crumb-sep {
+    color: #a1a1aa;
+    margin: 0 6px;
+  }
+
+  .crumb-current {
+    color: #17141a;
+  }
+
+  .auth-hero-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .auth-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f7fa27;
+    border: 2px solid #09080c;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    color: #09080c;
+    box-shadow: 2px 2px 0 #09080c;
+    margin-bottom: 12px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00d26a;
+  }
+
+  .auth-main-title {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 2.2rem;
+    color: #09080c;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  .auth-main-subtitle {
+    font-size: 1.05rem;
+    color: #4b5563;
+    font-weight: 600;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .clerk-auth-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .auth-alternate-box {
+    background: #ffffff;
+    border: 2px solid #09080c;
+    border-radius: 12px;
+    padding: 12px 24px;
+    box-shadow: 3px 3px 0 #09080c;
+    font-weight: 700;
+    color: #18181b;
+    text-align: center;
+  }
+
+  .auth-alt-link {
+    color: #f20caf;
+    text-decoration: underline;
+  }
+
+  .auth-alt-link:hover {
+    color: #7025ed;
+  }
+
+  @media (max-width: 640px) {
+    .auth-main-title {
+      font-size: 1.8rem;
+    }
+  }
+</style>

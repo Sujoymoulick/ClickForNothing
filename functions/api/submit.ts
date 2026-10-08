@@ -79,7 +79,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         ${userId},
         ${userEmail},
         ${userName},
-        'pending'
+        'pending_review'
       )
       RETURNING id, url, name, description, category, status, created_at;
     `;

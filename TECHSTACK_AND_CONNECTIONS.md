@@ -256,17 +256,33 @@ Store these variables in `.env` for local development, and in `wrangler.json` (a
   "name": "clickfornothing",
   "pages_build_output_dir": "dist",
   "compatibility_date": "2024-09-23",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "vars": {
-    "DATABASE_URL": "postgresql://neondb_owner:YOUR_DATABASE_PASSWORD@ep-YOUR-ENDPOINT-pooler.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
-    "DATABASE_URL_UNPOOLED": "postgresql://neondb_owner:YOUR_DATABASE_PASSWORD@ep-YOUR-ENDPOINT.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
+    "DATABASE_URL": "postgresql://neondb_owner:YOUR_PASSWORD@ep-YOUR-ENDPOINT-pooler.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
+    "DATABASE_URL_UNPOOLED": "postgresql://neondb_owner:YOUR_PASSWORD@ep-YOUR-ENDPOINT.c-6.us-east-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
     "NEON_BRANCH": "main",
-    "PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_YOUR_CLERK_PUBLISHABLE_KEY"
+    "PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_YOUR_CLERK_PUBLISHABLE_KEY",
+    "CLERK_SECRET_KEY": "sk_live_YOUR_CLERK_SECRET_KEY"
   }
 }
 ```
 
+### Required Cloudflare Pages Environment Variables:
+Ensure the following variables are present in Cloudflare Pages Dashboard under **Settings → Environment variables** (for **both Production and Preview**):
+
+| Variable Name | Type | Value / Purpose |
+| :--- | :--- | :--- |
+| `PUBLIC_CLERK_PUBLISHABLE_KEY` | Plain text | `pk_live_...` (Clerk Frontend API Key) |
+| `CLERK_SECRET_KEY` | Secret / Encrypted | `sk_live_...` (Backend verification token for `/api/*`) |
+| `DATABASE_URL` | Secret / Encrypted | Neon pooled PostgreSQL connection string |
+| `DATABASE_URL_UNPOOLED` | Secret / Encrypted | Neon unpooled connection string |
+| `NEON_BRANCH` | Plain text | `main` |
+| `NODE_VERSION` | Plain text | `20` or higher |
+
 ### Client-Side Variable Security:
-* `DATABASE_URL` and `DATABASE_URL_UNPOOLED` are server-only credentials used exclusively by Cloudflare Pages Functions (`functions/api/*`).
+* `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, and `CLERK_SECRET_KEY` are server-only credentials used exclusively by Cloudflare Pages Functions (`functions/api/*`).
 * They are strictly guarded and never exposed to client-side bundles, HTML, or DevTools inspection.
 * Only `PUBLIC_CLERK_PUBLISHABLE_KEY` is public by design for browser client Clerk authentication.
 * Cloudflare Pages Functions sanitize all error messages returned to the client to prevent leaking internal database schemas or connection strings.

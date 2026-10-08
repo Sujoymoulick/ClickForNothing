@@ -967,12 +967,18 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       }
     });
 
-    async function getAuthToken() {
-      if (window.Clerk && window.Clerk.session) {
-        try {
-          return await window.Clerk.session.getToken();
-        } catch {
-          return null;
+    async function getAuthToken(retries = 3): Promise<string | null> {
+      for (let i = 0; i < retries; i++) {
+        if ((window as any).Clerk?.session) {
+          try {
+            const token = await (window as any).Clerk.session.getToken();
+            if (token) return token;
+          } catch {
+            // retry
+          }
+        }
+        if (i < retries - 1) {
+          await new Promise((r) => setTimeout(r, 200));
         }
       }
       return null;

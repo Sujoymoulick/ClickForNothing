@@ -872,11 +872,17 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
         (async () => {
           try {
             let token: string | null = null;
-            if (window.Clerk && window.Clerk.session) {
-              try {
-                token = await window.Clerk.session.getToken();
-              } catch (e) {
-                console.warn('Could not retrieve Clerk token:', e);
+            for (let i = 0; i < 3; i++) {
+              if ((window as any).Clerk?.session) {
+                try {
+                  token = await (window as any).Clerk.session.getToken();
+                  if (token) break;
+                } catch (e) {
+                  console.warn('Could not retrieve Clerk token:', e);
+                }
+              }
+              if (i < 2) {
+                await new Promise((r) => setTimeout(r, 200));
               }
             }
 
