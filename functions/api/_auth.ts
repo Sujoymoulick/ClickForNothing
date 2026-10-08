@@ -9,9 +9,9 @@ export interface AuthenticatedUser {
 
 export async function getAuthenticatedUser(
   request: Request,
-  env: { CLERK_SECRET_KEY?: string; [key: string]: any }
+  env: { CLERK_SECRET_KEY?: string }
 ): Promise<AuthenticatedUser | null> {
-  const secretKey = env.CLERK_SECRET_KEY || process.env.CLERK_SECRET_KEY;
+  const secretKey = env.CLERK_SECRET_KEY;
 
   if (!secretKey) {
     console.error('CLERK_SECRET_KEY is not configured in environment.');
@@ -43,7 +43,10 @@ export async function getAuthenticatedUser(
   }
 
   try {
-    const payload = await verifyToken(token, { secretKey });
+    const payload = await verifyToken(token, {
+      secretKey,
+      authorizedParties: ['https://clickfornothing.com', 'https://www.clickfornothing.com'],
+    });
     if (!payload || !payload.sub) {
       return null;
     }
@@ -58,8 +61,8 @@ export async function getAuthenticatedUser(
       name,
       claims: payload,
     };
-  } catch (error: any) {
-    console.warn('Clerk session token verification failed:', error?.message || error);
+  } catch {
+    console.warn('[AUTH_ERROR] Clerk session token verification failed.');
     return null;
   }
 }

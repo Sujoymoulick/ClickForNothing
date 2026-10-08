@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 
-export function getDb(env: { DATABASE_URL?: string; [key: string]: any }) {
-  const databaseUrl = env.DATABASE_URL || process.env.DATABASE_URL;
+export function getDb(env: { DATABASE_URL?: string }) {
+  const databaseUrl = env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('DATABASE_URL is not configured.');
   }

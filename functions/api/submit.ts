@@ -15,9 +15,6 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       name?: string;
       description?: string;
       category?: string;
-      user_id?: string;
-      user_email?: string;
-      user_name?: string;
     };
 
     try {
@@ -60,11 +57,11 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       );
     }
 
-    // Attempt server-side auth verification if token is present
+    // A caller may submit without an account, but identity is always server-derived.
     const authUser = await getAuthenticatedUser(request, env);
-    const userId = authUser?.userId || body.user_id || null;
-    const userEmail = authUser?.email || body.user_email || null;
-    const userName = authUser?.name || body.user_name || null;
+    const userId = authUser?.userId || null;
+    const userEmail = authUser?.email || null;
+    const userName = authUser?.name || null;
 
     const sql = getDb(env);
 

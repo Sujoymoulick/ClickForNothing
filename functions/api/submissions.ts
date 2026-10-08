@@ -47,7 +47,6 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     return new Response(
       JSON.stringify({
         success: true,
-        userId: authUser.userId,
         submissions: rows,
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -96,7 +95,7 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
     };
 
     const { id, status, rejection_reason } = body;
-    if (!id || !status) {
+    if (!Number.isSafeInteger(id) || id <= 0 || !status) {
       return new Response(
         JSON.stringify({ error: 'Missing submission id or status.' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -124,7 +123,8 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
           rejection_reason = NULL,
           updated_at = NOW()
         WHERE id = ${id}
-        RETURNING *;
+        RETURNING id, url, name, description, category, status, created_at, updated_at,
+                  reviewed_at, published_at, rejection_reason;
       `;
     } else if (status === 'approved') {
       result = await sql`
@@ -135,7 +135,8 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
           rejection_reason = NULL,
           updated_at = NOW()
         WHERE id = ${id}
-        RETURNING *;
+        RETURNING id, url, name, description, category, status, created_at, updated_at,
+                  reviewed_at, published_at, rejection_reason;
       `;
     } else if (status === 'rejected') {
       const reason = sanitizeText(rejection_reason || 'Does not meet guidelines');
@@ -147,7 +148,8 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
           rejection_reason = ${reason},
           updated_at = NOW()
         WHERE id = ${id}
-        RETURNING *;
+        RETURNING id, url, name, description, category, status, created_at, updated_at,
+                  reviewed_at, published_at, rejection_reason;
       `;
     } else {
       result = await sql`
@@ -156,7 +158,8 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
           status = 'pending_review',
           updated_at = NOW()
         WHERE id = ${id}
-        RETURNING *;
+        RETURNING id, url, name, description, category, status, created_at, updated_at,
+                  reviewed_at, published_at, rejection_reason;
       `;
     }
 
