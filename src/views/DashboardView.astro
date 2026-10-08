@@ -10,7 +10,7 @@ const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromU
 const { t } = await useTranslations(currentLocale);
 
 const title = "My Submissions | ClickForNothing";
-const description = "Track the review and publishing status of your submitted useless websites.";
+const description = "Track the review, presentation, and publishing status of your submitted websites.";
 
 const submitUrl = getLocalizedPath('/submit/', currentLocale);
 const discoverUrl = getLocalizedPath('/discover/', currentLocale);
@@ -20,810 +20,1279 @@ const homeUrl = getLocalizedPath('/', currentLocale);
 <SiteLayout {title} {description} canonicalPath="/dashboard/">
   <SiteHeader activeNav="none" />
 
-  <div class="dashboard-body">
-    <!-- Top Hero Header -->
-    <header class="dash-hero">
-      <div class="dash-hero-inner">
-        <div class="dash-pill-badge">
-          <span class="badge-dot" aria-hidden="true"></span>
-          <span>USER DASHBOARD</span>
-        </div>
-        <h1 class="dash-title">My Submissions</h1>
-        <p class="dash-subtitle">
-          Track your submitted websites as they move through our review and publishing pipeline.
-        </p>
-      </div>
-    </header>
-
-    <main class="dash-container" id="dash-main">
-      <!-- Signed-out state prompt -->
-      <section class="dash-card auth-needed-card" id="dash-signed-out-view">
-        <div class="auth-icon-wrap" aria-hidden="true">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7025ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <div class="dash-page-wrapper">
+    <main class="dash-main-container">
+      <!-- Signed-out view -->
+      <section class="dash-signed-out-card" id="dash-signed-out-view">
+        <div class="signed-out-icon-box" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#7025ed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
         </div>
-        <h2 class="auth-title">Sign in to view your submissions</h2>
-        <p class="auth-desc">
+        <h2 class="signed-out-title">Sign in to view your submissions</h2>
+        <p class="signed-out-desc">
           Your submissions are securely linked to your authenticated Clerk account. Please sign in to track review and publishing status.
         </p>
-        <div class="auth-btn-row">
-          <SignInButton mode="modal" forceRedirectUrl={getLocalizedPath('/dashboard/', currentLocale)} class="dash-primary-btn">
+        <div class="signed-out-actions">
+          <SignInButton mode="modal" forceRedirectUrl={getLocalizedPath('/dashboard/', currentLocale)} class="dash-btn-magenta">
             <span>Sign In</span>
           </SignInButton>
-          <SignUpButton mode="modal" forceRedirectUrl={getLocalizedPath('/dashboard/', currentLocale)} class="dash-secondary-btn">
+          <SignUpButton mode="modal" forceRedirectUrl={getLocalizedPath('/dashboard/', currentLocale)} class="dash-btn-white">
             <span>Create Account</span>
           </SignUpButton>
         </div>
       </section>
 
-      <!-- Signed-in Dashboard View -->
-      <section class="dash-content-wrap" id="dash-signed-in-view" style="display: none;">
-        <!-- User Profile & Action Bar -->
-        <div class="dash-top-bar">
-          <div class="user-meta-summary">
-            <div class="user-avatar-slot">
+      <!-- Signed-in view -->
+      <div class="dash-signed-in-area" id="dash-signed-in-view" style="display: none;">
+        
+        <!-- 1. Top Welcome Bar Card -->
+        <header class="dash-welcome-card">
+          <div class="welcome-user-info">
+            <div class="welcome-avatar-wrap">
               <UserButton />
             </div>
-            <div class="user-info-text">
-              <span class="greeting-kicker">Welcome back,</span>
-              <h2 class="user-heading" id="dash-user-name">Explorer</h2>
+            <div class="welcome-text-col">
+              <span class="welcome-kicker">WELCOME BACK,</span>
+              <h1 class="welcome-name" id="dash-user-name">Explorer</h1>
             </div>
           </div>
 
-          <div class="dash-actions-group">
+          <div class="welcome-actions">
             <button type="button" class="dash-refresh-btn" id="dash-refresh-btn" title="Refresh submissions">
-              <span class="refresh-icon" aria-hidden="true">↻</span>
-              <span class="refresh-label">Refresh</span>
+              <span class="refresh-spinner" id="refresh-spinner" aria-hidden="true">↻</span>
+              <span id="refresh-label">Refresh</span>
             </button>
-            <a href={submitUrl} class="dash-primary-btn compact">
+            <a href={submitUrl} class="dash-submit-btn">
               <span>+ Submit Website</span>
             </a>
           </div>
-        </div>
+        </header>
 
-        <!-- Filter / Stats Bar -->
-        <div class="stats-counter-strip">
-          <div class="stat-bubble active" data-filter="all" id="filter-all">
-            <span class="stat-label">Total</span>
-            <span class="stat-count" id="count-total">0</span>
-          </div>
-          <div class="stat-bubble status-review" data-filter="pending_review" id="filter-review">
-            <span class="stat-dot dot-amber"></span>
-            <span class="stat-label">Under Review</span>
-            <span class="stat-count" id="count-review">0</span>
-          </div>
-          <div class="stat-bubble status-approved" data-filter="approved" id="filter-approved">
-            <span class="stat-dot dot-blue"></span>
-            <span class="stat-label">Approved</span>
-            <span class="stat-count" id="count-approved">0</span>
-          </div>
-          <div class="stat-bubble status-published" data-filter="published" id="filter-published">
-            <span class="stat-dot dot-green"></span>
-            <span class="stat-label">Published</span>
-            <span class="stat-count" id="count-published">0</span>
-          </div>
-          <div class="stat-bubble status-rejected" data-filter="rejected" id="filter-rejected">
-            <span class="stat-dot dot-red"></span>
-            <span class="stat-label">Rejected</span>
-            <span class="stat-count" id="count-rejected">0</span>
-          </div>
-        </div>
-
-        <!-- Live Status / Polling Indicator -->
-        <div class="live-sync-indicator" id="live-sync-indicator">
-          <span class="sync-dot" aria-hidden="true"></span>
-          <span class="sync-text">Live updates enabled • Checking Neon for changes</span>
-        </div>
-
-        <!-- Loading / Skeleton state -->
-        <div class="cards-grid skeleton-grid" id="dash-skeleton" style="display: none;">
-          <div class="card-skeleton">
-            <div class="sk-preview"></div>
-            <div class="sk-body">
-              <div class="sk-line sk-title"></div>
-              <div class="sk-line sk-desc"></div>
-              <div class="sk-line sk-badge"></div>
+        <!-- 2. Five Stat Cards Row -->
+        <section class="dash-stats-grid" aria-label="Submission summary statistics">
+          <!-- Total -->
+          <button type="button" class="stat-card active" data-filter="all" id="stat-card-all">
+            <div class="stat-header">
+              <span class="stat-dot dot-purple" aria-hidden="true"></span>
+              <span class="stat-title">TOTAL</span>
             </div>
-          </div>
-          <div class="card-skeleton">
-            <div class="sk-preview"></div>
-            <div class="sk-body">
-              <div class="sk-line sk-title"></div>
-              <div class="sk-line sk-desc"></div>
-              <div class="sk-line sk-badge"></div>
-            </div>
-          </div>
-          <div class="card-skeleton">
-            <div class="sk-preview"></div>
-            <div class="sk-body">
-              <div class="sk-line sk-title"></div>
-              <div class="sk-line sk-desc"></div>
-              <div class="sk-line sk-badge"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Error state -->
-        <div class="dash-card error-card" id="dash-error-view" style="display: none;">
-          <div class="err-icon">⚠️</div>
-          <h3 class="err-title">Failed to load submissions</h3>
-          <p class="err-msg" id="dash-error-msg">Could not reach the database. Please try again.</p>
-          <button type="button" class="dash-secondary-btn compact" id="dash-retry-btn">
-            Retry Connection
+            <div class="stat-value" id="count-total">0</div>
+            <div class="stat-subtext" id="label-subtext-total">Submissions</div>
           </button>
-        </div>
 
-        <!-- Empty state (Requirement 13) -->
-        <div class="dash-card empty-submissions-card" id="dash-empty-view" style="display: none;">
-          <div class="empty-emoji-art" aria-hidden="true">🛸</div>
-          <h2 class="empty-title">No submissions yet</h2>
-          <p class="empty-description">
-            Submit your first website and track its review and publishing status here.
-          </p>
-          <a href={submitUrl} class="dash-primary-btn">
-            <span>Submit a Website →</span>
-          </a>
-        </div>
+          <!-- Under Review -->
+          <button type="button" class="stat-card" data-filter="pending_review" id="stat-card-review">
+            <div class="stat-header">
+              <span class="stat-dot dot-amber" aria-hidden="true"></span>
+              <span class="stat-title">UNDER REVIEW</span>
+            </div>
+            <div class="stat-value" id="count-review">0</div>
+            <div class="stat-subtext">Awaiting review</div>
+          </button>
 
-        <!-- Submissions Cards Grid (Requirement 5 & 6) -->
-        <div class="cards-grid" id="submissions-grid" style="display: none;"></div>
-      </section>
+          <!-- Approved -->
+          <button type="button" class="stat-card" data-filter="approved" id="stat-card-approved">
+            <div class="stat-header">
+              <span class="stat-dot dot-blue" aria-hidden="true"></span>
+              <span class="stat-title">APPROVED</span>
+            </div>
+            <div class="stat-value" id="count-approved">0</div>
+            <div class="stat-subtext">Ready to publish</div>
+          </button>
+
+          <!-- Published -->
+          <button type="button" class="stat-card" data-filter="published" id="stat-card-published">
+            <div class="stat-header">
+              <span class="stat-dot dot-green" aria-hidden="true"></span>
+              <span class="stat-title">PUBLISHED</span>
+            </div>
+            <div class="stat-value" id="count-published">0</div>
+            <div class="stat-subtext">Live websites</div>
+          </button>
+
+          <!-- Rejected -->
+          <button type="button" class="stat-card" data-filter="rejected" id="stat-card-rejected">
+            <div class="stat-header">
+              <span class="stat-dot dot-red" aria-hidden="true"></span>
+              <span class="stat-title">REJECTED</span>
+            </div>
+            <div class="stat-value" id="count-rejected">0</div>
+            <div class="stat-subtext">Not accepted</div>
+          </button>
+        </section>
+
+        <!-- 3. Live Updates Status Strip -->
+        <aside class="dash-live-strip" id="dash-live-strip" aria-live="polite">
+          <span class="live-dot" id="live-indicator-dot" aria-hidden="true"></span>
+          <span class="live-text" id="live-indicator-text">Live updates enabled · Checking Neon for changes</span>
+        </aside>
+
+        <!-- 4. "My Submissions" Outer Container Card -->
+        <section class="dash-submissions-container">
+          <!-- Card Top Bar -->
+          <div class="submissions-header-bar">
+            <div class="submissions-title-group">
+              <div class="submissions-badge-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <h2 class="submissions-heading">My Submissions</h2>
+            </div>
+
+            <!-- Controls: Filter & Sort dropdowns -->
+            <div class="submissions-controls">
+              <div class="select-wrapper">
+                <select id="status-filter-select" aria-label="Filter submissions by status">
+                  <option value="all">All Statuses</option>
+                  <option value="pending_review">Under Review</option>
+                  <option value="approved">Approved</option>
+                  <option value="published">Published</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <span class="select-arrow" aria-hidden="true">▾</span>
+              </div>
+
+              <div class="select-wrapper">
+                <select id="sort-order-select" aria-label="Sort submissions order">
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="name_asc">Title (A-Z)</option>
+                  <option value="name_desc">Title (Z-A)</option>
+                </select>
+                <span class="select-arrow" aria-hidden="true">▾</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Skeleton Loader -->
+          <div class="submissions-skeleton-list" id="dash-skeleton" style="display: none;">
+            <div class="skeleton-card">
+              <div class="sk-left"></div>
+              <div class="sk-right">
+                <div class="sk-line sk-title"></div>
+                <div class="sk-line sk-url"></div>
+                <div class="sk-line sk-desc"></div>
+                <div class="sk-box"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Message State -->
+          <div class="submissions-empty-state" id="dash-error-view" style="display: none;">
+            <div class="empty-icon" aria-hidden="true">⚠️</div>
+            <h3 class="empty-title">Failed to load submissions</h3>
+            <p class="empty-desc" id="dash-error-msg">Could not establish connection with database. Please try again.</p>
+            <button type="button" class="dash-btn-white" id="dash-retry-btn">
+              Retry Connection
+            </button>
+          </div>
+
+          <!-- Empty State -->
+          <div class="submissions-empty-state" id="dash-empty-view" style="display: none;">
+            <div class="empty-icon" aria-hidden="true">🛸</div>
+            <h3 class="empty-title">No submissions yet</h3>
+            <p class="empty-desc">Submit your first website and track its review and publishing status here.</p>
+            <a href={submitUrl} class="dash-btn-magenta">
+              <span>Submit a Website →</span>
+            </a>
+          </div>
+
+          <!-- List of Submission Cards -->
+          <div class="submissions-list" id="submissions-list"></div>
+        </section>
+      </div>
     </main>
 
-    <!-- Rejection Reason Modal -->
-    <div class="reason-modal-backdrop" id="reason-modal" role="dialog" aria-modal="true" style="display: none;">
-      <div class="reason-modal-card">
-        <div class="reason-modal-header">
-          <div class="reason-title-wrap">
-            <span class="reason-icon">ℹ️</span>
-            <h3 class="reason-title">Submission Review Details</h3>
+    <!-- 5. Interactive Presentation & Edit Modal -->
+    <div class="dash-modal-backdrop" id="edit-modal" role="dialog" aria-modal="true" style="display: none;">
+      <div class="dash-modal-box edit-modal-box">
+        <div class="dash-modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-title-icon" id="edit-modal-icon">✏️</span>
+            <h3 class="dash-modal-title" id="edit-modal-title">Edit Presentation</h3>
           </div>
-          <button type="button" class="modal-close-icon-btn" id="reason-modal-close" aria-label="Close">✕</button>
+          <button type="button" class="modal-close-x" id="edit-modal-close" aria-label="Close dialog">✕</button>
         </div>
-        <div class="reason-modal-body">
-          <p class="reason-site-name" id="reason-site-name">Website Title</p>
-          <div class="reason-box">
-            <span class="reason-kicker">Reviewer feedback:</span>
-            <p class="reason-text" id="reason-text">No details provided.</p>
+
+        <div class="dash-modal-body modal-grid-body">
+          <!-- Left Column: Form Fields -->
+          <form class="edit-submission-form" id="edit-submission-form" novalidate>
+            <input type="hidden" name="id" id="edit-form-id" />
+
+            <!-- Lock Banner (shown if status is approved/published) -->
+            <div class="lock-banner" id="edit-lock-banner" style="display: none;">
+              <span class="lock-banner-icon">🔒</span>
+              <div class="lock-banner-text">
+                <strong>Approved submission is locked</strong>
+                <span>Project name and URL cannot be changed after approval. You can customize description, category, preview image, and theme.</span>
+              </div>
+            </div>
+
+            <!-- Project Name -->
+            <div class="form-field-group">
+              <div class="field-label-row">
+                <label for="edit-field-name">Project Name</label>
+                <span class="field-locked-tag" id="tag-name-locked" style="display: none;">🔒 Locked</span>
+              </div>
+              <input type="text" id="edit-field-name" name="name" maxlength="100" required />
+            </div>
+
+            <!-- Website URL -->
+            <div class="form-field-group">
+              <div class="field-label-row">
+                <label for="edit-field-url">Website URL</label>
+                <span class="field-locked-tag" id="tag-url-locked" style="display: none;">🔒 Locked</span>
+              </div>
+              <input type="url" id="edit-field-url" name="url" maxlength="2048" required />
+            </div>
+
+            <!-- Category -->
+            <div class="form-field-group">
+              <label for="edit-field-category">Category</label>
+              <input type="text" id="edit-field-category" name="category" maxlength="50" required placeholder="e.g. Creative, Games, Humor, Art" />
+            </div>
+
+            <!-- Description -->
+            <div class="form-field-group">
+              <div class="field-label-row">
+                <label for="edit-field-desc">Description</label>
+                <span class="char-count" id="desc-char-count">0/500</span>
+              </div>
+              <textarea id="edit-field-desc" name="description" maxlength="500" rows="3" required placeholder="Tell visitors what makes this website special..."></textarea>
+            </div>
+
+            <!-- Preview Image (Optional) -->
+            <div class="form-field-group">
+              <label for="edit-field-thumb">Preview Image URL <span class="optional-label">(Optional)</span></label>
+              <input type="url" id="edit-field-thumb" name="thumbnail_url" placeholder="https://... image link" />
+            </div>
+
+            <!-- Theme Picker -->
+            <div class="form-field-group theme-group">
+              <label>Select Card Theme</label>
+              <div class="theme-options-grid">
+                <!-- Theme 01: Cream -->
+                <label class="theme-option theme-cream">
+                  <input type="radio" name="theme" value="cream" />
+                  <div class="theme-swatch swatch-cream">
+                    <span class="swatch-accent accent-cream"></span>
+                  </div>
+                  <span class="theme-option-name">Theme 01</span>
+                  <span class="theme-option-flavor">Cream</span>
+                </label>
+
+                <!-- Theme 02: Pink -->
+                <label class="theme-option theme-pink">
+                  <input type="radio" name="theme" value="pink" />
+                  <div class="theme-swatch swatch-pink">
+                    <span class="swatch-accent accent-pink"></span>
+                  </div>
+                  <span class="theme-option-name">Theme 02</span>
+                  <span class="theme-option-flavor">Pink</span>
+                </label>
+
+                <!-- Theme 03: Cyan -->
+                <label class="theme-option theme-cyan">
+                  <input type="radio" name="theme" value="cyan" />
+                  <div class="theme-swatch swatch-cyan">
+                    <span class="swatch-accent accent-cyan"></span>
+                  </div>
+                  <span class="theme-option-name">Theme 03</span>
+                  <span class="theme-option-flavor">Cyan</span>
+                </label>
+
+                <!-- Theme 04: Purple -->
+                <label class="theme-option theme-purple">
+                  <input type="radio" name="theme" value="purple" />
+                  <div class="theme-swatch swatch-purple">
+                    <span class="swatch-accent accent-purple"></span>
+                  </div>
+                  <span class="theme-option-name">Theme 04</span>
+                  <span class="theme-option-flavor">Purple</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Form Status / Error Message -->
+            <div class="form-status-msg" id="edit-form-status" style="display: none;"></div>
+
+            <div class="form-actions-row">
+              <button type="button" class="dash-btn-white" id="edit-cancel-btn">Cancel</button>
+              <button type="submit" class="dash-btn-magenta" id="edit-submit-btn">
+                <span id="edit-submit-label">Save Changes</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Right Column: Live Modal Card Preview -->
+          <div class="modal-preview-column">
+            <span class="modal-preview-kicker">LIVE CARD PREVIEW</span>
+            <div class="live-theme-card-preview" id="modal-card-preview">
+              <div class="preview-deco-artwork" id="modal-preview-artwork">
+                <div class="default-gift-art">
+                  <span class="art-emoji">🎁</span>
+                  <span class="art-heart">❤️</span>
+                </div>
+              </div>
+              <h4 class="preview-card-title" id="modal-preview-title">SEND VIRTUAL GIFT</h4>
+              <p class="preview-card-desc" id="modal-preview-desc">Create and share beautiful digital gifts</p>
+              <div class="preview-card-pills">
+                <span class="preview-cat-pill" id="modal-preview-cat">Creative</span>
+                <span class="preview-btn-pill">Visit Website ↗</span>
+              </div>
+            </div>
+            <p class="modal-preview-note">Updates reflect immediately in the ClickForNothing library.</p>
           </div>
-          <p class="reason-help-note">
-            Feel free to review our submission guidelines and submit an updated or alternative website anytime!
-          </p>
-        </div>
-        <div class="reason-modal-actions">
-          <button type="button" class="dash-secondary-btn compact" id="reason-close-btn">Close</button>
-          <a href={submitUrl} class="dash-primary-btn compact">Submit Another Site</a>
         </div>
       </div>
     </div>
+
+    <!-- 6. Full Live Card Modal -->
+    <div class="dash-modal-backdrop" id="live-card-modal" role="dialog" aria-modal="true" style="display: none;">
+      <div class="dash-modal-box live-card-modal-box">
+        <div class="dash-modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-title-icon">👁</span>
+            <h3 class="dash-modal-title">Live Library Card Preview</h3>
+          </div>
+          <button type="button" class="modal-close-x" id="live-card-modal-close" aria-label="Close dialog">✕</button>
+        </div>
+        <div class="dash-modal-body live-card-modal-body">
+          <div class="full-live-card-stage" id="full-live-card-stage">
+            <!-- Dynamic full card injected here -->
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="dash-btn-white" id="live-card-done-btn">Close Preview</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Rejection Reason Modal -->
+    <div class="dash-modal-backdrop" id="reason-modal" role="dialog" aria-modal="true" style="display: none;">
+      <div class="dash-modal-box">
+        <div class="dash-modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-title-icon">ℹ️</span>
+            <h3 class="dash-modal-title">Reviewer Feedback</h3>
+          </div>
+          <button type="button" class="modal-close-x" id="reason-modal-close" aria-label="Close dialog">✕</button>
+        </div>
+        <div class="dash-modal-body">
+          <h4 class="reason-site-title" id="reason-site-title">Website Title</h4>
+          <div class="reason-alert-box">
+            <span class="reason-badge">STATUS: NOT ACCEPTED</span>
+            <p class="reason-content" id="reason-content">No specific comments provided.</p>
+          </div>
+          <p class="reason-guideline-note">
+            Review our submission guidelines and submit an updated or alternative website anytime!
+          </p>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="dash-btn-white" id="reason-close-btn">Close</button>
+          <a href={submitUrl} class="dash-btn-magenta">Submit Another Website</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </SiteLayout>
 
 <style>
-  .dashboard-body {
+  /* ==========================================================================
+     ClickForNothing Dashboard Styles - Neo-Brutalist Pixel-Perfect System
+     ========================================================================== */
+  
+  :root {
+    --ink: #09080c;
+    --page-bg: #fff9df;
+    --card-bg: #ffffff;
+    --magenta: #f20caf;
+    --purple: #7025ed;
+    --lime: #f7fa27;
+    --cyan: #19e8c5;
+    --border-w: 2.5px;
+    --shadow-sm: 3px 3px 0 var(--ink);
+    --shadow-md: 4px 4px 0 var(--ink);
+    --shadow-lg: 6px 6px 0 var(--ink);
+  }
+
+  .dash-page-wrapper {
     min-height: calc(100svh - 140px);
-    background: #fff9df;
-    padding-bottom: 80px;
+    background: var(--page-bg);
+    padding: 32px 16px 80px;
+    box-sizing: border-box;
   }
 
-  .dash-hero {
-    background: radial-gradient(ellipse at 51% 47%, #ffff61 0%, var(--lime) 68%, #eff52a 100%);
-    border-bottom: 4px solid var(--ink);
-    padding: clamp(32px, 6vw, 56px) 20px;
-    text-align: center;
-  }
-
-  .dash-hero-inner {
-    max-width: 800px;
+  .dash-main-container {
+    max-width: 1160px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 20px;
   }
 
-  .dash-pill-badge {
+  /* --------------------------------------------------------------------------
+     Buttons & Reusable Controls
+     -------------------------------------------------------------------------- */
+  .dash-btn-magenta,
+  .dash-submit-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--magenta);
+    color: #ffffff;
+    border: var(--border-w) solid var(--ink);
+    border-radius: 9999px;
+    padding: 10px 22px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.05rem;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 100ms ease, box-shadow 100ms ease;
+    white-space: nowrap;
+  }
+
+  .dash-btn-magenta:hover,
+  .dash-submit-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .dash-btn-magenta:active,
+  .dash-submit-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .dash-btn-white,
+  .dash-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
     background: #ffffff;
-    border: 2.5px solid var(--ink);
-    border-radius: 999px;
-    padding: 6px 16px;
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    box-shadow: 2.5px 2.5px 0 var(--ink);
-    margin-bottom: 14px;
-  }
-
-  .badge-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--pink);
-    border-radius: 50%;
-  }
-
-  .dash-title {
-    margin: 0;
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: clamp(2.4rem, 5vw, 3.8rem);
-    color: var(--purple);
-    -webkit-text-stroke: 1.8px var(--ink);
-    filter: drop-shadow(4px 4px 0 var(--ink));
-    line-height: 1;
-  }
-
-  .dash-subtitle {
-    margin: 14px 0 0;
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    font-weight: 700;
-    max-width: 600px;
     color: var(--ink);
+    border: var(--border-w) solid var(--ink);
+    border-radius: 9999px;
+    padding: 10px 20px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 100ms ease, box-shadow 100ms ease;
+    white-space: nowrap;
   }
 
-  .dash-container {
-    max-width: 1200px;
-    margin: 32px auto 0;
-    padding: 0 20px;
+  .dash-btn-white:hover,
+  .dash-refresh-btn:hover {
+    transform: translate(-1.5px, -1.5px);
+    box-shadow: var(--shadow-md);
   }
 
-  .dash-card {
-    background: #ffffff;
-    border: 3.5px solid var(--ink);
+  .dash-btn-white:active,
+  .dash-refresh-btn:active {
+    transform: translate(1.5px, 1.5px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .refresh-spinner {
+    display: inline-block;
+    font-size: 1.15rem;
+    font-weight: 900;
+    transition: transform 300ms ease;
+  }
+
+  .dash-refresh-btn.spinning .refresh-spinner {
+    animation: dashSpin 650ms linear infinite;
+  }
+
+  @keyframes dashSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* --------------------------------------------------------------------------
+     1. Top Welcome Bar Card
+     -------------------------------------------------------------------------- */
+  .dash-welcome-card {
+    background: var(--card-bg);
+    border: var(--border-w) solid var(--ink);
     border-radius: 18px;
-    box-shadow: 6px 6px 0 var(--ink);
-    padding: clamp(24px, 4vw, 40px);
-    text-align: center;
-  }
-
-  .auth-needed-card, .empty-submissions-card, .error-card {
-    max-width: 640px;
-    margin: 40px auto;
-  }
-
-  .auth-icon-wrap, .empty-emoji-art, .err-icon {
-    font-size: 52px;
-    margin-bottom: 16px;
-  }
-
-  .auth-title, .empty-title, .err-title {
-    margin: 0 0 12px;
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
-    color: var(--purple);
-  }
-
-  .auth-desc, .empty-description, .err-msg {
-    margin: 0 0 24px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    line-height: 1.5;
-    color: #4b5563;
-  }
-
-  .auth-btn-row {
+    box-shadow: var(--shadow-md);
+    padding: 16px 24px;
     display: flex;
-    gap: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .dash-top-bar {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 20px;
-    background: #ffffff;
-    border: 3.5px solid var(--ink);
-    border-radius: 18px;
-    padding: 18px 24px;
-    box-shadow: 6px 6px 0 var(--ink);
-    margin-bottom: 24px;
+    gap: 16px;
   }
 
-  .user-meta-summary {
+  .welcome-user-info {
     display: flex;
     align-items: center;
     gap: 16px;
   }
 
-  .greeting-kicker {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  .welcome-avatar-wrap {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .user-heading {
-    margin: 0;
+  .welcome-text-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .welcome-kicker {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #6b7280;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .welcome-name {
+    margin: 2px 0 0;
     font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.6rem;
+    font-size: 1.85rem;
+    line-height: 1.1;
     color: var(--ink);
   }
 
-  .dash-actions-group {
+  .welcome-actions {
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
-  .dash-primary-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #f415b5, #ed08a8);
-    color: #ffffff;
-    border: 3px solid var(--ink);
-    border-radius: 999px;
-    padding: 12px 28px;
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.15rem;
-    text-decoration: none;
-    box-shadow: 4px 4px 0 var(--ink);
-    cursor: pointer;
-    transition: transform 120ms ease, box-shadow 120ms ease;
-  }
-
-  .dash-primary-btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--ink);
-  }
-
-  .dash-primary-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0 var(--ink);
-  }
-
-  .dash-primary-btn.compact {
-    padding: 9px 20px;
-    font-size: 1rem;
-  }
-
-  .dash-secondary-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #f3f4f6;
-    color: var(--ink);
-    border: 3px solid var(--ink);
-    border-radius: 999px;
-    padding: 12px 28px;
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.15rem;
-    text-decoration: none;
-    box-shadow: 4px 4px 0 var(--ink);
-    cursor: pointer;
-    transition: transform 120ms ease, box-shadow 120ms ease;
-  }
-
-  .dash-secondary-btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 var(--ink);
-  }
-
-  .dash-secondary-btn.compact {
-    padding: 9px 20px;
-    font-size: 1rem;
-  }
-
-  .dash-refresh-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #ffffff;
-    border: 2.5px solid var(--ink);
-    border-radius: 999px;
-    padding: 8px 16px;
-    font-weight: 800;
-    font-size: 0.9rem;
-    cursor: pointer;
-    box-shadow: 3px 3px 0 var(--ink);
-    transition: transform 100ms ease;
-  }
-
-  .dash-refresh-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 var(--ink);
-  }
-
-  .refresh-icon {
-    font-size: 1.1rem;
-    transition: transform 300ms ease;
-  }
-
-  .dash-refresh-btn.spinning .refresh-icon {
-    animation: spin 700ms linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .stats-counter-strip {
+  /* --------------------------------------------------------------------------
+     2. Five Stat Cards Row
+     -------------------------------------------------------------------------- */
+  .dash-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
   }
 
-  .stat-bubble {
-    background: #ffffff;
-    border: 3px solid var(--ink);
-    border-radius: 14px;
-    padding: 12px 14px;
+  .stat-card {
+    background: var(--card-bg);
+    border: var(--border-w) solid var(--ink);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    padding: 16px 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 3.5px 3.5px 0 var(--ink);
+    text-align: center;
     cursor: pointer;
-    transition: transform 120ms ease;
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+    outline: none;
   }
 
-  .stat-bubble:hover {
+  .stat-card:hover {
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 
-  .stat-bubble.active {
-    background: #fffae0;
-    border-color: var(--purple);
+  .stat-card.active {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 2px #a855f7, var(--shadow-md);
+    background: #ffffff;
+  }
+
+  .stat-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
   }
 
   .stat-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    margin-bottom: 4px;
-  }
-
-  .dot-amber { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
-  .dot-blue { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
-  .dot-green { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
-  .dot-red { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
-
-  .stat-label {
-    font-size: 0.78rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #4b5563;
-  }
-
-  .stat-count {
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.5rem;
-    color: var(--ink);
-    margin-top: 2px;
-  }
-
-  .live-sync-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 24px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #4b5563;
-  }
-
-  .sync-dot {
     width: 8px;
     height: 8px;
-    background: #10b981;
     border-radius: 50%;
-    animation: pulse 1.8s ease-in-out infinite;
   }
 
-  @keyframes pulse {
+  .dot-purple { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
+  .dot-amber  { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+  .dot-blue   { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
+  .dot-green  { background: #10b981; box-shadow: 0 0 6px #10b981; }
+  .dot-red    { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+  .stat-title {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #4b5563;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 2.1rem;
+    line-height: 1.1;
+    color: var(--ink);
+    margin: 2px 0 4px;
+  }
+
+  .stat-subtext {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #6b7280;
+  }
+
+  /* --------------------------------------------------------------------------
+     3. Live Updates Status Strip
+     -------------------------------------------------------------------------- */
+  .dash-live-strip {
+    background: #dcfce7;
+    border: 1.5px solid #86efac;
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #166534;
+  }
+
+  .dash-live-strip.offline {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+  }
+
+  .dash-live-strip.syncing {
+    background: #fef9c3;
+    border-color: #fde047;
+    color: #854d0e;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16a34a;
+    animation: livePulse 2s infinite ease-in-out;
+  }
+
+  .dash-live-strip.offline .live-dot {
+    background: #dc2626;
+    animation: none;
+  }
+
+  .dash-live-strip.syncing .live-dot {
+    background: #eab308;
+  }
+
+  @keyframes livePulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.4; transform: scale(0.85); }
   }
 
-  /* Submissions Cards Grid */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 26px;
-  }
-
-  .sub-preview-card {
-    background: #ffffff;
-    border: 3.5px solid var(--ink);
-    border-radius: 18px;
-    box-shadow: 6px 6px 0 var(--ink);
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(280px, .9fr) minmax(0, 1.1fr);
-    align-items: stretch;
-    padding: 22px;
-    gap: 22px;
-    transition: transform 140ms ease, box-shadow 140ms ease;
-  }
-
-  .sub-preview-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 8px 8px 0 var(--ink);
-  }
-
-  .submission-heading { grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center; gap:12px; }
-  .submission-heading > div { display:flex; align-items:center; gap:12px; }
-  .library-preview { --preview-bg:#fff9df; --preview-tag:var(--cyan); background:var(--preview-bg); border:3px solid var(--ink); border-radius:22px; box-shadow:0 6px 0 var(--ink); padding:20px; min-height:250px; display:flex; flex-direction:column; position:relative; overflow:hidden; }
-  .library-preview.pink,.theme-choice.pink { --preview-bg:#ffe2f5; --preview-tag:#ff55c8; }
-  .library-preview.cyan,.theme-choice.cyan { --preview-bg:#dffaff; --preview-tag:#63e7f3; }
-  .library-preview.purple,.theme-choice.purple { --preview-bg:#eee3ff; --preview-tag:#a578ff; }
-  .library-preview.cream,.theme-choice.cream { --preview-bg:#fff9df; --preview-tag:#b5f0f3; }
-  .preview-label { font-size:.66rem; font-weight:900; letter-spacing:.12em; color:#737080; margin-bottom:16px; }
-  .preview-library-top { display:flex; justify-content:space-between; gap:8px; align-items:center; }
-  .preview-category { background:var(--preview-tag); border:2px solid var(--ink); border-radius:999px; padding:4px 10px; font-weight:900; font-size:.72rem; }
-  .preview-domain { font-size:.78rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .preview-library-main { flex:1; display:flex; flex-direction:column; justify-content:center; }
-  .preview-library-main h3 { font:400 clamp(1.5rem,3vw,2.2rem)/1.08 'Lilita One',system-ui,sans-serif; margin:10px 0 6px; }
-  .preview-library-main p { margin:0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-  .preview-visit { background:var(--pink); color:white; text-align:center; text-decoration:none; border:2.5px solid var(--ink); border-radius:999px; padding:8px 12px; font-weight:900; box-shadow:3px 3px 0 var(--ink); }
-  .live-preview-image { width:100%; max-height:90px; object-fit:cover; border:2px solid var(--ink); border-radius:10px; margin-bottom:10px; }
-  .card-body-content { padding:2px; min-width:0; display:flex; flex-direction:column; }
-  .submission-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:0 0 14px; }
-  .submission-facts span { background:#fff9df; border:2px solid var(--ink); border-radius:10px; padding:8px; font-size:.77rem; overflow-wrap:anywhere; }
-  .submission-facts b { display:block; text-transform:uppercase; font-size:.64rem; margin-bottom:3px; color:#6b7280; }
-  .lock-note { background:#fff4cc; border-left:4px solid #f59e0b; padding:10px 12px; font-size:.82rem; font-weight:800; margin:0 0 14px; }
-  .submission-actions,.edit-form-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:auto; }
-  .submission-edit-form,.theme-only-form { margin-top:18px; border-top:2px dashed #d6d3d1; padding-top:16px; }
-  .edit-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .edit-fields label { display:flex; flex-direction:column; gap:5px; font-size:.8rem; font-weight:900; }
-  .edit-fields label:nth-child(3),.edit-fields label:nth-child(5) { grid-column:1/-1; }
-  .edit-fields input,.edit-fields textarea { width:100%; border:2px solid var(--ink); border-radius:9px; padding:9px; font:600 .9rem system-ui; box-sizing:border-box; background:white; }
-  .edit-fields textarea { min-height:76px; resize:vertical; }
-  .theme-selector { border:0; padding:0; margin:16px 0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
-  .theme-selector legend { font-size:.85rem; font-weight:900; margin-bottom:8px; }
-  .theme-choice { cursor:pointer; background:var(--preview-bg); border:2px solid var(--ink); border-radius:10px; padding:8px; display:flex; flex-direction:column; gap:6px; font-size:.67rem; }
-  .theme-choice input { accent-color:var(--purple); }
-  .theme-swatch { height:30px; border:1px solid var(--ink); border-radius:6px; background:var(--preview-bg); box-shadow:inset 0 -9px var(--preview-tag); }
-  .edit-message { font-size:.8rem; font-weight:800; }
-  .preview-highlight { outline:4px solid var(--purple); outline-offset:4px; }
-  [hidden] { display:none !important; }
-
-  /* Safe Preview Container (Requirement 6) */
-  .card-preview-window {
-    background: #f3f4f6;
-    border-bottom: 3px solid var(--ink);
-    position: relative;
-    height: 180px;
+  /* --------------------------------------------------------------------------
+     4. "My Submissions" Outer Card & Controls
+     -------------------------------------------------------------------------- */
+  .dash-submissions-container {
+    background: var(--card-bg);
+    border: var(--border-w) solid var(--ink);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    padding: 24px;
     display: flex;
     flex-direction: column;
+    gap: 20px;
   }
 
-  .browser-mock-header {
-    height: 30px;
-    background: #e5e7eb;
-    border-bottom: 2px solid var(--ink);
+  .submissions-header-bar {
     display: flex;
     align-items: center;
-    padding: 0 10px;
-    gap: 6px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 8px;
   }
 
-  .mock-dots {
+  .submissions-title-group {
     display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .submissions-badge-icon {
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0 var(--ink);
+    color: var(--ink);
+  }
+
+  .submissions-heading {
+    margin: 0;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.7rem;
+    color: var(--ink);
+  }
+
+  .submissions-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .select-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .select-wrapper select {
+    appearance: none;
+    background: #ffffff;
+    border: var(--border-w) solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 34px 8px 14px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    outline: none;
+    transition: transform 100ms ease;
+  }
+
+  .select-wrapper select:hover {
+    transform: translateY(-1px);
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: var(--ink);
+  }
+
+  /* --------------------------------------------------------------------------
+     Submission Card (Left Live Preview, Right Meta/Facts)
+     -------------------------------------------------------------------------- */
+  .submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .sub-card-box {
+    background: #ffffff;
+    border: var(--border-w) solid var(--ink);
+    border-radius: 18px;
+    box-shadow: var(--shadow-md);
+    padding: 22px;
+    display: grid;
+    grid-template-columns: 330px 1fr;
+    gap: 24px;
+    align-items: start;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+
+  .sub-card-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Left Column: Live Card Preview */
+  .sub-preview-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .live-theme-card {
+    border: var(--border-w) solid var(--ink);
+    border-radius: 18px;
+    box-shadow: 0 5px 0 var(--ink);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+    position: relative;
+    overflow: hidden;
+    transition: background 150ms ease;
+  }
+
+  /* Themes */
+  .live-theme-card.theme-cream,
+  .live-theme-card-preview.theme-cream {
+    background: #fff9df;
+    --tag-bg: #b5f0f3;
+  }
+
+  .live-theme-card.theme-pink,
+  .live-theme-card-preview.theme-pink {
+    background: #ffe2f5;
+    --tag-bg: #ff55c8;
+  }
+
+  .live-theme-card.theme-cyan,
+  .live-theme-card-preview.theme-cyan {
+    background: #dffaff;
+    --tag-bg: #63e7f3;
+  }
+
+  .live-theme-card.theme-purple,
+  .live-theme-card-preview.theme-purple {
+    background: #eee3ff;
+    --tag-bg: #a578ff;
+  }
+
+  .card-artwork-box {
+    width: 100%;
+    height: 120px;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .card-artwork-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .default-gift-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .art-emoji {
+    font-size: 3.2rem;
+    filter: drop-shadow(2px 2px 0 var(--ink));
+  }
+
+  .art-heart {
+    position: absolute;
+    top: -6px;
+    right: -12px;
+    font-size: 1.4rem;
+    animation: heartBounce 1.8s infinite ease-in-out;
+  }
+
+  @keyframes heartBounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-4px) scale(1.1); }
+  }
+
+  .card-inner-title {
+    margin: 4px 0 4px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.55rem;
+    line-height: 1.1;
+    color: var(--ink);
+    text-transform: capitalize;
+  }
+
+  .card-inner-desc {
+    margin: 0 0 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #4b5563;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-inner-pills-row {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .pill-cat {
+    background: #ffffff;
+    border: 2px solid var(--ink);
+    border-radius: 9999px;
+    padding: 4px 14px;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: var(--ink);
+  }
+
+  .pill-visit {
+    background: var(--magenta);
+    color: #ffffff;
+    border: 2px solid var(--ink);
+    border-radius: 9999px;
+    padding: 4px 14px;
+    font-weight: 800;
+    font-size: 0.78rem;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .btn-live-preview-modal {
+    background: #ffffff;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 100ms ease;
+  }
+
+  .btn-live-preview-modal:hover {
+    transform: translateY(-1.5px);
+  }
+
+  /* Right Column: Information, Facts, Lock Note & Actions */
+  .sub-info-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .sub-top-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .sub-title-url-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .sub-title-link {
+    margin: 0;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    color: var(--ink);
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+
+  .sub-title-link:hover {
+    color: var(--purple);
+  }
+
+  .sub-domain-text {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .sub-domain-text:hover {
+    text-decoration: underline;
+  }
+
+  /* Status Pills */
+  .status-badge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 2px solid var(--ink);
+    border-radius: 9999px;
+    padding: 5px 14px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .status-pill.approved {
+    background: #2563eb;
+  }
+
+  .status-pill.published {
+    background: #16a34a;
+  }
+
+  .status-pill.under-review {
+    background: #d97706;
+  }
+
+  .status-pill.rejected {
+    background: #dc2626;
+  }
+
+  .sub-randomizer-status {
+    font-size: 0.76rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
     gap: 5px;
   }
 
-  .m-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    border: 1px solid var(--ink);
+  .sub-randomizer-status.green {
+    color: #15803d;
   }
-  .m-dot.red { background: #ef4444; }
-  .m-dot.yellow { background: #f59e0b; }
-  .m-dot.green { background: #22c55e; }
 
-  .mock-url-bar {
-    margin-left: 8px;
+  .sub-randomizer-status.amber {
+    color: #b45309;
+  }
+
+  .sub-randomizer-status.red {
+    color: #b91c1c;
+  }
+
+  .sub-desc-text {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.48;
+    color: #374151;
+  }
+
+  /* Tags / Meta Row */
+  .sub-meta-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .meta-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     background: #ffffff;
     border: 1.5px solid var(--ink);
-    border-radius: 999px;
-    padding: 1px 10px;
-    font-size: 0.7rem;
-    font-family: monospace;
+    border-radius: 9999px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
     color: #4b5563;
-    max-width: 190px;
+  }
+
+  .meta-tag-pill.theme-pill {
+    background: #eee3ff;
+    border-color: #a855f7;
+    color: #6b21a8;
+  }
+
+  /* Facts Table / Container */
+  .sub-facts-table {
+    background: #fbfbfd;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    font-size: 0.82rem;
+  }
+
+  .fact-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fact-label {
+    font-weight: 700;
+    color: #6b7280;
+    min-width: 75px;
+  }
+
+  .fact-value {
+    font-weight: 800;
+    color: var(--ink);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .preview-content-box {
-    position: relative;
-    flex: 1;
-    overflow: hidden;
-    background: linear-gradient(135deg, #fdf8e6 0%, #fffae8 100%);
+  /* Approval Lock Warning Notice */
+  .lock-notice-box {
+    background: #fefce8;
+    border: 1.5px solid #fde047;
+    border-radius: 12px;
+    padding: 12px 14px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .sandboxed-frame {
-    width: 100%;
-    height: 100%;
-    border: none;
-    pointer-events: none; /* Prevents iframe interaction breaking card */
-  }
-
-  .fallback-preview-view {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-  }
-
-  .fallback-icon {
-    font-size: 38px;
-    margin-bottom: 6px;
-    filter: drop-shadow(2px 2px 0 var(--ink));
-  }
-
-  .fallback-label {
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.05rem;
-    color: var(--purple);
-    margin: 0;
-  }
-
-  .card-body-content {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-
-  .card-meta-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    font-size: 0.8rem;
-  }
-
-  .category-pill {
-    background: #fef08a;
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    padding: 3px 10px;
-    font-weight: 800;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-  }
-
-  .date-text {
-    font-weight: 700;
-    color: #6b7280;
-  }
-
-  .card-site-title {
-    margin: 0 0 6px;
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.35rem;
-    line-height: 1.2;
-    color: var(--ink);
-  }
-
-  .card-site-url {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--purple);
-    text-decoration: none;
-    margin-bottom: 12px;
-    word-break: break-all;
-  }
-
-  .card-site-url:hover {
-    text-decoration: underline;
-  }
-
-  .card-site-desc {
-    font-size: 0.95rem;
-    font-weight: 500;
-    line-height: 1.45;
-    color: #374151;
-    margin: 0 0 20px;
-    flex: 1;
-  }
-
-  /* Status Badges */
-  .card-status-footer {
-    border-top: 2px dashed #e5e7eb;
-    padding-top: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    align-items: flex-start;
     gap: 10px;
   }
 
-  .status-badge-wrap {
+  .lock-notice-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .lock-notice-content {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .status-badge-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-weight: 800;
-    font-size: 0.78rem;
-    letter-spacing: 0.03em;
+  .lock-notice-title {
+    font-size: 0.84rem;
+    font-weight: 900;
+    color: #854d0e;
   }
 
-  .status-badge-pill.under-review {
-    background: #fef3c7;
-    color: #92400e;
+  .lock-notice-desc {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #713f12;
+    margin: 0;
   }
 
-  .status-badge-pill.approved {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-
-  .status-badge-pill.published {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .status-badge-pill.rejected {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .status-subtext {
-    font-size: 0.78rem;
+  .lock-notice-link {
+    color: #2563eb;
     font-weight: 700;
-    color: #6b7280;
+    text-decoration: underline;
+    cursor: pointer;
   }
 
-  .action-link-btn {
+  /* Actions Row */
+  .sub-actions-row {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-visit-site {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.85rem;
+    justify-content: center;
+    gap: 6px;
+    background: var(--magenta);
+    color: #ffffff;
+    border: var(--border-w) solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 18px;
     font-weight: 800;
-    color: var(--purple);
+    font-size: 0.9rem;
     text-decoration: none;
+    box-shadow: var(--shadow-sm);
     cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
+    transition: transform 100ms ease;
   }
 
-  .action-link-btn:hover {
-    text-decoration: underline;
+  .btn-visit-site:hover {
+    transform: translateY(-1.5px);
   }
 
-  /* Skeletons */
-  .card-skeleton {
+  .btn-edit-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     background: #ffffff;
-    border: 3.5px solid var(--ink);
+    color: var(--ink);
+    border: var(--border-w) solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 18px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 100ms ease;
+  }
+
+  .btn-edit-action:hover {
+    transform: translateY(-1.5px);
+  }
+
+  .btn-more-options {
+    background: #ffffff;
+    border: var(--border-w) solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+
+  .btn-more-options:hover {
+    transform: translateY(-1.5px);
+  }
+
+  /* --------------------------------------------------------------------------
+     Skeletons & Empty States
+     -------------------------------------------------------------------------- */
+  .skeleton-card {
+    background: #ffffff;
+    border: var(--border-w) solid var(--ink);
     border-radius: 18px;
-    overflow: hidden;
+    padding: 22px;
+    display: grid;
+    grid-template-columns: 330px 1fr;
+    gap: 24px;
   }
 
-  .sk-preview {
-    height: 180px;
+  .sk-left {
+    height: 240px;
     background: #e5e7eb;
-    animation: shimmer 1.5s infinite;
+    border-radius: 14px;
+    animation: dashShimmer 1.5s infinite;
   }
 
-  .sk-body {
-    padding: 20px;
+  .sk-right {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -832,78 +1301,154 @@ const homeUrl = getLocalizedPath('/', currentLocale);
   .sk-line {
     background: #e5e7eb;
     border-radius: 6px;
-    animation: shimmer 1.5s infinite;
+    animation: dashShimmer 1.5s infinite;
   }
 
-  .sk-title { height: 24px; width: 65%; }
-  .sk-desc { height: 40px; width: 90%; }
-  .sk-badge { height: 28px; width: 45%; }
+  .sk-title { height: 28px; width: 60%; }
+  .sk-url   { height: 16px; width: 35%; }
+  .sk-desc  { height: 48px; width: 90%; }
+  .sk-box   { height: 70px; width: 100%; border-radius: 10px; }
 
-  @keyframes shimmer {
-    0% { opacity: 0.6; }
+  @keyframes dashShimmer {
+    0% { opacity: 0.5; }
     50% { opacity: 1; }
-    100% { opacity: 0.6; }
+    100% { opacity: 0.5; }
   }
 
-  /* Rejection Modal */
-  .reason-modal-backdrop {
+  .submissions-empty-state {
+    padding: 48px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .empty-icon {
+    font-size: 3.5rem;
+  }
+
+  .empty-title {
+    margin: 0;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 2rem;
+    color: var(--ink);
+  }
+
+  .empty-desc {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #4b5563;
+    max-width: 500px;
+  }
+
+  /* Signed-out Card */
+  .dash-signed-out-card {
+    background: var(--card-bg);
+    border: var(--border-w) solid var(--ink);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    padding: 48px 24px;
+    max-width: 580px;
+    margin: 40px auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .signed-out-icon-box {
+    margin-bottom: 16px;
+  }
+
+  .signed-out-title {
+    margin: 0 0 12px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 2rem;
+    color: var(--purple);
+  }
+
+  .signed-out-desc {
+    margin: 0 0 24px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #4b5563;
+    line-height: 1.5;
+  }
+
+  .signed-out-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* --------------------------------------------------------------------------
+     Modals System
+     -------------------------------------------------------------------------- */
+  .dash-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 99999;
-    background: rgba(9, 8, 12, 0.7);
+    z-index: 999999;
+    background: rgba(9, 8, 12, 0.72);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 16px;
+    box-sizing: border-box;
   }
 
-  @media (max-width:760px) {
-    .sub-preview-card { grid-template-columns:1fr; padding:16px; gap:16px; }
-    .submission-heading { align-items:flex-start; flex-direction:column; }
-    .submission-heading > div { flex-wrap:wrap; }
-    .submission-facts { grid-template-columns:1fr 1fr; }
-    .theme-selector { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  }
-  @media (max-width:420px) {
-    .dash-actions-group { width:100%; justify-content:space-between; }
-    .edit-fields { grid-template-columns:1fr; }
-    .edit-fields label:nth-child(3),.edit-fields label:nth-child(5) { grid-column:auto; }
-    .submission-actions > button,.submission-actions > a { flex:1; }
-  }
-
-  .reason-modal-card {
+  .dash-modal-box {
     background: #ffffff;
-    border: 4px solid var(--ink);
+    border: 3.5px solid var(--ink);
     border-radius: 20px;
     box-shadow: 8px 8px 0 var(--ink);
-    max-width: 500px;
+    max-width: 520px;
     width: 100%;
-    padding: 28px;
+    padding: 26px;
+    box-sizing: border-box;
+    max-height: 90vh;
+    overflow-y: auto;
   }
 
-  .reason-modal-header {
+  .dash-modal-box.edit-modal-box {
+    max-width: 860px;
+  }
+
+  .dash-modal-box.live-card-modal-box {
+    max-width: 480px;
+  }
+
+  .dash-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
   }
 
-  .reason-title-wrap {
+  .modal-title-wrap {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
 
-  .reason-title {
+  .modal-title-icon {
+    font-size: 1.4rem;
+  }
+
+  .dash-modal-title {
     margin: 0;
     font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     color: var(--ink);
   }
 
-  .modal-close-icon-btn {
-    background: none;
+  .modal-close-x {
+    background: #ffffff;
     border: 2px solid var(--ink);
     border-radius: 50%;
     width: 32px;
@@ -911,116 +1456,494 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 900;
     cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink);
+    transition: transform 100ms ease;
   }
 
-  .reason-site-name {
-    margin: 0 0 12px;
+  .modal-close-x:hover {
+    transform: scale(1.1);
+  }
+
+  .modal-grid-body {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .edit-submission-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .lock-banner {
+    background: #fefce8;
+    border: 1.5px solid #fde047;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+
+  .lock-banner-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .lock-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: #713f12;
+  }
+
+  .lock-banner-text strong {
     font-weight: 800;
-    font-size: 1.15rem;
+  }
+
+  .form-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .form-field-group label {
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--ink);
+  }
+
+  .field-locked-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 9999px;
+    padding: 1px 8px;
+  }
+
+  .char-count, .optional-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+  }
+
+  .form-field-group input,
+  .form-field-group textarea {
+    width: 100%;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 10px;
+    font: 600 0.9rem system-ui, sans-serif;
+    background: #ffffff;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .form-field-group input:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+
+  .form-field-group textarea {
+    resize: vertical;
+  }
+
+  /* Themes Selector inside Modal */
+  .theme-options-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .theme-option {
+    cursor: pointer;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 8px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: transform 100ms ease, box-shadow 100ms ease;
+  }
+
+  .theme-option:hover {
+    transform: translateY(-2px);
+  }
+
+  .theme-option input[type="radio"] {
+    accent-color: var(--purple);
+    width: 16px;
+    height: 16px;
+    margin: 0;
+  }
+
+  .theme-option.theme-cream { background: #fff9df; }
+  .theme-option.theme-pink  { background: #ffe2f5; }
+  .theme-option.theme-cyan  { background: #dffaff; }
+  .theme-option.theme-purple{ background: #eee3ff; }
+
+  .theme-swatch {
+    width: 100%;
+    height: 24px;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .swatch-cream { background: #fff9df; }
+  .swatch-pink  { background: #ffe2f5; }
+  .swatch-cyan  { background: #dffaff; }
+  .swatch-purple{ background: #eee3ff; }
+
+  .swatch-accent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+  }
+
+  .accent-cream { background: #b5f0f3; }
+  .accent-pink  { background: #ff55c8; }
+  .accent-cyan  { background: #63e7f3; }
+  .accent-purple{ background: #a578ff; }
+
+  .theme-option-name {
+    font-weight: 800;
+    font-size: 0.72rem;
+    color: var(--ink);
+  }
+
+  .theme-option-flavor {
+    font-weight: 700;
+    font-size: 0.68rem;
+    color: #6b7280;
+  }
+
+  .form-status-msg {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .form-status-msg.error {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #991b1b;
+  }
+
+  .form-status-msg.success {
+    background: #dcfce7;
+    border: 1px solid #22c55e;
+    color: #166534;
+  }
+
+  .form-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  /* Modal Preview Column */
+  .modal-preview-column {
+    background: #f9fafb;
+    border: 2px dashed #d1d5db;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-preview-kicker {
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: #6b7280;
+    letter-spacing: 0.08em;
+  }
+
+  .live-theme-card-preview {
+    border: var(--border-w) solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 0 4px 0 var(--ink);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    transition: background 150ms ease;
+  }
+
+  .preview-deco-artwork {
+    width: 100%;
+    height: 90px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .preview-card-title {
+    margin: 0 0 4px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.35rem;
+    color: var(--ink);
+    text-transform: capitalize;
+  }
+
+  .preview-card-desc {
+    margin: 0 0 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4b5563;
+    line-height: 1.3;
+  }
+
+  .preview-card-pills {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .preview-cat-pill {
+    background: #ffffff;
+    border: 1.5px solid var(--ink);
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .preview-btn-pill {
+    background: var(--magenta);
+    color: #ffffff;
+    border: 1.5px solid var(--ink);
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .modal-preview-note {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-align: center;
+  }
+
+  /* Full Live Card Modal */
+  .full-live-card-stage {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+  }
+
+  .dash-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1.5px solid #e5e7eb;
+  }
+
+  /* Rejection Modal Details */
+  .reason-site-title {
+    margin: 0 0 10px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.3rem;
     color: var(--purple);
   }
 
-  .reason-box {
+  .reason-alert-box {
     background: #fef2f2;
     border: 2px solid #ef4444;
     border-radius: 12px;
     padding: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
-  .reason-kicker {
+  .reason-badge {
     display: block;
-    font-size: 0.78rem;
-    font-weight: 800;
+    font-size: 0.75rem;
+    font-weight: 900;
     color: #991b1b;
-    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin-bottom: 4px;
   }
 
-  .reason-text {
+  .reason-content {
     margin: 0;
     font-weight: 600;
+    font-size: 0.95rem;
     color: #7f1d1d;
-    line-height: 1.4;
+    line-height: 1.45;
   }
 
-  .reason-help-note {
-    font-size: 0.88rem;
+  .reason-guideline-note {
+    font-size: 0.85rem;
     font-weight: 600;
     color: #6b7280;
-    line-height: 1.4;
-    margin-bottom: 24px;
+    margin: 0;
   }
 
-  .reason-modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
+  /* --------------------------------------------------------------------------
+     Responsive Media Queries
+     -------------------------------------------------------------------------- */
+  @media (max-width: 980px) {
+    .dash-stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .sub-card-box {
+      grid-template-columns: 1fr;
+    }
+    .modal-grid-body {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .dash-stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .welcome-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .submissions-controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .sub-facts-table {
+      grid-template-columns: 1fr;
+    }
+    .theme-options-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 </style>
 
 <script>
   import { $authStore, $userStore } from '@clerk/astro/client';
 
-  let pollTimer: any = null;
+  // Global state
   let cachedSubmissions: any[] = [];
   let currentFilter = 'all';
+  let currentSort = 'newest';
+  let pollIntervalTimer: any = null;
+  let isFetching = false;
+  let lastFetchTimestamp = 0;
 
-  function initDashboard() {
+  function initUserDashboard() {
+    // DOM Elements
     const signedOutView = document.getElementById('dash-signed-out-view');
     const signedInView = document.getElementById('dash-signed-in-view');
     const userNameEl = document.getElementById('dash-user-name');
     const refreshBtn = document.getElementById('dash-refresh-btn');
-    const retryBtn = document.getElementById('dash-retry-btn');
-    const skeletonGrid = document.getElementById('dash-skeleton');
-    const errorCard = document.getElementById('dash-error-view');
-    const emptyCard = document.getElementById('dash-empty-view');
-    const grid = document.getElementById('submissions-grid');
+    const refreshLabel = document.getElementById('refresh-label');
+    const liveStrip = document.getElementById('dash-live-strip');
+    const liveDot = document.getElementById('live-indicator-dot');
+    const liveText = document.getElementById('live-indicator-text');
+    const skeletonList = document.getElementById('dash-skeleton');
+    const errorView = document.getElementById('dash-error-view');
     const errorMsg = document.getElementById('dash-error-msg');
+    const retryBtn = document.getElementById('dash-retry-btn');
+    const emptyView = document.getElementById('dash-empty-view');
+    const submissionsList = document.getElementById('submissions-list');
+    const statusSelect = document.getElementById('status-filter-select') as HTMLSelectElement | null;
+    const sortSelect = document.getElementById('sort-order-select') as HTMLSelectElement | null;
 
-    // Stats count elements
+    // Stat counts
     const countTotal = document.getElementById('count-total');
     const countReview = document.getElementById('count-review');
     const countApproved = document.getElementById('count-approved');
     const countPublished = document.getElementById('count-published');
     const countRejected = document.getElementById('count-rejected');
 
-    // Modal elements
+    // Modals
+    const editModal = document.getElementById('edit-modal');
+    const editModalClose = document.getElementById('edit-modal-close');
+    const editCancelBtn = document.getElementById('edit-cancel-btn');
+    const editForm = document.getElementById('edit-submission-form') as HTMLFormElement | null;
+    const editModalTitle = document.getElementById('edit-modal-title');
+    const editLockBanner = document.getElementById('edit-lock-banner');
+    const tagNameLocked = document.getElementById('tag-name-locked');
+    const tagUrlLocked = document.getElementById('tag-url-locked');
+    const editFieldName = document.getElementById('edit-field-name') as HTMLInputElement | null;
+    const editFieldUrl = document.getElementById('edit-field-url') as HTMLInputElement | null;
+    const editFieldCategory = document.getElementById('edit-field-category') as HTMLInputElement | null;
+    const editFieldDesc = document.getElementById('edit-field-desc') as HTMLTextAreaElement | null;
+    const editFieldThumb = document.getElementById('edit-field-thumb') as HTMLInputElement | null;
+    const descCharCount = document.getElementById('desc-char-count');
+    const editFormStatus = document.getElementById('edit-form-status');
+    const editSubmitBtn = document.getElementById('edit-submit-btn');
+    const editSubmitLabel = document.getElementById('edit-submit-label');
+
+    // Modal Live Preview
+    const modalCardPreview = document.getElementById('modal-card-preview');
+    const modalPreviewTitle = document.getElementById('modal-preview-title');
+    const modalPreviewDesc = document.getElementById('modal-preview-desc');
+    const modalPreviewCat = document.getElementById('modal-preview-cat');
+
+    // Live Card Modal
+    const liveCardModal = document.getElementById('live-card-modal');
+    const liveCardModalClose = document.getElementById('live-card-modal-close');
+    const liveCardDoneBtn = document.getElementById('live-card-done-btn');
+    const fullLiveCardStage = document.getElementById('full-live-card-stage');
+
+    // Reason Modal
     const reasonModal = document.getElementById('reason-modal');
-    const reasonSiteName = document.getElementById('reason-site-name');
-    const reasonText = document.getElementById('reason-text');
-    const reasonCloseBtn = document.getElementById('reason-close-btn');
     const reasonModalClose = document.getElementById('reason-modal-close');
+    const reasonCloseBtn = document.getElementById('reason-close-btn');
+    const reasonSiteTitle = document.getElementById('reason-site-title');
+    const reasonContent = document.getElementById('reason-content');
 
-    if (reasonCloseBtn && reasonModal) {
-      reasonCloseBtn.addEventListener('click', () => { reasonModal.style.display = 'none'; });
+    // Close Modals handler
+    function closeAllModals() {
+      if (editModal) editModal.style.display = 'none';
+      if (liveCardModal) liveCardModal.style.display = 'none';
+      if (reasonModal) reasonModal.style.display = 'none';
     }
-    if (reasonModalClose && reasonModal) {
-      reasonModalClose.addEventListener('click', () => { reasonModal.style.display = 'none'; });
-    }
+
+    if (editModalClose) editModalClose.addEventListener('click', () => { if (editModal) editModal.style.display = 'none'; });
+    if (editCancelBtn) editCancelBtn.addEventListener('click', () => { if (editModal) editModal.style.display = 'none'; });
+    if (liveCardModalClose) liveCardModalClose.addEventListener('click', () => { if (liveCardModal) liveCardModal.style.display = 'none'; });
+    if (liveCardDoneBtn) liveCardDoneBtn.addEventListener('click', () => { if (liveCardModal) liveCardModal.style.display = 'none'; });
+    if (reasonModalClose) reasonModalClose.addEventListener('click', () => { if (reasonModal) reasonModal.style.display = 'none'; });
+    if (reasonCloseBtn) reasonCloseBtn.addEventListener('click', () => { if (reasonModal) reasonModal.style.display = 'none'; });
+
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && reasonModal) {
-        reasonModal.style.display = 'none';
-      }
+      if (e.key === 'Escape') closeAllModals();
     });
 
-    // Filter clicks
-    const filters = ['all', 'pending_review', 'approved', 'published', 'rejected'];
-    filters.forEach((f) => {
-      const el = document.querySelector(`[data-filter="${f}"]`);
-      if (el) {
-        el.addEventListener('click', () => {
-          document.querySelectorAll('.stat-bubble').forEach((b) => b.classList.remove('active'));
-          el.classList.add('active');
-          currentFilter = f;
-          renderCards();
-        });
-      }
-    });
-
+    // Clerk Bearer token helper with retry
     async function getAuthToken(retries = 3): Promise<string | null> {
       for (let i = 0; i < retries; i++) {
         if ((window as any).Clerk?.session) {
@@ -1038,24 +1961,43 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       return null;
     }
 
+    // Set Live indicator status
+    function setLiveStatus(status: 'connected' | 'syncing' | 'offline', message?: string) {
+      if (!liveStrip || !liveText) return;
+      liveStrip.classList.remove('offline', 'syncing');
+
+      if (status === 'connected') {
+        liveText.textContent = message || 'Live updates enabled · Checking Neon for changes';
+      } else if (status === 'syncing') {
+        liveStrip.classList.add('syncing');
+        liveText.textContent = message || '↻ Syncing with Neon...';
+      } else if (status === 'offline') {
+        liveStrip.classList.add('offline');
+        liveText.textContent = message || '🔴 Live updates unavailable · Will retry automatically';
+      }
+    }
+
+    // Fetch Submissions from Neon via /api/submissions
     async function fetchSubmissions(isInitial = false) {
+      if (isFetching) return;
       const state = $authStore.get();
-      if (!state?.userId) {
-        return;
-      }
+      if (!state?.userId) return;
 
-      if (isInitial && skeletonGrid && (!cachedSubmissions || cachedSubmissions.length === 0)) {
-        skeletonGrid.style.display = 'grid';
-        if (grid) grid.style.display = 'none';
-        if (emptyCard) emptyCard.style.display = 'none';
-        if (errorCard) errorCard.style.display = 'none';
-      }
-
+      isFetching = true;
       if (refreshBtn) refreshBtn.classList.add('spinning');
+      if (refreshLabel) refreshLabel.textContent = 'Refreshing...';
+      setLiveStatus('syncing');
+
+      if (isInitial && (!cachedSubmissions || cachedSubmissions.length === 0)) {
+        if (skeletonList) skeletonList.style.display = 'block';
+        if (submissionsList) submissionsList.style.display = 'none';
+        if (emptyView) emptyView.style.display = 'none';
+        if (errorView) errorView.style.display = 'none';
+      }
 
       try {
         const token = await getAuthToken();
-        const headers: Record<string, string> = {};
+        const headers: Record<string, string> = { Accept: 'application/json' };
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
@@ -1067,41 +2009,52 @@ const homeUrl = getLocalizedPath('/', currentLocale);
         });
 
         if (!res.ok) {
-          if (res.status === 401) {
-            // Not signed in
-            return;
-          }
+          if (res.status === 401) return;
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || `HTTP error ${res.status}`);
+          throw new Error(errData.error || `Failed to fetch submissions (${res.status})`);
         }
 
         const data = await res.json();
         cachedSubmissions = Array.isArray(data.submissions) ? data.submissions : [];
+        lastFetchTimestamp = Date.now();
 
-        if (errorCard) errorCard.style.display = 'none';
-        updateStats();
-        renderCards();
+        if (errorView) errorView.style.display = 'none';
+        setLiveStatus('connected', 'Live updates enabled · Checking Neon for changes');
+
+        updateCounts();
+        renderSubmissions();
+
+        if (refreshLabel) {
+          refreshLabel.textContent = 'Updated just now';
+          setTimeout(() => {
+            if (refreshLabel) refreshLabel.textContent = 'Refresh';
+          }, 2000);
+        }
       } catch (err: any) {
-        console.error('Failed to fetch submissions:', err);
+        console.error('Error fetching submissions from Neon:', err);
+        setLiveStatus('offline', 'Failed to reach Neon · Retrying automatically');
+
         if (isInitial && (!cachedSubmissions || cachedSubmissions.length === 0)) {
-          if (skeletonGrid) skeletonGrid.style.display = 'none';
-          if (grid) grid.style.display = 'none';
-          if (emptyCard) emptyCard.style.display = 'none';
-          if (errorCard) {
-            errorCard.style.display = 'block';
-            if (errorMsg) errorMsg.textContent = err?.message || 'Could not reach database.';
+          if (skeletonList) skeletonList.style.display = 'none';
+          if (submissionsList) submissionsList.style.display = 'none';
+          if (emptyView) emptyView.style.display = 'none';
+          if (errorView) {
+            errorView.style.display = 'block';
+            if (errorMsg) errorMsg.textContent = err?.message || 'Could not connect to database.';
           }
         }
       } finally {
-        if (skeletonGrid) skeletonGrid.style.display = 'none';
+        isFetching = false;
+        if (skeletonList) skeletonList.style.display = 'none';
         if (refreshBtn) refreshBtn.classList.remove('spinning');
       }
     }
 
-    function updateStats() {
+    // Update 5 Stat Counts
+    function updateCounts() {
       const total = cachedSubmissions.length;
       const review = cachedSubmissions.filter((s) => s.status === 'pending_review' || s.status === 'pending').length;
-      const approved = cachedSubmissions.filter((s) => s.status === 'approved' || s.status === 'published').length;
+      const approved = cachedSubmissions.filter((s) => s.status === 'approved').length;
       const published = cachedSubmissions.filter((s) => s.status === 'published').length;
       const rejected = cachedSubmissions.filter((s) => s.status === 'rejected').length;
 
@@ -1110,176 +2063,499 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       if (countApproved) countApproved.textContent = String(approved);
       if (countPublished) countPublished.textContent = String(published);
       if (countRejected) countRejected.textContent = String(rejected);
+
+      const labelTotal = document.getElementById('label-subtext-total');
+      if (labelTotal) labelTotal.textContent = total === 1 ? 'Submission' : 'Submissions';
     }
 
-    function formatDate(raw: string) {
-      if (!raw) return 'Recently';
-      try {
-        const d = new Date(raw);
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      } catch {
-        return 'Recently';
-      }
+    // Filter & Sort Change Listeners
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const filter = card.getAttribute('data-filter') || 'all';
+        setFilter(filter);
+      });
+    });
+
+    if (statusSelect) {
+      statusSelect.addEventListener('change', () => {
+        setFilter(statusSelect.value);
+      });
     }
 
-    function renderCards() {
-      if (!grid || !emptyCard) return;
+    if (sortSelect) {
+      sortSelect.addEventListener('change', () => {
+        currentSort = sortSelect.value;
+        renderSubmissions();
+      });
+    }
 
-      let items = cachedSubmissions;
-      if (currentFilter !== 'all') {
-        if (currentFilter === 'pending_review') {
-          items = items.filter((s) => s.status === 'pending_review' || s.status === 'pending');
+    function setFilter(filter: string) {
+      currentFilter = filter;
+      statCards.forEach((c) => {
+        if (c.getAttribute('data-filter') === filter) {
+          c.classList.add('active');
         } else {
-          items = items.filter((s) => currentFilter === 'approved' ? s.status === 'approved' || s.status === 'published' : s.status === currentFilter);
+          c.classList.remove('active');
         }
+      });
+      if (statusSelect && statusSelect.value !== filter) {
+        statusSelect.value = filter;
       }
+      renderSubmissions();
+    }
+
+    // Render Submissions List
+    function renderSubmissions() {
+      if (!submissionsList || !emptyView) return;
 
       if (cachedSubmissions.length === 0) {
-        grid.style.display = 'none';
-        emptyCard.style.display = 'block';
+        submissionsList.style.display = 'none';
+        emptyView.style.display = 'block';
         return;
       }
 
-      emptyCard.style.display = 'none';
-      grid.style.display = 'grid';
+      emptyView.style.display = 'none';
+      submissionsList.style.display = 'flex';
 
-      if (items.length === 0) {
-        grid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; font-weight: 700; color: #6b7280;">
-            No submissions in this status category.
+      // 1. Filter
+      let list = [...cachedSubmissions];
+      if (currentFilter !== 'all') {
+        if (currentFilter === 'pending_review') {
+          list = list.filter((s) => s.status === 'pending_review' || s.status === 'pending');
+        } else if (currentFilter === 'approved') {
+          list = list.filter((s) => s.status === 'approved');
+        } else {
+          list = list.filter((s) => s.status === currentFilter);
+        }
+      }
+
+      // 2. Sort
+      list.sort((a, b) => {
+        const dateA = new Date(a.submitted_at || a.created_at || 0).getTime();
+        const dateB = new Date(b.submitted_at || b.created_at || 0).getTime();
+        if (currentSort === 'newest') return dateB - dateA;
+        if (currentSort === 'oldest') return dateA - dateB;
+        if (currentSort === 'name_asc') return (a.name || '').localeCompare(b.name || '');
+        if (currentSort === 'name_desc') return (b.name || '').localeCompare(a.name || '');
+        return 0;
+      });
+
+      if (list.length === 0) {
+        submissionsList.innerHTML = `
+          <div style="text-align: center; padding: 48px 20px; font-weight: 700; color: #6b7280;">
+            No submissions found under the selected "${escapeHtml(currentFilter.replace('_', ' '))}" filter.
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = items.map((sub) => {
+      const themeDisplayMap: Record<string, { label: string; name: string }> = {
+        cream: { label: 'Theme 01', name: 'Theme 01 - Cream' },
+        pink: { label: 'Theme 02', name: 'Theme 02 - Pink' },
+        cyan: { label: 'Theme 03', name: 'Theme 03 - Cyan' },
+        purple: { label: 'Theme 04', name: 'Theme 04 - Purple' },
+      };
+
+      submissionsList.innerHTML = list.map((sub) => {
+        const id = sub.id;
+        const name = sub.name || 'Untitled Project';
+        const url = sub.url || '#';
+        const desc = sub.description || 'No description provided.';
+        const category = sub.category || 'General';
         const status = sub.status || 'pending_review';
-        const dateStr = formatDate(sub.submitted_at || sub.created_at);
-        const locked = status === 'approved' || status === 'published';
+        const isLocked = status === 'approved' || status === 'published';
         const theme = sub.preview_info?.theme || 'cream';
-        const themeLabels: Record<string, string> = { cream: 'Theme 01 · Cream', pink: 'Theme 02 · Pink', cyan: 'Theme 03 · Cyan', purple: 'Theme 04 · Purple' };
-        const statusLabel = status === 'published' ? 'Approved · Published' : status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Under Review';
-        const statusClass = status === 'published' ? 'published' : status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'under-review';
-        let hostname = 'website';
-        try { hostname = new URL(sub.url).hostname; } catch {}
-        const image = sub.thumbnail_url ? `<img src="${escapeHtml(sub.thumbnail_url)}" alt="" class="live-preview-image">` : '';
+        const themeInfo = themeDisplayMap[theme] || themeDisplayMap.cream;
+
+        let domain = 'website.com';
+        try { domain = new URL(url).hostname; } catch {}
+
+        const formattedDate = formatDate(sub.submitted_at || sub.created_at);
+
+        // Status pill badge rendering
+        let statusBadgeText = 'Under Review';
+        let statusClass = 'under-review';
+        let randomizerStatusHtml = `<span class="sub-randomizer-status amber">● In review queue</span>`;
+        let publishingFact = 'Not published';
+
+        if (status === 'approved') {
+          statusBadgeText = '✓ Approved';
+          statusClass = 'approved';
+          randomizerStatusHtml = `<span class="sub-randomizer-status green">● Published in randomizer</span>`;
+          publishingFact = 'Publishing soon';
+        } else if (status === 'published') {
+          statusBadgeText = '✓ Published';
+          statusClass = 'published';
+          randomizerStatusHtml = `<span class="sub-randomizer-status green">● Live in randomizer</span>`;
+          publishingFact = 'Published';
+        } else if (status === 'rejected') {
+          statusBadgeText = '✕ Rejected';
+          statusClass = 'rejected';
+          randomizerStatusHtml = `<span class="sub-randomizer-status red">● Not accepted</span>`;
+          publishingFact = 'Not eligible';
+        }
+
+        // Preview Artwork
+        const artworkHtml = sub.thumbnail_url
+          ? `<img src="${escapeHtml(sub.thumbnail_url)}" alt="${escapeHtml(name)}" class="card-artwork-img" loading="lazy" />`
+          : `<div class="default-gift-art">
+               <span class="art-emoji">🎁</span>
+               <span class="art-heart">❤️</span>
+             </div>`;
+
         return `
-          <article class="sub-preview-card" data-sub-id="${sub.id}">
-            <div class="submission-heading">
-              <div><span class="category-pill">${escapeHtml(sub.category || 'General')}</span><span class="date-text">Submitted ${dateStr}</span></div>
-              <span class="status-badge-pill ${statusClass}">${status === 'published' ? '✓ ' : ''}${statusLabel}</span>
-            </div>
-            <div class="library-preview ${escapeHtml(theme)}">
-              <span class="preview-label">LIVE CARD PREVIEW</span>
-              ${image}
-              <div class="preview-library-top"><span class="preview-category">${escapeHtml(sub.category || 'General')}</span><span class="preview-domain">${escapeHtml(hostname)}</span></div>
-              <div class="preview-library-main"><h3 data-preview-name>${escapeHtml(sub.name)}</h3><p data-preview-desc>${escapeHtml(sub.description)}</p></div>
-              <a class="preview-visit" href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" data-preview-url>Visit Website ↗</a>
-            </div>
-            <div class="card-body-content">
-              <h3 class="card-site-title">${escapeHtml(sub.name)}</h3>
-              <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="card-site-url">${escapeHtml(sub.url)} ↗</a>
-              <p class="card-site-desc">${escapeHtml(sub.description)}</p>
-              <div class="submission-facts"><span><b>Category</b>${escapeHtml(sub.category || 'General')}</span><span><b>Theme</b>${themeLabels[theme] || themeLabels.cream}</span><span><b>Publishing</b>${status === 'published' ? 'LIVE IN RANDOMIZER' : status === 'approved' ? 'Publishing soon' : 'Not published'}</span></div>
-              ${locked ? '<p class="lock-note">🔒 Approved submissions are locked. Project name and URL cannot be changed after approval.</p>' : ''}
-              <div class="submission-actions">
-                ${status === 'rejected' ? `<button type="button" class="action-link-btn view-reason-trigger" data-id="${sub.id}">View review reason</button>` : ''}
-                ${status === 'published' ? `<a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="action-link-btn">Visit site ↗</a>` : ''}
-                <button type="button" class="dash-secondary-btn compact preview-trigger" data-id="${sub.id}">Preview</button>
-                ${locked ? `<button type="button" class="dash-secondary-btn compact theme-edit-trigger" data-id="${sub.id}">Edit Presentation</button>` : `<button type="button" class="dash-primary-btn compact edit-trigger" data-id="${sub.id}">Edit Submission</button>`}
-              </div>
-              ${locked ? `<form class="theme-only-form" data-theme-form="${sub.id}" hidden><fieldset class="theme-selector"><legend>Change card theme</legend>${Object.entries(themeLabels).map(([key, label]) => `<label class="theme-choice ${key}"><input type="radio" name="theme" value="${key}" ${theme === key ? 'checked' : ''}><span class="theme-swatch"></span><b>${label}</b></label>`).join('')}</fieldset><button class="dash-primary-btn compact" type="submit">Save Theme</button><span class="edit-message" aria-live="polite"></span></form>` : ''}
-              ${locked ? '' : `<form class="submission-edit-form" data-edit-form="${sub.id}" hidden>
-                <div class="edit-fields">
-                  <label>Project name<input name="name" maxlength="100" required value="${escapeHtml(sub.name)}"></label>
-                  <label>Website URL<input name="url" type="url" maxlength="2048" required value="${escapeHtml(sub.url)}"></label>
-                  <label>Description<textarea name="description" maxlength="500" required>${escapeHtml(sub.description)}</textarea></label>
-                  <label>Category<input name="category" maxlength="50" required value="${escapeHtml(sub.category || '')}"></label>
-                  <label>Preview image URL <span>(optional)</span><input name="thumbnail_url" type="url" value="${escapeHtml(sub.thumbnail_url || '')}"></label>
+          <article class="sub-card-box" data-id="${id}">
+            <!-- Left Column: ClickForNothing Live Theme Card Preview -->
+            <div class="sub-preview-column">
+              <div class="live-theme-card theme-${escapeHtml(theme)}" id="card-preview-${id}">
+                <div class="card-artwork-box">
+                  ${artworkHtml}
                 </div>
-                <fieldset class="theme-selector"><legend>Choose a library theme</legend>
-                  ${Object.entries(themeLabels).map(([key, label]) => `<label class="theme-choice ${key}"><input type="radio" name="theme" value="${key}" ${theme === key ? 'checked' : ''}><span class="theme-swatch"></span><b>${label}</b></label>`).join('')}
-                </fieldset>
-                <div class="edit-form-actions"><button class="dash-primary-btn compact" type="submit">Save Changes</button><button class="dash-secondary-btn compact cancel-edit" type="button">Cancel</button><span class="edit-message" aria-live="polite"></span></div>
-              </form>`}
+                <h3 class="card-inner-title">${escapeHtml(name)}</h3>
+                <p class="card-inner-desc">${escapeHtml(desc)}</p>
+                <div class="card-inner-pills-row">
+                  <span class="pill-cat">${escapeHtml(category)}</span>
+                  <span class="pill-visit">Visit Website ↗</span>
+                </div>
+              </div>
+              <button type="button" class="btn-live-preview-modal" data-preview-id="${id}">
+                <span>👁</span>
+                <span>Preview (Live Card)</span>
+              </button>
             </div>
-          </article>`;
+
+            <!-- Right Column: Facts, Lock Note & Actions -->
+            <div class="sub-info-column">
+              <div class="sub-top-header-row">
+                <div class="sub-title-url-wrap">
+                  <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="sub-title-link">
+                    <span>${escapeHtml(name)}</span>
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                  <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="sub-domain-text">
+                    ${escapeHtml(domain)}
+                  </a>
+                </div>
+
+                <div class="status-badge-container">
+                  <span class="status-pill ${statusClass}">${statusBadgeText}</span>
+                  ${randomizerStatusHtml}
+                </div>
+              </div>
+
+              <p class="sub-desc-text">${escapeHtml(desc)}</p>
+
+              <!-- Meta pills row -->
+              <div class="sub-meta-tags-row">
+                <span class="meta-tag-pill">📁 ${escapeHtml(category)}</span>
+                <span class="meta-tag-pill">📅 ${formattedDate}</span>
+                <span class="meta-tag-pill theme-pill">🎨 ${escapeHtml(themeInfo.label)}</span>
+              </div>
+
+              <!-- Fact Table Box -->
+              <div class="sub-facts-table">
+                <div class="fact-item">
+                  <span class="fact-label">🌐 Website</span>
+                  <span class="fact-value">${escapeHtml(domain)}</span>
+                </div>
+                <div class="fact-item">
+                  <span class="fact-label">🏷️ Category</span>
+                  <span class="fact-value">${escapeHtml(category)}</span>
+                </div>
+                <div class="fact-item">
+                  <span class="fact-label">🎨 Theme</span>
+                  <span class="fact-value">${escapeHtml(themeInfo.name)}</span>
+                </div>
+                <div class="fact-item">
+                  <span class="fact-label">📈 Status</span>
+                  <span class="fact-value">${escapeHtml(status === 'published' ? 'Published' : status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Under Review')}</span>
+                </div>
+                <div class="fact-item">
+                  <span class="fact-label">🚀 Publishing</span>
+                  <span class="fact-value">${escapeHtml(publishingFact)}</span>
+                </div>
+                <div class="fact-item">
+                  <span class="fact-label">⏱️ Last Sync</span>
+                  <span class="fact-value">Neon Realtime</span>
+                </div>
+              </div>
+
+              <!-- Lock Notice Box (When Approved or Published) -->
+              ${isLocked ? `
+                <div class="lock-notice-box">
+                  <span class="lock-notice-icon">🔒</span>
+                  <div class="lock-notice-content">
+                    <span class="lock-notice-title">Approved submission is locked</span>
+                    <p class="lock-notice-desc">Project name and URL cannot be changed after approval. <span class="lock-notice-link trigger-edit-pres" data-edit-id="${id}">You can still edit description, theme and preview.</span></p>
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- Bottom Action Buttons Row -->
+              <div class="sub-actions-row">
+                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="btn-visit-site">
+                  <span>Visit Website ↗</span>
+                </a>
+
+                <button type="button" class="btn-edit-action trigger-edit-pres" data-edit-id="${id}">
+                  <span>✏️</span>
+                  <span>${isLocked ? 'Edit Presentation' : 'Edit Submission'}</span>
+                </button>
+
+                ${status === 'rejected' ? `
+                  <button type="button" class="btn-edit-action trigger-reason-modal" data-reason-id="${id}">
+                    <span>ℹ️</span>
+                    <span>View Feedback</span>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </article>
+        `;
       }).join('');
 
-      grid.querySelectorAll('.view-reason-trigger').forEach((btn) => btn.addEventListener('click', () => {
-        const found = cachedSubmissions.find((s) => String(s.id) === btn.getAttribute('data-id'));
-        if (found && reasonModal && reasonSiteName && reasonText) { reasonSiteName.textContent = found.name; reasonText.textContent = found.rejection_reason || 'This website did not meet our community guidelines.'; reasonModal.style.display = 'flex'; }
-      }));
-      grid.querySelectorAll('.edit-trigger').forEach((btn) => btn.addEventListener('click', () => {
-        const form = grid.querySelector(`[data-edit-form="${btn.getAttribute('data-id')}"]`) as HTMLFormElement | null;
-        if (form) form.hidden = !form.hidden;
-      }));
-      grid.querySelectorAll('.theme-edit-trigger').forEach((btn) => btn.addEventListener('click', () => {
-        const form = grid.querySelector(`[data-theme-form="${btn.getAttribute('data-id')}"]`) as HTMLFormElement | null;
-        if (form) form.hidden = !form.hidden;
-      }));
-      grid.querySelectorAll<HTMLFormElement>('.theme-only-form').forEach((form) => form.addEventListener('change', () => {
-        const theme = form.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
-        form.closest('.sub-preview-card')?.querySelector('.library-preview')?.setAttribute('class', `library-preview ${theme}`);
-      }));
-      grid.querySelectorAll<HTMLFormElement>('.theme-only-form').forEach((form) => form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const message = form.querySelector('.edit-message')!;
-        const token = await getAuthToken();
-        const id = Number(form.dataset.themeForm);
-        const theme = form.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
-        message.textContent = 'Saving…';
-        try {
-          const response = await fetch('/api/submissions', { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ id, theme, editThemeOnly: true }) });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || 'Could not save theme.');
-          message.textContent = 'Saved';
-          await fetchSubmissions(false);
-        } catch (error: any) { message.textContent = error.message || 'Could not save theme.'; }
-      }));
-      grid.querySelectorAll('.cancel-edit').forEach((btn) => btn.addEventListener('click', () => { const form = (btn as HTMLElement).closest('form'); if (form) form.hidden = true; }));
-      grid.querySelectorAll('.preview-trigger').forEach((btn) => btn.addEventListener('click', () => {
-        const card = (btn as HTMLElement).closest('.sub-preview-card');
-        card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card?.querySelector('.library-preview')?.classList.add('preview-highlight');
-        setTimeout(() => card?.querySelector('.library-preview')?.classList.remove('preview-highlight'), 900);
-      }));
-      grid.querySelectorAll<HTMLFormElement>('.submission-edit-form').forEach((form) => {
-        const card = form.closest('.sub-preview-card')!;
-        const fields = ['name', 'url', 'description', 'category'];
-        const syncPreview = () => {
-          card.querySelector('[data-preview-name]')!.textContent = (form.elements.namedItem('name') as HTMLInputElement).value || 'Project name';
-          card.querySelector('[data-preview-desc]')!.textContent = (form.elements.namedItem('description') as HTMLTextAreaElement).value || 'Your description will appear here.';
-          const url = (form.elements.namedItem('url') as HTMLInputElement).value;
-          try { card.querySelector('.preview-domain')!.textContent = new URL(url).hostname; } catch { card.querySelector('.preview-domain')!.textContent = 'your-site.com'; }
-          const category = (form.elements.namedItem('category') as HTMLInputElement).value || 'General';
-          card.querySelector('.preview-category')!.textContent = category;
-          const link = card.querySelector('[data-preview-url]') as HTMLAnchorElement;
-          link.href = url || '#';
-          const picked = form.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
-          card.querySelector('.library-preview')!.className = `library-preview ${picked}`;
-        };
-        form.addEventListener('input', syncPreview);
-        form.addEventListener('change', syncPreview);
-        form.addEventListener('submit', async (event) => {
-          event.preventDefault();
-          const message = form.querySelector('.edit-message')!;
-          const data = new FormData(form);
-          const payload: Record<string, any> = { id: Number(form.dataset.editForm), theme: data.get('theme'), thumbnail_url: data.get('thumbnail_url') || null };
-          fields.forEach((key) => payload[key] = data.get(key));
-          const token = await getAuthToken();
-          message.textContent = 'Saving…';
-          try {
-            const response = await fetch('/api/submissions', { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(payload) });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Could not save changes.');
-            message.textContent = 'Saved';
-            await fetchSubmissions(false);
-          } catch (error: any) { message.textContent = error.message || 'Could not save changes.'; }
+      attachActionListeners();
+    }
+
+    // Attach card action button click listeners
+    function attachActionListeners() {
+      // 1. Edit Presentation / Edit Submission modal opener
+      document.querySelectorAll('.trigger-edit-pres').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const subId = btn.getAttribute('data-edit-id');
+          openEditModal(subId);
+        });
+      });
+
+      // 2. Full Live Card preview modal opener
+      document.querySelectorAll('.btn-live-preview-modal').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const subId = btn.getAttribute('data-preview-id');
+          openLiveCardModal(subId);
+        });
+      });
+
+      // 3. Rejection Reason modal opener
+      document.querySelectorAll('.trigger-reason-modal').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const subId = btn.getAttribute('data-reason-id');
+          openReasonModal(subId);
         });
       });
     }
 
+    // Open Edit Modal with exact submission state
+    function openEditModal(subId: string | null) {
+      if (!subId || !editModal || !editForm) return;
+      const sub = cachedSubmissions.find((s) => String(s.id) === String(subId));
+      if (!sub) return;
+
+      const isLocked = sub.status === 'approved' || sub.status === 'published';
+
+      if (editModalTitle) {
+        editModalTitle.textContent = isLocked ? 'Edit Presentation' : 'Edit Submission';
+      }
+
+      if (editLockBanner) {
+        editLockBanner.style.display = isLocked ? 'flex' : 'none';
+      }
+      if (tagNameLocked) tagNameLocked.style.display = isLocked ? 'inline-block' : 'none';
+      if (tagUrlLocked) tagUrlLocked.style.display = isLocked ? 'inline-block' : 'none';
+
+      // Set input values
+      const idInput = document.getElementById('edit-form-id') as HTMLInputElement | null;
+      if (idInput) idInput.value = String(sub.id);
+
+      if (editFieldName) {
+        editFieldName.value = sub.name || '';
+        editFieldName.disabled = isLocked;
+      }
+      if (editFieldUrl) {
+        editFieldUrl.value = sub.url || '';
+        editFieldUrl.disabled = isLocked;
+      }
+      if (editFieldCategory) {
+        editFieldCategory.value = sub.category || 'Creative';
+      }
+      if (editFieldDesc) {
+        editFieldDesc.value = sub.description || '';
+        if (descCharCount) descCharCount.textContent = `${(sub.description || '').length}/500`;
+      }
+      if (editFieldThumb) {
+        editFieldThumb.value = sub.thumbnail_url || '';
+      }
+
+      // Theme radio
+      const chosenTheme = sub.preview_info?.theme || 'cream';
+      const themeRadio = editForm.querySelector<HTMLInputElement>(`input[name="theme"][value="${chosenTheme}"]`);
+      if (themeRadio) themeRadio.checked = true;
+
+      // Update right-side Live Preview in Modal
+      updateModalLivePreview(chosenTheme, sub.name, sub.description, sub.category);
+
+      if (editFormStatus) editFormStatus.style.display = 'none';
+      editModal.style.display = 'flex';
+    }
+
+    // Update the live preview card in the edit modal
+    function updateModalLivePreview(theme: string, name?: string, desc?: string, cat?: string) {
+      if (!modalCardPreview) return;
+      modalCardPreview.className = `live-theme-card-preview theme-${theme || 'cream'}`;
+      if (modalPreviewTitle) modalPreviewTitle.textContent = name || 'PROJECT TITLE';
+      if (modalPreviewDesc) modalPreviewDesc.textContent = desc || 'Your website description will appear here...';
+      if (modalPreviewCat) modalPreviewCat.textContent = cat || 'General';
+    }
+
+    // Modal Live Sync on form input / theme select
+    if (editForm) {
+      editForm.addEventListener('input', () => {
+        const theme = editForm.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
+        const name = editFieldName?.value || 'PROJECT TITLE';
+        const desc = editFieldDesc?.value || 'Your website description will appear here...';
+        const cat = editFieldCategory?.value || 'General';
+        if (descCharCount && editFieldDesc) {
+          descCharCount.textContent = `${editFieldDesc.value.length}/500`;
+        }
+        updateModalLivePreview(theme, name, desc, cat);
+      });
+
+      editForm.querySelectorAll('input[name="theme"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+          const theme = (radio as HTMLInputElement).value || 'cream';
+          const name = editFieldName?.value || 'PROJECT TITLE';
+          const desc = editFieldDesc?.value || 'Your website description will appear here...';
+          const cat = editFieldCategory?.value || 'General';
+          updateModalLivePreview(theme, name, desc, cat);
+        });
+      });
+
+      // Submit Edit Form to Neon PUT /api/submissions
+      editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const idInput = document.getElementById('edit-form-id') as HTMLInputElement | null;
+        const subId = Number(idInput?.value);
+        if (!subId) return;
+
+        const sub = cachedSubmissions.find((s) => s.id === subId);
+        const isLocked = sub?.status === 'approved' || sub?.status === 'published';
+
+        const theme = editForm.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
+        const category = editFieldCategory?.value.trim() || 'General';
+        const description = editFieldDesc?.value.trim() || '';
+        const thumbnail_url = editFieldThumb?.value.trim() || null;
+
+        const payload: Record<string, any> = {
+          id: subId,
+          theme,
+          category,
+          description,
+          thumbnail_url,
+        };
+
+        if (!isLocked) {
+          payload.name = editFieldName?.value.trim() || '';
+          payload.url = editFieldUrl?.value.trim() || '';
+        }
+
+        if (editSubmitBtn) (editSubmitBtn as HTMLButtonElement).disabled = true;
+        if (editSubmitLabel) editSubmitLabel.textContent = 'Saving Changes...';
+        if (editFormStatus) {
+          editFormStatus.style.display = 'block';
+          editFormStatus.className = 'form-status-msg';
+          editFormStatus.textContent = 'Saving changes to Neon...';
+        }
+
+        try {
+          const token = await getAuthToken();
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          };
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const res = await fetch('/api/submissions', {
+            method: 'PUT',
+            headers,
+            credentials: 'include',
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Failed to save changes.');
+          }
+
+          if (editFormStatus) {
+            editFormStatus.className = 'form-status-msg success';
+            editFormStatus.textContent = '✓ Changes saved successfully!';
+          }
+
+          // Realtime refresh
+          await fetchSubmissions(false);
+
+          setTimeout(() => {
+            if (editModal) editModal.style.display = 'none';
+          }, 600);
+        } catch (err: any) {
+          console.error('Save failed:', err);
+          if (editFormStatus) {
+            editFormStatus.className = 'form-status-msg error';
+            editFormStatus.textContent = `Error: ${err.message || 'Could not save.'}`;
+          }
+        } finally {
+          if (editSubmitBtn) (editSubmitBtn as HTMLButtonElement).disabled = false;
+          if (editSubmitLabel) editSubmitLabel.textContent = 'Save Changes';
+        }
+      });
+    }
+
+    // Open Full Live Card Modal
+    function openLiveCardModal(subId: string | null) {
+      if (!subId || !liveCardModal || !fullLiveCardStage) return;
+      const sub = cachedSubmissions.find((s) => String(s.id) === String(subId));
+      if (!sub) return;
+
+      const theme = sub.preview_info?.theme || 'cream';
+      const artworkHtml = sub.thumbnail_url
+        ? `<img src="${escapeHtml(sub.thumbnail_url)}" alt="${escapeHtml(sub.name)}" class="card-artwork-img" />`
+        : `<div class="default-gift-art">
+             <span class="art-emoji">🎁</span>
+             <span class="art-heart">❤️</span>
+           </div>`;
+
+      fullLiveCardStage.innerHTML = `
+        <div class="live-theme-card theme-${escapeHtml(theme)}" style="width: 100%; max-width: 380px;">
+          <div class="card-artwork-box" style="height: 140px;">
+            ${artworkHtml}
+          </div>
+          <h3 class="card-inner-title" style="font-size: 1.8rem;">${escapeHtml(sub.name)}</h3>
+          <p class="card-inner-desc" style="font-size: 0.95rem; -webkit-line-clamp: 4;">${escapeHtml(sub.description)}</p>
+          <div class="card-inner-pills-row" style="margin-top: 20px;">
+            <span class="pill-cat" style="font-size: 0.85rem; padding: 6px 16px;">${escapeHtml(sub.category || 'Creative')}</span>
+            <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="pill-visit" style="text-decoration: none; font-size: 0.85rem; padding: 6px 16px;">Visit Website ↗</a>
+          </div>
+        </div>
+      `;
+
+      liveCardModal.style.display = 'flex';
+    }
+
+    // Open Rejection Reason Modal
+    function openReasonModal(subId: string | null) {
+      if (!subId || !reasonModal) return;
+      const sub = cachedSubmissions.find((s) => String(s.id) === String(subId));
+      if (!sub) return;
+
+      if (reasonSiteTitle) reasonSiteTitle.textContent = sub.name || 'Website Submission';
+      if (reasonContent) reasonContent.textContent = sub.rejection_reason || 'This website did not meet our community guidelines.';
+      reasonModal.style.display = 'flex';
+    }
+
+    // Helper: Escape HTML
     function escapeHtml(str: string) {
       if (!str) return '';
       return String(str)
@@ -1290,36 +2566,48 @@ const homeUrl = getLocalizedPath('/', currentLocale);
         .replace(/'/g, '&#39;');
     }
 
-    function updateAuth() {
-      const state = $authStore.get();
+    // Helper: Format Date
+    function formatDate(raw: string) {
+      if (!raw) return 'Recently';
+      try {
+        const d = new Date(raw);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch {
+        return 'Recently';
+      }
+    }
+
+    // Update Auth subscription
+    function updateAuthState() {
+      const auth = $authStore.get();
       const user = $userStore.get();
-      const isLoggedIn = Boolean(state?.userId);
+      const isLoggedIn = Boolean(auth?.userId);
 
       if (isLoggedIn) {
         if (signedOutView) signedOutView.style.display = 'none';
         if (signedInView) signedInView.style.display = 'block';
 
         if (userNameEl && user) {
-          const name = user.username || user.firstName || (user.primaryEmailAddress ? user.primaryEmailAddress.emailAddress.split('@')[0] : 'Explorer');
+          const name = user.firstName || user.username || (user.primaryEmailAddress ? user.primaryEmailAddress.emailAddress.split('@')[0] : 'Explorer');
           userNameEl.textContent = name;
         }
 
         fetchSubmissions(true);
 
-        // Realtime Polling (Requirement 11) - Every 12 seconds
-        if (!pollTimer) {
-          pollTimer = setInterval(() => {
-            if (document.visibilityState === 'visible') {
+        // Realtime Polling: Check Neon every 10 seconds
+        if (!pollIntervalTimer) {
+          pollIntervalTimer = setInterval(() => {
+            if (document.visibilityState === 'visible' && !isFetching) {
               fetchSubmissions(false);
             }
-          }, 12000);
+          }, 10000);
         }
       } else {
         if (signedOutView) signedOutView.style.display = 'block';
         if (signedInView) signedInView.style.display = 'none';
-        if (pollTimer) {
-          clearInterval(pollTimer);
-          pollTimer = null;
+        if (pollIntervalTimer) {
+          clearInterval(pollIntervalTimer);
+          pollIntervalTimer = null;
         }
       }
     }
@@ -1327,32 +2615,38 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     if (refreshBtn) {
       refreshBtn.addEventListener('click', () => fetchSubmissions(false));
     }
+
     if (retryBtn) {
       retryBtn.addEventListener('click', () => fetchSubmissions(true));
     }
 
-    // Revalidate on visibility change & window focus
+    // Listen to Clerk Store
+    $authStore.subscribe(updateAuthState);
+    $userStore.subscribe(updateAuthState);
+    updateAuthState();
+
+    // Foreground Focus & Visibility Revalidation
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && $authStore.get()?.userId) {
-        fetchSubmissions(false);
+        if (Date.now() - lastFetchTimestamp > 5000) {
+          fetchSubmissions(false);
+        }
       }
     });
 
     window.addEventListener('focus', () => {
       if ($authStore.get()?.userId) {
-        fetchSubmissions(false);
+        if (Date.now() - lastFetchTimestamp > 5000) {
+          fetchSubmissions(false);
+        }
       }
     });
-
-    $authStore.subscribe(updateAuth);
-    $userStore.subscribe(updateAuth);
-    updateAuth();
   }
 
   // Mount
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDashboard);
+    document.addEventListener('DOMContentLoaded', initUserDashboard);
   } else {
-    initDashboard();
+    initUserDashboard();
   }
 </script>

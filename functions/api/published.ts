@@ -21,7 +21,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         published_at,
         created_at
       FROM website_submissions
-      WHERE status = 'published'
+      WHERE status IN ('published', 'approved')
       ORDER BY published_at DESC NULLS LAST, created_at DESC;
     `;
 

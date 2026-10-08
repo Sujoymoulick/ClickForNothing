@@ -23,12 +23,26 @@ const discoverUrl = getLocalizedPath('/discover/', currentLocale);
   </main>
 
   <script is:inline set:html={`
-    const sites = ${JSON.stringify(websites.filter(w => w.verified && /^https:\/\//i.test(w.url)).map(w => w.url))};
-    if (sites.length > 0) {
-      const randomIndex = Math.floor(Math.random() * sites.length);
-      const targetUrl = sites[randomIndex];
-      window.location.replace(targetUrl);
-    }
+    const staticSites = ${JSON.stringify(websites.filter(w => w.verified && /^https:\/\//i.test(w.url)).map(w => w.url))};
+    (async function() {
+      let pool = [...staticSites];
+      try {
+        const res = await fetch('/api/published', { signal: AbortSignal.timeout(1800) });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.sites)) {
+            const dynamicUrls = data.sites.map(s => s.url).filter(u => /^https?:\/\//i.test(u));
+            pool = Array.from(new Set([...pool, ...dynamicUrls]));
+          }
+        }
+      } catch (e) {
+        // Fallback to static pool on error or timeout
+      }
+      if (pool.length > 0) {
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        window.location.replace(pool[randomIndex]);
+      }
+    })();
   `} />
 </SiteLayout>
 

@@ -33,14 +33,36 @@ const discoverUrl = getLocalizedPath('/discover/', currentLocale);
   </main>
 
   <script is:inline set:html={`
-    const sites = ${JSON.stringify(categorySites.map(w => w.url))};
-    if (sites.length > 0) {
-      const randomIndex = Math.floor(Math.random() * sites.length);
-      const targetUrl = sites[randomIndex];
-      window.location.replace(targetUrl);
-    } else {
-      window.location.replace('${discoverUrl}');
-    }
+    const staticSites = ${JSON.stringify(categorySites.map(w => w.url))};
+    const catNameLower = ${JSON.stringify(catName.toLowerCase())};
+    const catSlugLower = ${JSON.stringify(categoryObj.slug.toLowerCase())};
+    (async function() {
+      let pool = [...staticSites];
+      try {
+        const res = await fetch('/api/published', { signal: AbortSignal.timeout(1800) });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.sites)) {
+            const dynamicUrls = data.sites
+              .filter(s => {
+                const sCat = (s.category || '').toLowerCase();
+                return sCat === catNameLower || sCat === catSlugLower;
+              })
+              .map(s => s.url)
+              .filter(u => /^https?:\/\//i.test(u));
+            pool = Array.from(new Set([...pool, ...dynamicUrls]));
+          }
+        }
+      } catch (e) {
+        // Fallback to static category pool
+      }
+      if (pool.length > 0) {
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        window.location.replace(pool[randomIndex]);
+      } else {
+        window.location.replace('${discoverUrl}');
+      }
+    })();
   `} />
 </SiteLayout>
 
