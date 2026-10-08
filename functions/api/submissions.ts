@@ -1,5 +1,5 @@
 import { getAuthenticatedUser } from './_auth';
-import { getDb, logServerError, sanitizeText } from './_db';
+import { getDb, logServerError, sanitizeText, validateUrl } from './_db';
 
 interface Env {
   DATABASE_URL?: string;
@@ -57,6 +57,53 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       JSON.stringify({ error: 'Failed to retrieve submissions. Please try again later.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
+  }
+}
+
+/** Owner-only editing. Identity fields are protected by the status predicate in SQL,
+ * so a forged dashboard request cannot change an approved/published project. */
+export async function onRequestPut(context: { request: Request; env: Env }) {
+  try {
+    const { request, env } = context;
+    const authUser = await getAuthenticatedUser(request, env);
+    if (!authUser?.userId) return new Response(JSON.stringify({ error: 'Unauthorized.' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    const body = await request.json() as { id?: number; name?: string; url?: string; description?: string; category?: string; theme?: string; thumbnail_url?: string | null; editThemeOnly?: boolean };
+    if (!Number.isSafeInteger(body.id)) return new Response(JSON.stringify({ error: 'Submission ID is required.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    const sql = getDb(env);
+    const allowedThemes = ['cream', 'pink', 'cyan', 'purple'];
+    const theme = allowedThemes.includes(body.theme || '') ? body.theme! : 'cream';
+    if (body.editThemeOnly) {
+      const rows = await sql`
+        UPDATE website_submissions
+        SET preview_info = COALESCE(preview_info, '{}'::jsonb) || ${JSON.stringify({ theme })}::jsonb, updated_at = NOW()
+        WHERE id = ${body.id} AND user_id = ${authUser.userId} AND status IN ('approved', 'published')
+        RETURNING id, url, name, description, category, status, submitted_at, reviewed_at, published_at, rejection_reason, thumbnail_url, preview_info, created_at, updated_at;
+      `;
+      if (!rows.length) return new Response(JSON.stringify({ error: 'Submission not found.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ success: true, submission: rows[0] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (!body.name || !body.url || !body.description || !body.category) return new Response(JSON.stringify({ error: 'Complete all required fields.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    const checkedUrl = validateUrl(body.url);
+    if (!checkedUrl.valid || !checkedUrl.normalized) return new Response(JSON.stringify({ error: checkedUrl.error || 'Invalid URL.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    const thumbnail = body.thumbnail_url?.trim() || null;
+    if (thumbnail && (!validateUrl(thumbnail).valid || thumbnail.length > 2048)) return new Response(JSON.stringify({ error: 'Preview image must be a valid http(s) URL.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    const rows = await sql`
+      UPDATE website_submissions
+      SET name = ${sanitizeText(body.name.trim().slice(0, 100))},
+          url = ${checkedUrl.normalized},
+          description = ${sanitizeText(body.description.trim().slice(0, 500))},
+          category = ${sanitizeText(body.category.trim().slice(0, 50))},
+          thumbnail_url = ${thumbnail},
+          preview_info = COALESCE(preview_info, '{}'::jsonb) || ${JSON.stringify({ theme })}::jsonb,
+          updated_at = NOW()
+      WHERE id = ${body.id} AND user_id = ${authUser.userId} AND status NOT IN ('approved', 'published')
+      RETURNING id, url, name, description, category, status, submitted_at, reviewed_at, published_at, rejection_reason, thumbnail_url, preview_info, created_at, updated_at;
+    `;
+    if (!rows.length) return new Response(JSON.stringify({ error: 'Submission not found, or its approved project identity is locked.' }), { status: 409, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: true, submission: rows[0] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  } catch (error) {
+    logServerError('Error editing submission.', error);
+    return new Response(JSON.stringify({ error: 'Failed to save submission changes.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
@@ -122,7 +169,7 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
           reviewed_at = COALESCE(reviewed_at, NOW()),
           rejection_reason = NULL,
           updated_at = NOW()
-        WHERE id = ${id}
+        WHERE id = ${id} AND status <> 'rejected'
         RETURNING id, url, name, description, category, status, created_at, updated_at,
                   reviewed_at, published_at, rejection_reason;
       `;
@@ -130,11 +177,12 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
       result = await sql`
         UPDATE website_submissions
         SET
-          status = 'approved',
+          status = 'published',
           reviewed_at = NOW(),
+          published_at = COALESCE(published_at, NOW()),
           rejection_reason = NULL,
           updated_at = NOW()
-        WHERE id = ${id}
+        WHERE id = ${id} AND status NOT IN ('approved', 'published', 'rejected')
         RETURNING id, url, name, description, category, status, created_at, updated_at,
                   reviewed_at, published_at, rejection_reason;
       `;
@@ -147,7 +195,7 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
           reviewed_at = NOW(),
           rejection_reason = ${reason},
           updated_at = NOW()
-        WHERE id = ${id}
+        WHERE id = ${id} AND status NOT IN ('approved', 'published')
         RETURNING id, url, name, description, category, status, created_at, updated_at,
                   reviewed_at, published_at, rejection_reason;
       `;
@@ -157,7 +205,7 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
         SET
           status = 'pending_review',
           updated_at = NOW()
-        WHERE id = ${id}
+        WHERE id = ${id} AND status NOT IN ('approved', 'published')
         RETURNING id, url, name, description, category, status, created_at, updated_at,
                   reviewed_at, published_at, rejection_reason;
       `;

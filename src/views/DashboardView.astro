@@ -524,7 +524,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
   /* Submissions Cards Grid */
   .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: 1fr;
     gap: 26px;
   }
 
@@ -534,8 +534,11 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     border-radius: 18px;
     box-shadow: 6px 6px 0 var(--ink);
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(280px, .9fr) minmax(0, 1.1fr);
+    align-items: stretch;
+    padding: 22px;
+    gap: 22px;
     transition: transform 140ms ease, box-shadow 140ms ease;
   }
 
@@ -543,6 +546,43 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     transform: translateY(-4px);
     box-shadow: 8px 8px 0 var(--ink);
   }
+
+  .submission-heading { grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .submission-heading > div { display:flex; align-items:center; gap:12px; }
+  .library-preview { --preview-bg:#fff9df; --preview-tag:var(--cyan); background:var(--preview-bg); border:3px solid var(--ink); border-radius:22px; box-shadow:0 6px 0 var(--ink); padding:20px; min-height:250px; display:flex; flex-direction:column; position:relative; overflow:hidden; }
+  .library-preview.pink,.theme-choice.pink { --preview-bg:#ffe2f5; --preview-tag:#ff55c8; }
+  .library-preview.cyan,.theme-choice.cyan { --preview-bg:#dffaff; --preview-tag:#63e7f3; }
+  .library-preview.purple,.theme-choice.purple { --preview-bg:#eee3ff; --preview-tag:#a578ff; }
+  .library-preview.cream,.theme-choice.cream { --preview-bg:#fff9df; --preview-tag:#b5f0f3; }
+  .preview-label { font-size:.66rem; font-weight:900; letter-spacing:.12em; color:#737080; margin-bottom:16px; }
+  .preview-library-top { display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  .preview-category { background:var(--preview-tag); border:2px solid var(--ink); border-radius:999px; padding:4px 10px; font-weight:900; font-size:.72rem; }
+  .preview-domain { font-size:.78rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .preview-library-main { flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .preview-library-main h3 { font:400 clamp(1.5rem,3vw,2.2rem)/1.08 'Lilita One',system-ui,sans-serif; margin:10px 0 6px; }
+  .preview-library-main p { margin:0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .preview-visit { background:var(--pink); color:white; text-align:center; text-decoration:none; border:2.5px solid var(--ink); border-radius:999px; padding:8px 12px; font-weight:900; box-shadow:3px 3px 0 var(--ink); }
+  .live-preview-image { width:100%; max-height:90px; object-fit:cover; border:2px solid var(--ink); border-radius:10px; margin-bottom:10px; }
+  .card-body-content { padding:2px; min-width:0; display:flex; flex-direction:column; }
+  .submission-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:0 0 14px; }
+  .submission-facts span { background:#fff9df; border:2px solid var(--ink); border-radius:10px; padding:8px; font-size:.77rem; overflow-wrap:anywhere; }
+  .submission-facts b { display:block; text-transform:uppercase; font-size:.64rem; margin-bottom:3px; color:#6b7280; }
+  .lock-note { background:#fff4cc; border-left:4px solid #f59e0b; padding:10px 12px; font-size:.82rem; font-weight:800; margin:0 0 14px; }
+  .submission-actions,.edit-form-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:auto; }
+  .submission-edit-form,.theme-only-form { margin-top:18px; border-top:2px dashed #d6d3d1; padding-top:16px; }
+  .edit-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .edit-fields label { display:flex; flex-direction:column; gap:5px; font-size:.8rem; font-weight:900; }
+  .edit-fields label:nth-child(3),.edit-fields label:nth-child(5) { grid-column:1/-1; }
+  .edit-fields input,.edit-fields textarea { width:100%; border:2px solid var(--ink); border-radius:9px; padding:9px; font:600 .9rem system-ui; box-sizing:border-box; background:white; }
+  .edit-fields textarea { min-height:76px; resize:vertical; }
+  .theme-selector { border:0; padding:0; margin:16px 0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+  .theme-selector legend { font-size:.85rem; font-weight:900; margin-bottom:8px; }
+  .theme-choice { cursor:pointer; background:var(--preview-bg); border:2px solid var(--ink); border-radius:10px; padding:8px; display:flex; flex-direction:column; gap:6px; font-size:.67rem; }
+  .theme-choice input { accent-color:var(--purple); }
+  .theme-swatch { height:30px; border:1px solid var(--ink); border-radius:6px; background:var(--preview-bg); box-shadow:inset 0 -9px var(--preview-tag); }
+  .edit-message { font-size:.8rem; font-weight:800; }
+  .preview-highlight { outline:4px solid var(--purple); outline-offset:4px; }
+  [hidden] { display:none !important; }
 
   /* Safe Preview Container (Requirement 6) */
   .card-preview-window {
@@ -818,6 +858,20 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     padding: 16px;
   }
 
+  @media (max-width:760px) {
+    .sub-preview-card { grid-template-columns:1fr; padding:16px; gap:16px; }
+    .submission-heading { align-items:flex-start; flex-direction:column; }
+    .submission-heading > div { flex-wrap:wrap; }
+    .submission-facts { grid-template-columns:1fr 1fr; }
+    .theme-selector { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+  @media (max-width:420px) {
+    .dash-actions-group { width:100%; justify-content:space-between; }
+    .edit-fields { grid-template-columns:1fr; }
+    .edit-fields label:nth-child(3),.edit-fields label:nth-child(5) { grid-column:auto; }
+    .submission-actions > button,.submission-actions > a { flex:1; }
+  }
+
   .reason-modal-card {
     background: #ffffff;
     border: 4px solid var(--ink);
@@ -1047,7 +1101,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     function updateStats() {
       const total = cachedSubmissions.length;
       const review = cachedSubmissions.filter((s) => s.status === 'pending_review' || s.status === 'pending').length;
-      const approved = cachedSubmissions.filter((s) => s.status === 'approved').length;
+      const approved = cachedSubmissions.filter((s) => s.status === 'approved' || s.status === 'published').length;
       const published = cachedSubmissions.filter((s) => s.status === 'published').length;
       const rejected = cachedSubmissions.filter((s) => s.status === 'rejected').length;
 
@@ -1076,7 +1130,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
         if (currentFilter === 'pending_review') {
           items = items.filter((s) => s.status === 'pending_review' || s.status === 'pending');
         } else {
-          items = items.filter((s) => s.status === currentFilter);
+          items = items.filter((s) => currentFilter === 'approved' ? s.status === 'approved' || s.status === 'published' : s.status === currentFilter);
         }
       }
 
@@ -1101,108 +1155,127 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       grid.innerHTML = items.map((sub) => {
         const status = sub.status || 'pending_review';
         const dateStr = formatDate(sub.submitted_at || sub.created_at);
-
-        let statusBadgeHtml = '';
-        if (status === 'pending_review' || status === 'pending') {
-          statusBadgeHtml = `
-            <div class="status-badge-wrap">
-              <span class="status-badge-pill under-review">
-                <span class="stat-dot dot-amber" style="margin:0;width:7px;height:7px;"></span>
-                <span>Under Review</span>
-              </span>
-            </div>
-            <span class="status-subtext">Submitted ${dateStr}</span>
-          `;
-        } else if (status === 'approved') {
-          statusBadgeHtml = `
-            <div class="status-badge-wrap">
-              <span class="status-badge-pill approved">
-                <span class="stat-dot dot-blue" style="margin:0;width:7px;height:7px;"></span>
-                <span>Approved</span>
-              </span>
-            </div>
-            <span class="status-subtext">Publishing soon</span>
-          `;
-        } else if (status === 'published') {
-          statusBadgeHtml = `
-            <div class="status-badge-wrap">
-              <span class="status-badge-pill published">
-                <span class="stat-dot dot-green" style="margin:0;width:7px;height:7px;"></span>
-                <span>Published</span>
-              </span>
-            </div>
-            <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="action-link-btn">
-              View Site →
-            </a>
-          `;
-        } else if (status === 'rejected') {
-          statusBadgeHtml = `
-            <div class="status-badge-wrap">
-              <span class="status-badge-pill rejected">
-                <span class="stat-dot dot-red" style="margin:0;width:7px;height:7px;"></span>
-                <span>Rejected</span>
-              </span>
-            </div>
-            <button type="button" class="action-link-btn view-reason-trigger" data-id="${sub.id}">
-              View reason
-            </button>
-          `;
-        }
-
+        const locked = status === 'approved' || status === 'published';
+        const theme = sub.preview_info?.theme || 'cream';
+        const themeLabels: Record<string, string> = { cream: 'Theme 01 · Cream', pink: 'Theme 02 · Pink', cyan: 'Theme 03 · Cyan', purple: 'Theme 04 · Purple' };
+        const statusLabel = status === 'published' ? 'Approved · Published' : status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Under Review';
+        const statusClass = status === 'published' ? 'published' : status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'under-review';
         let hostname = 'website';
-        try {
-          hostname = new URL(sub.url).hostname;
-        } catch {}
-
+        try { hostname = new URL(sub.url).hostname; } catch {}
+        const image = sub.thumbnail_url ? `<img src="${escapeHtml(sub.thumbnail_url)}" alt="" class="live-preview-image">` : '';
         return `
           <article class="sub-preview-card" data-sub-id="${sub.id}">
-            <!-- Website Preview (Requirement 6) -->
-            <div class="card-preview-window">
-              <div class="browser-mock-header">
-                <div class="mock-dots">
-                  <span class="m-dot red"></span>
-                  <span class="m-dot yellow"></span>
-                  <span class="m-dot green"></span>
-                </div>
-                <span class="mock-url-bar">${escapeHtml(hostname)}</span>
-              </div>
-              <div class="preview-content-box">
-                <div class="fallback-preview-view">
-                  <span class="fallback-icon">🌐</span>
-                  <h4 class="fallback-label">${escapeHtml(sub.name)}</h4>
-                </div>
-              </div>
+            <div class="submission-heading">
+              <div><span class="category-pill">${escapeHtml(sub.category || 'General')}</span><span class="date-text">Submitted ${dateStr}</span></div>
+              <span class="status-badge-pill ${statusClass}">${status === 'published' ? '✓ ' : ''}${statusLabel}</span>
             </div>
-
-            <!-- Card Body Content -->
+            <div class="library-preview ${escapeHtml(theme)}">
+              <span class="preview-label">LIVE CARD PREVIEW</span>
+              ${image}
+              <div class="preview-library-top"><span class="preview-category">${escapeHtml(sub.category || 'General')}</span><span class="preview-domain">${escapeHtml(hostname)}</span></div>
+              <div class="preview-library-main"><h3 data-preview-name>${escapeHtml(sub.name)}</h3><p data-preview-desc>${escapeHtml(sub.description)}</p></div>
+              <a class="preview-visit" href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" data-preview-url>Visit Website ↗</a>
+            </div>
             <div class="card-body-content">
-              <div class="card-meta-row">
-                <span class="category-pill">${escapeHtml(sub.category || 'General')}</span>
-                <span class="date-text">${dateStr}</span>
-              </div>
               <h3 class="card-site-title">${escapeHtml(sub.name)}</h3>
-              <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="card-site-url">
-                ${escapeHtml(sub.url)} ↗
-              </a>
+              <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="card-site-url">${escapeHtml(sub.url)} ↗</a>
               <p class="card-site-desc">${escapeHtml(sub.description)}</p>
-              <div class="card-status-footer">
-                ${statusBadgeHtml}
+              <div class="submission-facts"><span><b>Category</b>${escapeHtml(sub.category || 'General')}</span><span><b>Theme</b>${themeLabels[theme] || themeLabels.cream}</span><span><b>Publishing</b>${status === 'published' ? 'LIVE IN RANDOMIZER' : status === 'approved' ? 'Publishing soon' : 'Not published'}</span></div>
+              ${locked ? '<p class="lock-note">🔒 Approved submissions are locked. Project name and URL cannot be changed after approval.</p>' : ''}
+              <div class="submission-actions">
+                ${status === 'rejected' ? `<button type="button" class="action-link-btn view-reason-trigger" data-id="${sub.id}">View review reason</button>` : ''}
+                ${status === 'published' ? `<a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="action-link-btn">Visit site ↗</a>` : ''}
+                <button type="button" class="dash-secondary-btn compact preview-trigger" data-id="${sub.id}">Preview</button>
+                ${locked ? `<button type="button" class="dash-secondary-btn compact theme-edit-trigger" data-id="${sub.id}">Edit Presentation</button>` : `<button type="button" class="dash-primary-btn compact edit-trigger" data-id="${sub.id}">Edit Submission</button>`}
               </div>
+              ${locked ? `<form class="theme-only-form" data-theme-form="${sub.id}" hidden><fieldset class="theme-selector"><legend>Change card theme</legend>${Object.entries(themeLabels).map(([key, label]) => `<label class="theme-choice ${key}"><input type="radio" name="theme" value="${key}" ${theme === key ? 'checked' : ''}><span class="theme-swatch"></span><b>${label}</b></label>`).join('')}</fieldset><button class="dash-primary-btn compact" type="submit">Save Theme</button><span class="edit-message" aria-live="polite"></span></form>` : ''}
+              ${locked ? '' : `<form class="submission-edit-form" data-edit-form="${sub.id}" hidden>
+                <div class="edit-fields">
+                  <label>Project name<input name="name" maxlength="100" required value="${escapeHtml(sub.name)}"></label>
+                  <label>Website URL<input name="url" type="url" maxlength="2048" required value="${escapeHtml(sub.url)}"></label>
+                  <label>Description<textarea name="description" maxlength="500" required>${escapeHtml(sub.description)}</textarea></label>
+                  <label>Category<input name="category" maxlength="50" required value="${escapeHtml(sub.category || '')}"></label>
+                  <label>Preview image URL <span>(optional)</span><input name="thumbnail_url" type="url" value="${escapeHtml(sub.thumbnail_url || '')}"></label>
+                </div>
+                <fieldset class="theme-selector"><legend>Choose a library theme</legend>
+                  ${Object.entries(themeLabels).map(([key, label]) => `<label class="theme-choice ${key}"><input type="radio" name="theme" value="${key}" ${theme === key ? 'checked' : ''}><span class="theme-swatch"></span><b>${label}</b></label>`).join('')}
+                </fieldset>
+                <div class="edit-form-actions"><button class="dash-primary-btn compact" type="submit">Save Changes</button><button class="dash-secondary-btn compact cancel-edit" type="button">Cancel</button><span class="edit-message" aria-live="polite"></span></div>
+              </form>`}
             </div>
-          </article>
-        `;
+          </article>`;
       }).join('');
 
-      // Wire up view reason buttons
-      grid.querySelectorAll('.view-reason-trigger').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const id = Number(btn.getAttribute('data-id'));
-          const found = cachedSubmissions.find((s) => s.id === id);
-          if (found && reasonModal && reasonSiteName && reasonText) {
-            reasonSiteName.textContent = found.name;
-            reasonText.textContent = found.rejection_reason || 'This website did not meet our community guidelines.';
-            reasonModal.style.display = 'flex';
-          }
+      grid.querySelectorAll('.view-reason-trigger').forEach((btn) => btn.addEventListener('click', () => {
+        const found = cachedSubmissions.find((s) => String(s.id) === btn.getAttribute('data-id'));
+        if (found && reasonModal && reasonSiteName && reasonText) { reasonSiteName.textContent = found.name; reasonText.textContent = found.rejection_reason || 'This website did not meet our community guidelines.'; reasonModal.style.display = 'flex'; }
+      }));
+      grid.querySelectorAll('.edit-trigger').forEach((btn) => btn.addEventListener('click', () => {
+        const form = grid.querySelector(`[data-edit-form="${btn.getAttribute('data-id')}"]`) as HTMLFormElement | null;
+        if (form) form.hidden = !form.hidden;
+      }));
+      grid.querySelectorAll('.theme-edit-trigger').forEach((btn) => btn.addEventListener('click', () => {
+        const form = grid.querySelector(`[data-theme-form="${btn.getAttribute('data-id')}"]`) as HTMLFormElement | null;
+        if (form) form.hidden = !form.hidden;
+      }));
+      grid.querySelectorAll<HTMLFormElement>('.theme-only-form').forEach((form) => form.addEventListener('change', () => {
+        const theme = form.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
+        form.closest('.sub-preview-card')?.querySelector('.library-preview')?.setAttribute('class', `library-preview ${theme}`);
+      }));
+      grid.querySelectorAll<HTMLFormElement>('.theme-only-form').forEach((form) => form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const message = form.querySelector('.edit-message')!;
+        const token = await getAuthToken();
+        const id = Number(form.dataset.themeForm);
+        const theme = form.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
+        message.textContent = 'Saving…';
+        try {
+          const response = await fetch('/api/submissions', { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ id, theme, editThemeOnly: true }) });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'Could not save theme.');
+          message.textContent = 'Saved';
+          await fetchSubmissions(false);
+        } catch (error: any) { message.textContent = error.message || 'Could not save theme.'; }
+      }));
+      grid.querySelectorAll('.cancel-edit').forEach((btn) => btn.addEventListener('click', () => { const form = (btn as HTMLElement).closest('form'); if (form) form.hidden = true; }));
+      grid.querySelectorAll('.preview-trigger').forEach((btn) => btn.addEventListener('click', () => {
+        const card = (btn as HTMLElement).closest('.sub-preview-card');
+        card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card?.querySelector('.library-preview')?.classList.add('preview-highlight');
+        setTimeout(() => card?.querySelector('.library-preview')?.classList.remove('preview-highlight'), 900);
+      }));
+      grid.querySelectorAll<HTMLFormElement>('.submission-edit-form').forEach((form) => {
+        const card = form.closest('.sub-preview-card')!;
+        const fields = ['name', 'url', 'description', 'category'];
+        const syncPreview = () => {
+          card.querySelector('[data-preview-name]')!.textContent = (form.elements.namedItem('name') as HTMLInputElement).value || 'Project name';
+          card.querySelector('[data-preview-desc]')!.textContent = (form.elements.namedItem('description') as HTMLTextAreaElement).value || 'Your description will appear here.';
+          const url = (form.elements.namedItem('url') as HTMLInputElement).value;
+          try { card.querySelector('.preview-domain')!.textContent = new URL(url).hostname; } catch { card.querySelector('.preview-domain')!.textContent = 'your-site.com'; }
+          const category = (form.elements.namedItem('category') as HTMLInputElement).value || 'General';
+          card.querySelector('.preview-category')!.textContent = category;
+          const link = card.querySelector('[data-preview-url]') as HTMLAnchorElement;
+          link.href = url || '#';
+          const picked = form.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'cream';
+          card.querySelector('.library-preview')!.className = `library-preview ${picked}`;
+        };
+        form.addEventListener('input', syncPreview);
+        form.addEventListener('change', syncPreview);
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const message = form.querySelector('.edit-message')!;
+          const data = new FormData(form);
+          const payload: Record<string, any> = { id: Number(form.dataset.editForm), theme: data.get('theme'), thumbnail_url: data.get('thumbnail_url') || null };
+          fields.forEach((key) => payload[key] = data.get(key));
+          const token = await getAuthToken();
+          message.textContent = 'Saving…';
+          try {
+            const response = await fetch('/api/submissions', { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(payload) });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Could not save changes.');
+            message.textContent = 'Saved';
+            await fetchSubmissions(false);
+          } catch (error: any) { message.textContent = error.message || 'Could not save changes.'; }
         });
       });
     }

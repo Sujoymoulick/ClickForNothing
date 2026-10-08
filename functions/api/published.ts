@@ -17,6 +17,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         description,
         category,
         thumbnail_url,
+        preview_info,
         published_at,
         created_at
       FROM website_submissions

@@ -36,8 +36,8 @@ async function main() {
   if (action === 'approve') {
     const updated = await sql`
       UPDATE website_submissions
-      SET status = 'approved', reviewed_at = NOW(), rejection_reason = NULL, updated_at = NOW()
-      WHERE id = ${id}
+      SET status = 'published', reviewed_at = NOW(), published_at = COALESCE(published_at, NOW()), rejection_reason = NULL, updated_at = NOW()
+      WHERE id = ${id} AND status <> 'rejected'
       RETURNING *;
     `;
     console.log('✅ Approved submission:', updated[0]);
@@ -45,7 +45,7 @@ async function main() {
     const updated = await sql`
       UPDATE website_submissions
       SET status = 'published', published_at = NOW(), reviewed_at = COALESCE(reviewed_at, NOW()), rejection_reason = NULL, updated_at = NOW()
-      WHERE id = ${id}
+      WHERE id = ${id} AND status <> 'rejected'
       RETURNING *;
     `;
     console.log('🚀 Published submission:', updated[0]);
@@ -54,7 +54,7 @@ async function main() {
     const updated = await sql`
       UPDATE website_submissions
       SET status = 'rejected', reviewed_at = NOW(), rejection_reason = ${reason}, updated_at = NOW()
-      WHERE id = ${id}
+      WHERE id = ${id} AND status NOT IN ('approved', 'published')
       RETURNING *;
     `;
     console.log('❌ Rejected submission:', updated[0]);

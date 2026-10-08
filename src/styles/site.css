@@ -164,6 +164,11 @@ a { color: inherit; }
   will-change: transform, opacity;
 }
 
+.card-stage .website-card.theme-pink { background: #ffe2f5; }
+.card-stage .website-card.theme-cyan { background: #dffaff; }
+.card-stage .website-card.theme-purple { background: #eee3ff; }
+.card-stage .website-card.theme-cream { background: #fff9df; }
+
 .card-inner {
   display: flex;
   flex-direction: column;
