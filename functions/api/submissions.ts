@@ -66,7 +66,7 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
 
     // Admin authentication: either admin key header or Clerk admin role
     const adminKey = request.headers.get('x-admin-key');
-    const expectedAdminKey = env.ADMIN_SECRET_KEY || process.env.ADMIN_SECRET_KEY;
+    const expectedAdminKey = env.ADMIN_SECRET_KEY;
 
     let isAdmin = Boolean(expectedAdminKey && adminKey === expectedAdminKey);
 
