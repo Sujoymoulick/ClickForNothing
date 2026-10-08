@@ -2484,9 +2484,9 @@ const homeUrl = getLocalizedPath('/', currentLocale);
             body: JSON.stringify(payload),
           });
 
-          const data = await res.json();
+          const data = await res.json().catch(() => null);
           if (!res.ok) {
-            throw new Error(data.error || 'Failed to save changes.');
+            throw new Error(data?.error || `Failed to save changes (${res.status}: ${res.statusText || 'Server Error'}).`);
           }
 
           if (editFormStatus) {
