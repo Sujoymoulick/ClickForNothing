@@ -59,42 +59,92 @@ const homeUrl = getLocalizedPath('/', currentLocale);
 
   <script>
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
-    const cards = Array.from(document.querySelectorAll('.site-card')) as HTMLElement[];
+    let cards = Array.from(document.querySelectorAll('.site-card')) as HTMLElement[];
+    const grid = document.getElementById('results-grid');
     const countNode = document.getElementById('results-count');
     const noResultsNode = document.getElementById('no-results');
 
     const templateAll = countNode?.getAttribute('data-template-all') || 'Showing all {count} websites';
     const templateFound = countNode?.getAttribute('data-template-found') || 'Found {count} matching websites';
 
+    function performSearch() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const name = card.getAttribute('data-name') || '';
+        const desc = card.getAttribute('data-desc') || '';
+        const cat = card.getAttribute('data-category') || '';
+        const tags = card.getAttribute('data-tags') || '';
+
+        const match = !query || name.includes(query) || desc.includes(query) || cat.includes(query) || tags.includes(query);
+
+        if (match) {
+          card.style.display = 'flex';
+          visibleCount += 1;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (countNode) {
+        countNode.textContent = query
+          ? templateFound.replace('{count}', String(visibleCount))
+          : templateAll.replace('{count}', String(cards.length));
+      }
+      if (noResultsNode) noResultsNode.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
     if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        const query = searchInput.value.trim().toLowerCase();
-        let visibleCount = 0;
+      searchInput.addEventListener('input', performSearch);
+    }
 
-        cards.forEach((card) => {
-          const name = card.getAttribute('data-name') || '';
-          const desc = card.getAttribute('data-desc') || '';
-          const cat = card.getAttribute('data-category') || '';
-          const tags = card.getAttribute('data-tags') || '';
+    // Dynamic database merge
+    (async function fetchPublishedForSearch() {
+      try {
+        const res = await fetch('/api/published', { signal: AbortSignal.timeout(3000) });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data?.sites) || data.sites.length === 0 || !grid) return;
 
-          const match = !query || name.includes(query) || desc.includes(query) || cat.includes(query) || tags.includes(query);
+        const existingNames = new Set(cards.map((c) => (c.getAttribute('data-name') || '').toLowerCase().trim()));
 
-          if (match) {
-            card.style.display = 'flex';
-            visibleCount += 1;
-          } else {
-            card.style.display = 'none';
+        let added = 0;
+        data.sites.forEach((site: any) => {
+          const siteName = (site.name || '').toLowerCase().trim();
+          if (!existingNames.has(siteName)) {
+            const article = document.createElement('article');
+            article.className = 'site-card';
+            article.setAttribute('data-name', (site.name || '').toLowerCase());
+            article.setAttribute('data-desc', (site.description || '').toLowerCase());
+            article.setAttribute('data-category', (site.category || '').toLowerCase());
+            article.setAttribute('data-tags', (site.category || '').toLowerCase());
+
+            article.innerHTML = `
+              <div class="meta">
+                <span class="category-tag">${site.category || 'Useless Websites'}</span>
+              </div>
+              <h2><a href="${site.url}" target="_blank" rel="noopener noreferrer">${site.name}</a></h2>
+              <p>${site.description || ''}</p>
+              <div class="card-actions">
+                <a href="${site.url}" target="_blank" rel="noopener noreferrer" class="detail-link">Visit Site ↗</a>
+                <a href="${site.url}" target="_blank" rel="noopener noreferrer" class="visit-link">Visit</a>
+              </div>
+            `;
+            grid.appendChild(article);
+            cards.push(article);
+            existingNames.add(siteName);
+            added++;
           }
         });
 
-        if (countNode) {
-          countNode.textContent = query
-            ? templateFound.replace('{count}', String(visibleCount))
-            : templateAll.replace('{count}', String(cards.length));
+        if (added > 0) {
+          performSearch();
         }
-        if (noResultsNode) noResultsNode.style.display = visibleCount === 0 ? 'block' : 'none';
-      });
-    }
+      } catch {
+        // Silently fallback
+      }
+    })();
   </script>
 </SiteLayout>
 

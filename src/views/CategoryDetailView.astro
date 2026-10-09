@@ -78,10 +78,10 @@ const collectionSchema = {
     </header>
 
     <section class="sites-section">
-      <h2>{t('category_detail.found_count', { count: categoryWebsites.length, name: catName })}</h2>
-      <div class="sites-grid">
+      <h2 id="category-found-count" data-template={t('category_detail.found_count', { count: '{count}', name: catName })}>{t('category_detail.found_count', { count: categoryWebsites.length, name: catName })}</h2>
+      <div class="sites-grid" id="category-sites-grid">
         {categoryWebsites.map((site) => (
-          <article class="site-card">
+          <article class="site-card" data-name={site.name.toLowerCase()}>
             <h3><a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a></h3>
             <p>{site.description}</p>
             <div class="tags">
@@ -105,6 +105,79 @@ const collectionSchema = {
 
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+
+  <script is:inline define:vars={{ targetCategorySlug: category.slug, targetCatName: catName }}>
+    (async function fetchDynamicCategorySites() {
+      try {
+        const res = await fetch('/api/published', { signal: AbortSignal.timeout(3000) });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data?.sites) || data.sites.length === 0) return;
+
+        const grid = document.getElementById('category-sites-grid');
+        const countHeading = document.getElementById('category-found-count');
+        if (!grid) return;
+
+        const existingNames = new Set(
+          Array.from(grid.querySelectorAll('.site-card')).map((c) => (c.getAttribute('data-name') || '').toLowerCase().trim())
+        );
+
+        const normalize = (c) => {
+          if (!c) return '';
+          const s = String(c).trim().toLowerCase();
+          const map = {
+            'creative & art toys': 'creative',
+            'silly animals': 'silly-animals',
+            'interactive web experiments': 'interactive',
+            'pointless mini games': 'mini-games',
+            'internet nostalgia': 'internet-nostalgia',
+            'visual oddities': 'visual-oddities',
+            'music & sounds': 'music-sounds',
+            'funny & humor websites': 'funny-websites',
+            'ultimate time wasters': 'time-wasters',
+            'food for thought': 'food-for-thought',
+            'internet experiments': 'internet-experiments',
+            'useless websites': 'useless-websites',
+          };
+          return map[s] || s;
+        };
+
+        let added = 0;
+        data.sites.forEach((site) => {
+          const sCat = normalize(site.category);
+          const sName = (site.name || '').toLowerCase().trim();
+          if ((sCat === targetCategorySlug || sCat === targetCatName.toLowerCase()) && !existingNames.has(sName)) {
+            const article = document.createElement('article');
+            article.className = 'site-card';
+            article.setAttribute('data-name', sName);
+            article.innerHTML = `
+              <h3><a href="${site.url}" target="_blank" rel="noopener noreferrer">${site.name}</a></h3>
+              <p>${site.description || ''}</p>
+              <div class="tags">
+                <span class="tag">#${sCat}</span>
+                <span class="tag">#community</span>
+              </div>
+              <div class="card-actions">
+                <a href="${site.url}" target="_blank" rel="noopener noreferrer" class="detail-link">Visit Site ↗</a>
+                <a href="${site.url}" target="_blank" rel="noopener noreferrer" class="visit-link">Visit</a>
+              </div>
+            `;
+            grid.prepend(article);
+            existingNames.add(sName);
+            added++;
+          }
+        });
+
+        if (added > 0 && countHeading) {
+          const total = grid.querySelectorAll('.site-card').length;
+          const template = countHeading.getAttribute('data-template');
+          if (template) {
+            countHeading.textContent = template.replace('{count}', String(total));
+          }
+        }
+      } catch {}
+    })();
+  </script>
 </SiteLayout>
 
 <style>
