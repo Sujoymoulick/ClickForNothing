@@ -685,17 +685,27 @@ const categoryDataMap = Object.fromEntries([
       }
     }
 
+    function formatCount(num) {
+      const n = Number(num) || 0;
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(n);
+    }
+
     function createCardElement(site, index) {
       const card = document.createElement('article');
-      const siteId = String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`;
+      const rawId = String(site.id || '');
+      const numericId = rawId.replace(/^submission-/, '');
+      const siteId = rawId.startsWith('submission-') ? rawId : `submission-${rawId}`;
       const catSlug = normalizeCat(site.category);
       const catObj = categoryData[catSlug] || { name: site.category || 'Useless Websites', icon: categoryData['all']?.icon || '' };
-      const likesRaw = 1200 + (String(site.name).length * 137 % 3800);
-      const likesFormatted = (likesRaw / 1000).toFixed(1) + 'K';
+      const likesRaw = Number(site.likes_count) || 0;
+      const likesFormatted = formatCount(likesRaw);
       const isLiked = likedSites.has(siteId);
 
       card.className = 'site-card is-hidden';
       card.setAttribute('data-site-id', siteId);
+      card.setAttribute('data-numeric-id', numericId);
       card.setAttribute('data-name', site.name || '');
       card.setAttribute('data-category', catSlug);
       card.setAttribute('data-likes', String(likesRaw));
@@ -732,7 +742,7 @@ const categoryDataMap = Object.fromEntries([
             </button>
           </div>
           <div class="card-footer">
-            <button type="button" class="card-like-btn ${isLiked ? 'is-liked' : ''}" data-like-target="${siteId}" aria-label="Like ${escapeHtml(site.name)}">
+            <button type="button" class="card-like-btn ${isLiked ? 'is-liked' : ''}" data-like-target="${siteId}" data-numeric-id="${numericId}" aria-label="Like ${escapeHtml(site.name)}">
               <svg class="heart-icon" width="15" height="15" viewBox="0 0 24 24" fill="${isLiked ? '#f43f5e' : 'none'}" stroke="currentColor" stroke-width="2">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
               </svg>
@@ -823,6 +833,17 @@ const categoryDataMap = Object.fromEntries([
               descEl.textContent = site.description;
               updated = true;
             }
+            // Live Update: Synchronize real likes count from Neon DB
+            if (site.likes_count !== undefined && site.likes_count !== null) {
+              const currentLikes = parseInt(existingCard.getAttribute('data-likes') || '0', 10);
+              const dbLikes = Number(site.likes_count);
+              if (currentLikes !== dbLikes) {
+                existingCard.setAttribute('data-likes', String(dbLikes));
+                const numEl = existingCard.querySelector('.like-number');
+                if (numEl) numEl.textContent = formatCount(dbLikes);
+                updated = true;
+              }
+            }
             return;
           }
 
@@ -841,9 +862,6 @@ const categoryDataMap = Object.fromEntries([
           updatePillCounts();
           renderCards();
         }
-      } catch (e) {
-        // Silently continue with static directory
-      }
     }
 
     // Listen for cross-tab or dashboard template updates
@@ -853,9 +871,32 @@ const categoryDataMap = Object.fromEntries([
       }
     });
 
+    // Delegate click events on cards: likes, views, and categories
+    container.addEventListener('click', async (e) => {
+      // 1. Visit tracking (External direct button, thumbnail link, title link, arrow button)
+      const visitLink = e.target.closest('.card-ext-btn, .thumb-link, .card-title-link, .card-arrow-btn');
+      if (visitLink) {
+        const card = visitLink.closest('.site-card');
+        if (card) {
+          const siteId = card.getAttribute('data-site-id') || '';
+          const rawNumericId = card.getAttribute('data-numeric-id') || (siteId.startsWith('submission-') ? siteId.replace('submission-', '') : null);
+          const numId = rawNumericId ? parseInt(rawNumericId, 10) : NaN;
+          if (!isNaN(numId) && numId > 0) {
+            try {
+              fetch('/api/interactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ submission_id: numId, type: 'view' }),
+                keepalive: true
+              }).then(() => {
+                localStorage.setItem('cfn_submission_updated', String(Date.now()));
+              }).catch(() => {});
+            } catch (err) {}
+          }
+        }
+      }
 
-    // Delegate like button clicks
-    container.addEventListener('click', (e) => {
+      // 2. Like button click
       const likeBtn = e.target.closest('.card-like-btn');
       if (likeBtn) {
         e.preventDefault();
@@ -867,9 +908,10 @@ const categoryDataMap = Object.fromEntries([
 
         if (!siteId || !card) return;
 
-        let rawLikes = parseInt(card.getAttribute('data-likes') || '1000', 10);
+        let rawLikes = parseInt(card.getAttribute('data-likes') || '0', 10);
         const isLiked = likedSites.has(siteId);
 
+        // Optimistic UI update
         if (isLiked) {
           likedSites.delete(siteId);
           likeBtn.classList.remove('is-liked');
@@ -884,13 +926,38 @@ const categoryDataMap = Object.fromEntries([
 
         card.setAttribute('data-likes', String(rawLikes));
         if (numEl) {
-          numEl.textContent = (rawLikes / 1000).toFixed(1) + 'K';
+          numEl.textContent = formatCount(rawLikes);
         }
         localStorage.setItem('cfn_liked_sites', JSON.stringify(Array.from(likedSites)));
+
+        // If this is a database submission, persist atomically to Neon DB
+        const rawNumericId = card.getAttribute('data-numeric-id') || likeBtn.getAttribute('data-numeric-id') || (siteId.startsWith('submission-') ? siteId.replace('submission-', '') : null);
+        const numId = rawNumericId ? parseInt(rawNumericId, 10) : NaN;
+        if (!isNaN(numId) && numId > 0) {
+          try {
+            const action = isLiked ? 'decrement' : 'increment';
+            const res = await fetch('/api/interactions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ submission_id: numId, type: 'like', action })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && typeof data.likes_count === 'number') {
+                card.setAttribute('data-likes', String(data.likes_count));
+                if (numEl) numEl.textContent = formatCount(data.likes_count);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to update likes in DB', err);
+          }
+          // Notify dashboard and other tabs that submission data has been updated in real-time
+          localStorage.setItem('cfn_submission_updated', String(Date.now()));
+        }
         return;
       }
 
-      // Delegate inline category badge clicks
+      // 3. Delegate inline category badge clicks
       const catBadge = e.target.closest('[data-category-trigger]');
       if (catBadge) {
         e.preventDefault();

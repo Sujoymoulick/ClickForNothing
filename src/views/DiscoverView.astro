@@ -594,6 +594,26 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       initialize();
       initDiscoverShare();
 
+      const visitBtn = document.querySelector('[data-visit]') as HTMLAnchorElement | null;
+      if (visitBtn) {
+        visitBtn.addEventListener('click', () => {
+          const currentId = navState.history[navState.index];
+          if (currentId && currentId.startsWith('submission-')) {
+            const numId = parseInt(currentId.replace('submission-', ''), 10);
+            if (!isNaN(numId) && numId > 0) {
+              fetch('/api/interactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ submission_id: numId, type: 'view' }),
+                keepalive: true
+              }).then(() => {
+                localStorage.setItem('cfn_submission_updated', String(Date.now()));
+              }).catch(() => {});
+            }
+          }
+        });
+      }
+
       previousButton.addEventListener('click', handlePrevious);
       nextButton.addEventListener('click', handleNext);
       surpriseButton.addEventListener('click', handleSurprise);

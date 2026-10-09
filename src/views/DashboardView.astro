@@ -1134,6 +1134,18 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     border: 1px solid #fde68a;
   }
 
+  .tag-pill.tag-views {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #dbeafe;
+  }
+
+  .tag-pill.tag-loves {
+    background: #fdf2f8;
+    color: #db2777;
+    border: 1px solid #fce7f3;
+  }
+
   .tag-pill.tag-theme {
     background: #f3e8ff;
     color: #7e22ce;
@@ -2363,6 +2375,13 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       renderSubmissions();
     }
 
+    function formatCount(num: number | string): string {
+      const n = Number(num) || 0;
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(n);
+    }
+
     // Render Submissions List
     function renderSubmissions() {
       if (!submissionsList || !emptyView) return;
@@ -2488,6 +2507,8 @@ const homeUrl = getLocalizedPath('/', currentLocale);
               </a>
 
               <div class="sub-tags-row">
+                <span class="tag-pill tag-views" title="Real Website Views">👁️ ${formatCount(sub.views_count || 0)} Views</span>
+                <span class="tag-pill tag-loves" title="Real User Loves">❤️ ${formatCount(sub.likes_count || 0)} Loves</span>
                 <span class="tag-pill tag-category">🏷️ ${escapeHtml(category)}</span>
                 <span class="tag-pill tag-theme">🎨 ${escapeHtml(themeInfo.name)}</span>
                 <span class="tag-pill tag-date">📅 Submitted ${formattedDate}</span>
@@ -2745,8 +2766,10 @@ const homeUrl = getLocalizedPath('/', currentLocale);
           <h3 class="card-inner-title" style="font-size: 1.8rem;">${escapeHtml(sub.name)}</h3>
           <p class="card-inner-desc" style="font-size: 0.95rem; -webkit-line-clamp: 4;">${escapeHtml(sub.description)}</p>
 
-          <div class="card-inner-pills-row" style="margin-top: 20px;">
+          <div class="card-inner-pills-row" style="margin-top: 20px; flex-wrap: wrap; gap: 8px;">
             <span class="pill-cat" style="font-size: 0.85rem; padding: 6px 16px;">${escapeHtml(sub.category || 'Creative')}</span>
+            <span style="font-size: 0.82rem; padding: 5px 12px; background: #eff6ff; color: #1d4ed8; border: 1.5px solid #dbeafe; border-radius: 999px; font-weight: 700;">👁️ ${formatCount(sub.views_count || 0)} Views</span>
+            <span style="font-size: 0.82rem; padding: 5px 12px; background: #fdf2f8; color: #db2777; border: 1.5px solid #fce7f3; border-radius: 999px; font-weight: 700;">❤️ ${formatCount(sub.likes_count || 0)} Loves</span>
             <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="pill-visit" style="text-decoration: none; font-size: 0.85rem; padding: 6px 16px;">Visit Website ↗</a>
           </div>
         </div>

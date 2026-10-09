@@ -60,6 +60,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
             id, url, name, description, category, status, design_id,
             user_id, user_email, user_name, submitted_at, reviewed_at,
             published_at, rejection_reason, thumbnail_url, preview_info,
+            COALESCE(views_count, 0) AS views_count,
+            COALESCE(likes_count, 0) AS likes_count,
             created_at, updated_at
           FROM website_submissions
           WHERE status = ${filterStatus}
@@ -71,6 +73,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
             id, url, name, description, category, status, design_id,
             user_id, user_email, user_name, submitted_at, reviewed_at,
             published_at, rejection_reason, thumbnail_url, preview_info,
+            COALESCE(views_count, 0) AS views_count,
+            COALESCE(likes_count, 0) AS likes_count,
             created_at, updated_at
           FROM website_submissions
           ORDER BY created_at DESC;
@@ -108,6 +112,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         rejection_reason,
         thumbnail_url,
         preview_info,
+        COALESCE(views_count, 0) AS views_count,
+        COALESCE(likes_count, 0) AS likes_count,
         created_at,
         updated_at
       FROM website_submissions
@@ -293,6 +299,7 @@ export async function onRequestPut(context: { request: Request; env: Env }) {
         updated_at = NOW()
       WHERE id = ${existing.id} AND user_id = ${authUser.userId}
       RETURNING id, url, name, description, category, status, design_id, preview_info, thumbnail_url,
+                COALESCE(views_count, 0) AS views_count, COALESCE(likes_count, 0) AS likes_count,
                 submitted_at, reviewed_at, published_at, rejection_reason, created_at, updated_at;
     `;
 

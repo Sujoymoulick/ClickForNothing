@@ -20,6 +20,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         design_id,
         thumbnail_url,
         preview_info,
+        COALESCE(views_count, 0) AS views_count,
+        COALESCE(likes_count, 0) AS likes_count,
         published_at,
         created_at
       FROM website_submissions
