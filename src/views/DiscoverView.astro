@@ -115,24 +115,60 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
     const ANIMATION_DURATION = 260;
     const EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
+    const categoryNameMap: Record<string, string> = {
+      'creative': 'Creative & Art Toys',
+      'visual-oddities': 'Visual Oddities',
+      'silly-animals': 'Silly Animals',
+      'interactive': 'Interactive Web Experiments',
+      'mini-games': 'Pointless Mini Games',
+      'music-sounds': 'Music & Sounds',
+      'internet-nostalgia': 'Internet Nostalgia',
+      'funny-websites': 'Funny Websites',
+      'time-wasters': 'Time Wasters',
+      'internet-experiments': 'Internet Experiments',
+      'food-for-thought': 'Food for Thought',
+      'useless-websites': 'Useless Websites',
+      'weird-websites': 'Weird Websites',
+    };
+    function formatCategoryName(cat?: string): string {
+      if (!cat) return 'Creative';
+      const clean = cat.toLowerCase().trim();
+      return categoryNameMap[clean] || (cat.charAt(0).toUpperCase() + cat.slice(1));
+    }
+
+    const getThemeSlugFromSite = (site: any) => {
+      const raw = String(site.design_id || site.preview_info?.design_id || site.preview_info?.theme || 'gift-box').toLowerCase().trim();
+      const map: Record<string, string> = {
+        'gift-box': 'pink', 'cat-bounce': 'pink', 'heeeey': 'pink',
+        'long-doge': 'amber', 'versus': 'amber', 'mondrian': 'cream',
+        'rgb': 'cyber', 'pointer': 'cyber', 'windows-93': 'cyan',
+        'interactive': 'cyan', 'silly-animal': 'cyan', 'falling-falling': 'purple',
+        'theme-01': 'cream', 'cream': 'cream',
+        'theme-02': 'pink', 'pink': 'pink',
+        'theme-03': 'cyan', 'cyan': 'cyan',
+        'theme-04': 'purple', 'purple': 'purple',
+        'theme-05': 'amber', 'amber': 'amber',
+        'theme-06': 'cyber', 'cyber': 'cyber',
+      };
+      return map[raw] || 'pink';
+    };
+
     let publishedSites: any[] = [];
     try {
-      const publishedResponse = await fetch('/api/published', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(2500) });
+      const publishedResponse = await fetch('/api/published?_t=' + Date.now(), {
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000)
+      });
       if (publishedResponse.ok) {
         const publishedData = await publishedResponse.json();
-        const getThemeSlugFromSite = (site: any) => {
-          const raw = site.design_id || site.preview_info?.design_id || site.preview_info?.theme || 'cream';
-          const map: Record<string, string> = {
-            'theme-01': 'cream', 'cream': 'cream',
-            'theme-02': 'pink', 'pink': 'pink',
-            'theme-03': 'cyan', 'cyan': 'cyan',
-            'theme-04': 'purple', 'purple': 'purple',
-            'theme-05': 'amber', 'amber': 'amber',
-            'theme-06': 'cyber', 'cyber': 'cyber',
-          };
-          return map[raw] || 'cream';
-        };
-        publishedSites = (publishedData.sites || []).map((site: any) => ({ ...site, id: `submission-${site.id}`, theme: getThemeSlugFromSite(site), verified: true }));
+        publishedSites = (publishedData.sites || []).map((site: any) => ({
+          ...site,
+          id: String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`,
+          theme: getThemeSlugFromSite(site),
+          category: formatCategoryName(site.category),
+          verified: true
+        }));
       }
     } catch { /* Curated sites remain available when the submissions API is offline. */ }
 
@@ -140,12 +176,13 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       if (!site.verified) return [];
       try {
         const url = new URL(site.url);
-        if (url.protocol !== 'https:') return [];
+        if (url.protocol !== 'https:' && url.protocol !== 'http:') return [];
         return [{ ...site, url: url.href }];
       } catch {
         return [];
       }
     });
+
 
     const slugify = (text: string) =>
       text
@@ -464,6 +501,15 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
         /* Storage unavailable */
       }
 
+      // Ensure any newly added/published sites are seamlessly appended to the cycle
+      if (navState.cycle.length > 0) {
+        const cycleSet = new Set(navState.cycle);
+        const missing = safeSites.filter((s) => !cycleSet.has(s.id)).map((s) => s.id);
+        if (missing.length > 0) {
+          navState.cycle.push(...missing);
+        }
+      }
+
       const urlParams = new URL(window.location.href).searchParams;
       const rawParam = urlParams.get('name') || urlParams.get('site') || urlParams.get('id');
       let requestedId: string | null = null;
@@ -472,11 +518,18 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
         const cleanParam = rawParam.trim().toLowerCase();
         if (byId.has(cleanParam)) {
           requestedId = cleanParam;
+        } else if (byId.has(`submission-${cleanParam}`)) {
+          requestedId = `submission-${cleanParam}`;
         } else if (bySlug.has(cleanParam)) {
           requestedId = bySlug.get(cleanParam)!.id;
         } else {
           const matched = safeSites.find(
-            (s) => s.id.toLowerCase() === cleanParam || slugify(s.name) === cleanParam || s.name.toLowerCase() === cleanParam
+            (s) =>
+              s.id.toLowerCase() === cleanParam ||
+              s.id.toLowerCase() === `submission-${cleanParam}` ||
+              cleanParam === `submission-${s.id.toLowerCase()}` ||
+              slugify(s.name) === cleanParam ||
+              s.name.toLowerCase() === cleanParam
           );
           if (matched) requestedId = matched.id;
         }
@@ -544,6 +597,35 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       previousButton.addEventListener('click', handlePrevious);
       nextButton.addEventListener('click', handleNext);
       surpriseButton.addEventListener('click', handleSurprise);
+
+      // Listen for cross-tab or dashboard template updates
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'cfn_submission_updated') {
+          fetch('/api/published?_t=' + Date.now(), {
+            headers: { Accept: 'application/json' },
+            cache: 'no-store'
+          })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+              if (!Array.isArray(data?.sites)) return;
+              const updatedPublished = data.sites.map((site: any) => ({
+                ...site,
+                id: String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`,
+                theme: getThemeSlugFromSite(site),
+                category: formatCategoryName(site.category),
+                verified: true
+              }));
+              for (const site of updatedPublished) {
+                byId.set(site.id, site);
+              }
+              const currentId = navState.history[navState.index];
+              if (currentId && currentId.startsWith('submission-')) {
+                renderDirect(currentId);
+              }
+            })
+            .catch(() => {});
+        }
+      });
 
       let accumulatedDeltaY = 0;
       let wheelResetTimeout: number | null = null;

@@ -5,5 +5,7 @@ export {
   isValidDesignId,
   getCardDesign,
   getThemeSlug,
+  generateTemplateSvg,
   type CardDesign,
 } from '../../functions/api/_cardDesigns';
+

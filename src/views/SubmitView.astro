@@ -295,7 +295,7 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
                 <div class="design-gallery-grid" id="design-gallery-grid">
                   {CARD_DESIGNS.map((design) => (
                     <article
-                      class={`design-option-card theme-${design.themeSlug} ${design.id === 'theme-04' ? 'is-selected' : ''}`}
+                      class={`design-option-card theme-${design.themeSlug} ${design.id === 'gift-box' ? 'is-selected' : ''}`}
                       data-design-id={design.id}
                       data-theme-slug={design.themeSlug}
                       data-design-name={design.name}
@@ -872,18 +872,31 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
     const previewModalSelectThis = document.getElementById('preview-modal-select-this');
 
     let currentStep = 1;
-    let selectedDesignId = 'theme-04';
-    let previewModalDesignId = 'theme-04';
+    let selectedDesignId = 'gift-box';
+    let previewModalDesignId = 'gift-box';
     let isSubmitting = false;
 
     const designCatalogMeta: Record<string, { name: string; themeSlug: string; emoji: string; bgColor: string }> = {
-      'theme-01': { name: 'Theme 01 · Cream', themeSlug: 'cream', emoji: '🎁', bgColor: '#fff9df' },
-      'theme-02': { name: 'Theme 02 · Pink', themeSlug: 'pink', emoji: '💖', bgColor: '#ffe2f5' },
-      'theme-03': { name: 'Theme 03 · Cyan', themeSlug: 'cyan', emoji: '🚀', bgColor: '#dffaff' },
-      'theme-04': { name: 'Theme 04 · Purple', themeSlug: 'purple', emoji: '✨', bgColor: '#eee3ff' },
-      'theme-05': { name: 'Theme 05 · Amber', themeSlug: 'amber', emoji: '⚡', bgColor: '#fef3c7' },
-      'theme-06': { name: 'Theme 06 · Dark Matrix', themeSlug: 'cyber', emoji: '👾', bgColor: '#18181b' },
+      'gift-box': { name: 'Virtual Gift Box', themeSlug: 'pink', emoji: '🎁', bgColor: '#ffe2f5' },
+      'cat-bounce': { name: 'Cat Bounce', themeSlug: 'pink', emoji: '🐱', bgColor: '#fce7f3' },
+      'long-doge': { name: 'Long Doge Challenge', themeSlug: 'amber', emoji: '🐕', bgColor: '#fef3c7' },
+      'mondrian': { name: 'Mondrian & Me', themeSlug: 'cream', emoji: '🎨', bgColor: '#f8fafc' },
+      'versus': { name: 'Potato or Tomato', themeSlug: 'amber', emoji: '🥔', bgColor: '#ffedd5' },
+      'heeeey': { name: 'HEEEEEEEY!', themeSlug: 'pink', emoji: '🎉', bgColor: '#fdf4ff' },
+      'rgb': { name: 'RGB Color Space', themeSlug: 'cyber', emoji: '🔴', bgColor: '#09090b' },
+      'pointer': { name: 'Pointer Pointer', themeSlug: 'cyber', emoji: '🎯', bgColor: '#18181b' },
+      'windows-93': { name: 'Windows 93', themeSlug: 'cyan', emoji: '💾', bgColor: '#008080' },
+      'falling-falling': { name: 'Falling Falling', themeSlug: 'purple', emoji: '🌀', bgColor: '#a855f7' },
+      'interactive': { name: 'Interactive Target', themeSlug: 'cyan', emoji: '👆', bgColor: '#f0fdf4' },
+      'silly-animal': { name: 'Silly Mascot', themeSlug: 'cyan', emoji: '🐻', bgColor: '#ecfdf5' },
+      'theme-01': { name: 'Mondrian & Me', themeSlug: 'cream', emoji: '🎨', bgColor: '#f8fafc' },
+      'theme-02': { name: 'Cat Bounce', themeSlug: 'pink', emoji: '🐱', bgColor: '#fce7f3' },
+      'theme-03': { name: 'Interactive Target', themeSlug: 'cyan', emoji: '👆', bgColor: '#f0fdf4' },
+      'theme-04': { name: 'Virtual Gift Box', themeSlug: 'pink', emoji: '🎁', bgColor: '#ffe2f5' },
+      'theme-05': { name: 'Long Doge Challenge', themeSlug: 'amber', emoji: '🐕', bgColor: '#fef3c7' },
+      'theme-06': { name: 'Windows 93', themeSlug: 'cyan', emoji: '💾', bgColor: '#008080' },
     };
+
 
     function escapeHtml(str: string): string {
       return String(str || '')

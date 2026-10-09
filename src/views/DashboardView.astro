@@ -284,71 +284,85 @@ const homeUrl = getLocalizedPath('/', currentLocale);
               <input type="url" id="edit-field-thumb" name="thumbnail_url" placeholder="https://... image link" />
             </div>
 
-            <!-- Theme Picker: All 6 Catalog Themes -->
+            <!-- Theme Picker: All 12 Rich Site Templates -->
             <div class="form-field-group theme-group">
-              <label>Select Card Theme</label>
+              <label>Select Card Design Template</label>
               <div class="theme-options-grid">
-                <!-- Theme 01: Cream -->
-                <label class="theme-option theme-cream">
-                  <input type="radio" name="theme" value="theme-01" />
-                  <div class="theme-swatch swatch-cream">
-                    <span class="swatch-accent accent-cream"></span>
-                  </div>
-                  <span class="theme-option-name">Theme 01</span>
-                  <span class="theme-option-flavor">Cream</span>
-                </label>
-
-                <!-- Theme 02: Pink -->
                 <label class="theme-option theme-pink">
-                  <input type="radio" name="theme" value="theme-02" />
-                  <div class="theme-swatch swatch-pink">
-                    <span class="swatch-accent accent-pink"></span>
-                  </div>
-                  <span class="theme-option-name">Theme 02</span>
-                  <span class="theme-option-flavor">Pink</span>
+                  <input type="radio" name="theme" value="gift-box" />
+                  <div class="theme-swatch swatch-pink"><span class="swatch-accent accent-pink"></span></div>
+                  <span class="theme-option-name">🎁 Gift Box</span>
+                  <span class="theme-option-flavor">Surprise</span>
                 </label>
-
-                <!-- Theme 03: Cyan -->
-                <label class="theme-option theme-cyan">
-                  <input type="radio" name="theme" value="theme-03" />
-                  <div class="theme-swatch swatch-cyan">
-                    <span class="swatch-accent accent-cyan"></span>
-                  </div>
-                  <span class="theme-option-name">Theme 03</span>
-                  <span class="theme-option-flavor">Cyan</span>
+                <label class="theme-option theme-pink">
+                  <input type="radio" name="theme" value="cat-bounce" />
+                  <div class="theme-swatch swatch-pink"><span class="swatch-accent accent-pink"></span></div>
+                  <span class="theme-option-name">🐱 Cat Bounce</span>
+                  <span class="theme-option-flavor">Kitty</span>
                 </label>
-
-                <!-- Theme 04: Purple -->
-                <label class="theme-option theme-purple">
-                  <input type="radio" name="theme" value="theme-04" />
-                  <div class="theme-swatch swatch-purple">
-                    <span class="swatch-accent accent-purple"></span>
-                  </div>
-                  <span class="theme-option-name">Theme 04</span>
-                  <span class="theme-option-flavor">Purple</span>
-                </label>
-
-                <!-- Theme 05: Amber -->
                 <label class="theme-option theme-amber">
-                  <input type="radio" name="theme" value="theme-05" />
-                  <div class="theme-swatch swatch-amber">
-                    <span class="swatch-accent accent-amber"></span>
-                  </div>
-                  <span class="theme-option-name">Theme 05</span>
-                  <span class="theme-option-flavor">Amber</span>
+                  <input type="radio" name="theme" value="long-doge" />
+                  <div class="theme-swatch swatch-amber"><span class="swatch-accent accent-amber"></span></div>
+                  <span class="theme-option-name">🐕 Long Doge</span>
+                  <span class="theme-option-flavor">Much Wow</span>
                 </label>
-
-                <!-- Theme 06: Dark Matrix -->
+                <label class="theme-option theme-cream">
+                  <input type="radio" name="theme" value="mondrian" />
+                  <div class="theme-swatch swatch-cream"><span class="swatch-accent accent-cream"></span></div>
+                  <span class="theme-option-name">🎨 Mondrian</span>
+                  <span class="theme-option-flavor">Art Grid</span>
+                </label>
+                <label class="theme-option theme-amber">
+                  <input type="radio" name="theme" value="versus" />
+                  <div class="theme-swatch swatch-amber"><span class="swatch-accent accent-amber"></span></div>
+                  <span class="theme-option-name">🥔 Tomato/Potato</span>
+                  <span class="theme-option-flavor">Versus</span>
+                </label>
+                <label class="theme-option theme-pink">
+                  <input type="radio" name="theme" value="heeeey" />
+                  <div class="theme-swatch swatch-pink"><span class="swatch-accent accent-purple"></span></div>
+                  <span class="theme-option-name">🎉 HEEEY!</span>
+                  <span class="theme-option-flavor">Poster</span>
+                </label>
                 <label class="theme-option theme-cyber">
-                  <input type="radio" name="theme" value="theme-06" />
-                  <div class="theme-swatch swatch-cyber">
-                    <span class="swatch-accent accent-cyber"></span>
-                  </div>
-                  <span class="theme-option-name">Theme 06</span>
-                  <span class="theme-option-flavor">Cyber</span>
+                  <input type="radio" name="theme" value="rgb" />
+                  <div class="theme-swatch swatch-cyber"><span class="swatch-accent accent-cyber"></span></div>
+                  <span class="theme-option-name">🔴 RGB Space</span>
+                  <span class="theme-option-flavor">Additive</span>
+                </label>
+                <label class="theme-option theme-cyber">
+                  <input type="radio" name="theme" value="pointer" />
+                  <div class="theme-swatch swatch-cyber"><span class="swatch-accent accent-pink"></span></div>
+                  <span class="theme-option-name">🎯 Pointer</span>
+                  <span class="theme-option-flavor">Radar</span>
+                </label>
+                <label class="theme-option theme-cyan">
+                  <input type="radio" name="theme" value="windows-93" />
+                  <div class="theme-swatch swatch-cyan"><span class="swatch-accent accent-cyan"></span></div>
+                  <span class="theme-option-name">💾 Windows 93</span>
+                  <span class="theme-option-flavor">Retro OS</span>
+                </label>
+                <label class="theme-option theme-purple">
+                  <input type="radio" name="theme" value="falling-falling" />
+                  <div class="theme-swatch swatch-purple"><span class="swatch-accent accent-purple"></span></div>
+                  <span class="theme-option-name">🌀 Falling</span>
+                  <span class="theme-option-flavor">Hypnotic</span>
+                </label>
+                <label class="theme-option theme-cyan">
+                  <input type="radio" name="theme" value="interactive" />
+                  <div class="theme-swatch swatch-cyan"><span class="swatch-accent accent-cyan"></span></div>
+                  <span class="theme-option-name">👆 Interactive</span>
+                  <span class="theme-option-flavor">Rings</span>
+                </label>
+                <label class="theme-option theme-cyan">
+                  <input type="radio" name="theme" value="silly-animal" />
+                  <div class="theme-swatch swatch-cyan"><span class="swatch-accent accent-cyan"></span></div>
+                  <span class="theme-option-name">🐻 Silly Mascot</span>
+                  <span class="theme-option-flavor">Creature</span>
                 </label>
               </div>
             </div>
+
 
             <!-- Form Status / Error Message -->
             <div class="form-status-msg" id="edit-form-status" style="display: none;"></div>
@@ -2057,6 +2071,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
 
 <script>
   import { $authStore, $userStore } from '@clerk/astro/client';
+  import { generateTemplateSvg, normalizeDesignId } from '../data/cardDesigns.ts';
 
   // Global state
   let cachedSubmissions: any[] = [];
@@ -2067,21 +2082,36 @@ const homeUrl = getLocalizedPath('/', currentLocale);
   let isFetching = false;
   let lastFetchTimestamp = 0;
 
-  // Catalog of 6 Card Designs with display mapping
+  // Catalog of 12 Card Design Templates with display mapping
   const themeDisplayMap: Record<string, { id: string; label: string; name: string; slug: string; emoji: string; accent: string; bg: string }> = {
-    'theme-01': { id: 'theme-01', label: 'Theme 01', name: 'Theme 01 · Cream', slug: 'cream', emoji: '🎁', accent: '#f59e0b', bg: '#fff9df' },
-    'theme-02': { id: 'theme-02', label: 'Theme 02', name: 'Theme 02 · Pink', slug: 'pink', emoji: '💖', accent: '#f20caf', bg: '#ffe2f5' },
-    'theme-03': { id: 'theme-03', label: 'Theme 03', name: 'Theme 03 · Cyan', slug: 'cyan', emoji: '🚀', accent: '#0d9488', bg: '#dffaff' },
-    'theme-04': { id: 'theme-04', label: 'Theme 04', name: 'Theme 04 · Purple', slug: 'purple', emoji: '✨', accent: '#7025ed', bg: '#eee3ff' },
-    'theme-05': { id: 'theme-05', label: 'Theme 05', name: 'Theme 05 · Amber', slug: 'amber', emoji: '⚡', accent: '#d97706', bg: '#fef3c7' },
-    'theme-06': { id: 'theme-06', label: 'Theme 06', name: 'Theme 06 · Dark Matrix', slug: 'cyber', emoji: '👾', accent: '#f7fa27', bg: '#18181b' },
-    cream:  { id: 'theme-01', label: 'Theme 01', name: 'Theme 01 · Cream', slug: 'cream', emoji: '🎁', accent: '#f59e0b', bg: '#fff9df' },
-    pink:   { id: 'theme-02', label: 'Theme 02', name: 'Theme 02 · Pink', slug: 'pink', emoji: '💖', accent: '#f20caf', bg: '#ffe2f5' },
-    cyan:   { id: 'theme-03', label: 'Theme 03', name: 'Theme 03 · Cyan', slug: 'cyan', emoji: '🚀', accent: '#0d9488', bg: '#dffaff' },
-    purple: { id: 'theme-04', label: 'Theme 04', name: 'Theme 04 · Purple', slug: 'purple', emoji: '✨', accent: '#7025ed', bg: '#eee3ff' },
-    amber:  { id: 'theme-05', label: 'Theme 05', name: 'Theme 05 · Amber', slug: 'amber', emoji: '⚡', accent: '#d97706', bg: '#fef3c7' },
-    cyber:  { id: 'theme-06', label: 'Theme 06', name: 'Theme 06 · Dark Matrix', slug: 'cyber', emoji: '👾', accent: '#f7fa27', bg: '#18181b' },
+    'gift-box':        { id: 'gift-box', label: 'Gift Box', name: 'Virtual Gift Box', slug: 'pink', emoji: '🎁', accent: '#f20caf', bg: '#ffe2f5' },
+    'cat-bounce':      { id: 'cat-bounce', label: 'Cat Bounce', name: 'Cat Bounce', slug: 'pink', emoji: '🐱', accent: '#f472b6', bg: '#fce7f3' },
+    'long-doge':       { id: 'long-doge', label: 'Long Doge', name: 'Long Doge Challenge', slug: 'amber', emoji: '🐕', accent: '#d97706', bg: '#fef3c7' },
+    'mondrian':        { id: 'mondrian', label: 'Mondrian', name: 'Mondrian & Me', slug: 'cream', emoji: '🎨', accent: '#ef4444', bg: '#f8fafc' },
+    'versus':          { id: 'versus', label: 'Potato or Tomato', name: 'Potato or Tomato', slug: 'amber', emoji: '🥔', accent: '#ea580c', bg: '#ffedd5' },
+    'heeeey':          { id: 'heeeey', label: 'HEEEEY!', name: 'HEEEEEEEY!', slug: 'pink', emoji: '🎉', accent: '#d946ef', bg: '#fdf4ff' },
+    'rgb':             { id: 'rgb', label: 'RGB Space', name: 'RGB Color Space', slug: 'cyber', emoji: '🔴', accent: '#22c55e', bg: '#09090b' },
+    'pointer':         { id: 'pointer', label: 'Pointer', name: 'Pointer Pointer', slug: 'cyber', emoji: '🎯', accent: '#f43f5e', bg: '#18181b' },
+    'windows-93':      { id: 'windows-93', label: 'Windows 93', name: 'Windows 93', slug: 'cyan', emoji: '💾', accent: '#000080', bg: '#008080' },
+    'falling-falling': { id: 'falling-falling', label: 'Falling', name: 'Falling Falling', slug: 'purple', emoji: '🌀', accent: '#facc15', bg: '#a855f7' },
+    'interactive':     { id: 'interactive', label: 'Interactive', name: 'Interactive Target', slug: 'cyan', emoji: '👆', accent: '#16a34a', bg: '#f0fdf4' },
+    'silly-animal':    { id: 'silly-animal', label: 'Silly Mascot', name: 'Silly Mascot', slug: 'cyan', emoji: '🐻', accent: '#10b981', bg: '#ecfdf5' },
+
+    // Legacy and slug aliases
+    'theme-01': { id: 'mondrian', label: 'Mondrian', name: 'Mondrian & Me', slug: 'cream', emoji: '🎨', accent: '#ef4444', bg: '#f8fafc' },
+    'theme-02': { id: 'cat-bounce', label: 'Cat Bounce', name: 'Cat Bounce', slug: 'pink', emoji: '🐱', accent: '#f472b6', bg: '#fce7f3' },
+    'theme-03': { id: 'interactive', label: 'Interactive', name: 'Interactive Target', slug: 'cyan', emoji: '👆', accent: '#16a34a', bg: '#f0fdf4' },
+    'theme-04': { id: 'gift-box', label: 'Gift Box', name: 'Virtual Gift Box', slug: 'pink', emoji: '🎁', accent: '#f20caf', bg: '#ffe2f5' },
+    'theme-05': { id: 'long-doge', label: 'Long Doge', name: 'Long Doge Challenge', slug: 'amber', emoji: '🐕', accent: '#d97706', bg: '#fef3c7' },
+    'theme-06': { id: 'windows-93', label: 'Windows 93', name: 'Windows 93', slug: 'cyan', emoji: '💾', accent: '#000080', bg: '#008080' },
+    cream:  { id: 'mondrian', label: 'Mondrian', name: 'Mondrian & Me', slug: 'cream', emoji: '🎨', accent: '#ef4444', bg: '#f8fafc' },
+    pink:   { id: 'cat-bounce', label: 'Cat Bounce', name: 'Cat Bounce', slug: 'pink', emoji: '🐱', accent: '#f472b6', bg: '#fce7f3' },
+    cyan:   { id: 'interactive', label: 'Interactive', name: 'Interactive Target', slug: 'cyan', emoji: '👆', accent: '#16a34a', bg: '#f0fdf4' },
+    purple: { id: 'gift-box', label: 'Gift Box', name: 'Virtual Gift Box', slug: 'pink', emoji: '🎁', accent: '#f20caf', bg: '#ffe2f5' },
+    amber:  { id: 'long-doge', label: 'Long Doge', name: 'Long Doge Challenge', slug: 'amber', emoji: '🐕', accent: '#d97706', bg: '#fef3c7' },
+    cyber:  { id: 'windows-93', label: 'Windows 93', name: 'Windows 93', slug: 'cyan', emoji: '💾', accent: '#000080', bg: '#008080' },
   };
+
 
   function initUserDashboard() {
     // DOM Elements
@@ -2431,19 +2461,12 @@ const homeUrl = getLocalizedPath('/', currentLocale);
           bannerVisualHtml = `<img src="${escapeHtml(sub.thumbnail_url)}" alt="${escapeHtml(name)}" class="banner-custom-img" loading="lazy" />`;
         } else {
           bannerVisualHtml = `
-            <div class="banner-graphic-card">
-              <div class="banner-gift-left">
-                <span class="banner-gift-emoji">${themeInfo.emoji}</span>
-                <span class="banner-heart-fly">❤️</span>
-              </div>
-              <div class="banner-content-right">
-                <h4 class="banner-site-title">${escapeHtml(displayName)}</h4>
-                <p class="banner-site-tagline">Spread happiness with a digital surprise!</p>
-                <div class="banner-arrow-circle" aria-hidden="true">→</div>
-              </div>
+            <div class="banner-thumb-svg-wrap" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 14px;">
+              ${generateTemplateSvg(sub.design_id || themeInfo.id, displayName, category)}
             </div>
           `;
         }
+
 
         return `
           <article class="sub-card-box" data-id="${id}">
@@ -2559,9 +2582,9 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       }
 
       // Theme radio selection
-      const currentDesign = sub.design_id || (sub.preview_info?.theme ? (themeDisplayMap[sub.preview_info.theme]?.id || 'theme-01') : 'theme-01');
+      const currentDesign = normalizeDesignId(sub.design_id || sub.preview_info?.design_id || sub.preview_info?.theme || 'gift-box');
       const radio = editForm.querySelector<HTMLInputElement>(`input[name="theme"][value="${currentDesign}"]`) ||
-                    editForm.querySelector<HTMLInputElement>(`input[name="theme"][value="${themeDisplayMap[currentDesign]?.id || 'theme-01'}"]`);
+                    editForm.querySelector<HTMLInputElement>(`input[name="theme"][value="${themeDisplayMap[currentDesign]?.id || 'gift-box'}"]`);
       if (radio) radio.checked = true;
 
       // Update right-side Live Preview in Modal
@@ -2574,19 +2597,26 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     // Update the live preview card in the edit modal
     function updateModalLivePreview(designKey: string, name?: string, desc?: string, cat?: string) {
       if (!modalCardPreview) return;
-      const info = themeDisplayMap[designKey] || themeDisplayMap['theme-01'];
+      const normalizedKey = normalizeDesignId(designKey);
+      const info = themeDisplayMap[normalizedKey] || themeDisplayMap['gift-box'];
       modalCardPreview.className = `live-theme-card-preview theme-${info.slug}`;
       if (modalPreviewTitle) modalPreviewTitle.textContent = name || 'PROJECT TITLE';
       if (modalPreviewDesc) modalPreviewDesc.textContent = desc || 'Your website description will appear here...';
       if (modalPreviewCat) modalPreviewCat.textContent = cat || 'Creative';
-      const emojiEl = document.getElementById('modal-art-emoji');
-      if (emojiEl) emojiEl.textContent = info.emoji;
+      const artworkBox = document.getElementById('modal-preview-artwork');
+      if (artworkBox) {
+        artworkBox.innerHTML = `
+          <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 8px;">
+            ${generateTemplateSvg(normalizedKey, name || 'PROJECT TITLE', cat)}
+          </div>
+        `;
+      }
     }
 
     // Modal Live Sync on form input / theme select
     if (editForm) {
       editForm.addEventListener('input', () => {
-        const theme = editForm.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'theme-01';
+        const theme = editForm.querySelector<HTMLInputElement>('input[name="theme"]:checked')?.value || 'gift-box';
         const name = editFieldName?.value || 'PROJECT TITLE';
         const desc = editFieldDesc?.value || 'Your website description will appear here...';
         if (descCharCount && editFieldDesc) {
@@ -2597,7 +2627,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
 
       editForm.querySelectorAll('input[name="theme"]').forEach((radio) => {
         radio.addEventListener('change', () => {
-          const theme = (radio as HTMLInputElement).value || 'theme-01';
+          const theme = (radio as HTMLInputElement).value || 'gift-box';
           const name = editFieldName?.value || 'PROJECT TITLE';
           const desc = editFieldDesc?.value || 'Your website description will appear here...';
           updateModalLivePreview(theme, name, desc);
@@ -2612,8 +2642,8 @@ const homeUrl = getLocalizedPath('/', currentLocale);
         if (!subId) return;
 
         const selectedThemeInput = editForm.querySelector<HTMLInputElement>('input[name="theme"]:checked');
-        const chosenDesignVal = selectedThemeInput?.value || 'theme-01';
-        const designId = themeDisplayMap[chosenDesignVal]?.id || 'theme-01';
+        const chosenDesignVal = selectedThemeInput?.value || 'gift-box';
+        const designId = normalizeDesignId(chosenDesignVal);
         const description = editFieldDesc?.value.trim() || '';
         const thumbnail_url = editFieldThumb?.value.trim() || null;
 
@@ -2668,6 +2698,11 @@ const homeUrl = getLocalizedPath('/', currentLocale);
             editFormStatus.textContent = '✓ Changes saved successfully!';
           }
 
+          // Broadcast to explore directory & discover randomizer for instant real-time sync
+          try {
+            localStorage.setItem('cfn_submission_updated', String(Date.now()));
+          } catch {}
+
           // Realtime refresh
           await fetchSubmissions(false);
 
@@ -2693,14 +2728,13 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       const sub = cachedSubmissions.find((s) => String(s.id) === String(subId));
       if (!sub) return;
 
-      const designKey = sub.design_id || sub.preview_info?.theme || 'theme-01';
-      const info = themeDisplayMap[designKey] || themeDisplayMap['theme-01'];
+      const designKey = normalizeDesignId(sub.design_id || sub.preview_info?.design_id || sub.preview_info?.theme || 'gift-box');
+      const info = themeDisplayMap[designKey] || themeDisplayMap['gift-box'];
 
       const artworkHtml = sub.thumbnail_url
         ? `<img src="${escapeHtml(sub.thumbnail_url)}" alt="${escapeHtml(sub.name)}" class="card-artwork-img" />`
-        : `<div class="default-gift-art">
-             <span class="art-emoji">${info.emoji}</span>
-             <span class="art-heart">❤️</span>
+        : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px;">
+             ${generateTemplateSvg(designKey, sub.name, sub.category)}
            </div>`;
 
       fullLiveCardStage.innerHTML = `
@@ -2710,6 +2744,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
           </div>
           <h3 class="card-inner-title" style="font-size: 1.8rem;">${escapeHtml(sub.name)}</h3>
           <p class="card-inner-desc" style="font-size: 0.95rem; -webkit-line-clamp: 4;">${escapeHtml(sub.description)}</p>
+
           <div class="card-inner-pills-row" style="margin-top: 20px;">
             <span class="pill-cat" style="font-size: 0.85rem; padding: 6px 16px;">${escapeHtml(sub.category || 'Creative')}</span>
             <a href="${escapeHtml(sub.url)}" target="_blank" rel="noopener noreferrer" class="pill-visit" style="text-decoration: none; font-size: 0.85rem; padding: 6px 16px;">Visit Website ↗</a>

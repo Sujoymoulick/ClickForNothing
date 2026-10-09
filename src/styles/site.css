@@ -170,6 +170,10 @@ a { color: inherit; }
 .card-stage .website-card.theme-cream { background: #fff9df; }
 .card-stage .website-card.theme-amber { background: #fef3c7; }
 .card-stage .website-card.theme-cyber { background: #18181b; color: #f4f4f5; }
+.card-stage .website-card.theme-cyber .category-badge { background: #27272a; color: #38bdf8; border-color: #52525b; }
+.card-stage .website-card.theme-cyber .site-position { color: #a1a1aa; }
+.card-stage .website-card.theme-cyber .site-description { color: #d4d4d8; }
+.card-stage .website-card.theme-cyber .visit-hint { color: #a1a1aa; }
 
 .card-inner {
   display: flex;

@@ -37,7 +37,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'public, max-age=5, s-maxage=10, stale-while-revalidate=30',
+          'Cache-Control': 'public, max-age=0, s-maxage=2, must-revalidate',
         },
       }
     );
