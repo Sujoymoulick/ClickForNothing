@@ -435,7 +435,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
   </div>
 </SiteLayout>
 
-<style>
+<style is:global>
   /* ==========================================================================
      ClickForNothing Dashboard Styles - Neo-Brutalist Pixel-Perfect System
      ========================================================================== */
@@ -1191,6 +1191,21 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     color: #b91c1c;
   }
 
+  .badge-check-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1d4ed8;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
   .sub-dots-btn {
     background: #f3f4f6;
     border: none;
@@ -1216,23 +1231,27 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
   }
 
   .btn-preview-card {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     background: #ffffff;
     color: var(--ink);
     border: 2.2px solid var(--ink);
     border-radius: 9999px;
-    padding: 8px 16px;
+    padding: 9px 18px;
     font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     box-shadow: 2px 2px 0 var(--ink);
     cursor: pointer;
     transition: transform 100ms ease, box-shadow 100ms ease;
+    width: 100%;
+    box-sizing: border-box;
+    text-decoration: none;
   }
 
   .btn-preview-card:hover {
@@ -1249,17 +1268,20 @@ const homeUrl = getLocalizedPath('/', currentLocale);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     background: #ffe4f2;
     color: #db2777;
     border: 2px solid #f472b6;
     border-radius: 9999px;
-    padding: 8px 16px;
+    padding: 9px 18px;
     font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
     cursor: pointer;
     transition: transform 100ms ease, box-shadow 100ms ease;
+    width: 100%;
+    box-sizing: border-box;
+    text-decoration: none;
   }
 
   .btn-customize-card:hover {
@@ -2370,9 +2392,11 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       submissionsList.innerHTML = list.map((sub) => {
         const id = sub.id;
         const name = sub.name || 'Untitled Project';
+        const displayName = formatTitle(name);
         const url = sub.url || '#';
         const desc = sub.description || 'No description provided.';
-        const category = sub.category || 'Creative';
+        const rawCat = sub.category || 'Creative';
+        const category = rawCat ? (rawCat.charAt(0).toUpperCase() + rawCat.slice(1).toLowerCase()) : 'Creative';
         const status = sub.status || 'pending_review';
 
         const designKey = sub.design_id || sub.preview_info?.theme || 'theme-01';
@@ -2387,12 +2411,12 @@ const homeUrl = getLocalizedPath('/', currentLocale);
         let statusPillsHtml = '';
         if (status === 'published') {
           statusPillsHtml = `
-            <span class="pill-badge pill-approved"><span class="badge-icon">✓</span> Approved</span>
+            <span class="pill-badge pill-approved"><span class="badge-check-circle">✓</span> Approved</span>
             <span class="pill-badge pill-published"><span class="badge-icon">🚀</span> Published</span>
           `;
         } else if (status === 'approved') {
           statusPillsHtml = `
-            <span class="pill-badge pill-approved"><span class="badge-icon">✓</span> Approved</span>
+            <span class="pill-badge pill-approved"><span class="badge-check-circle">✓</span> Approved</span>
             <span class="pill-badge pill-ready"><span class="badge-icon">⏳</span> Ready to publish</span>
           `;
         } else if (status === 'rejected') {
@@ -2413,7 +2437,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
                 <span class="banner-heart-fly">❤️</span>
               </div>
               <div class="banner-content-right">
-                <h4 class="banner-site-title">${escapeHtml(name)}</h4>
+                <h4 class="banner-site-title">${escapeHtml(displayName)}</h4>
                 <p class="banner-site-tagline">Spread happiness with a digital surprise!</p>
                 <div class="banner-arrow-circle" aria-hidden="true">→</div>
               </div>
@@ -2431,7 +2455,7 @@ const homeUrl = getLocalizedPath('/', currentLocale);
             <!-- 2. Middle: Information & Metadata -->
             <div class="sub-info-col">
               <span class="sub-kicker">${escapeHtml((name || '').toUpperCase())}</span>
-              <h3 class="sub-title">${escapeHtml(name)}</h3>
+              <h3 class="sub-title">${escapeHtml(displayName)}</h3>
               <p class="sub-desc">${escapeHtml(desc)}</p>
 
               <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="sub-domain-link">
@@ -2727,6 +2751,18 @@ const homeUrl = getLocalizedPath('/', currentLocale);
       } catch {
         return 'Recently';
       }
+    }
+
+    // Helper: Format Title to Title Case
+    function formatTitle(str: string): string {
+      if (!str) return 'Untitled Project';
+      if (str === str.toUpperCase() && str.length > 3) {
+        return str
+          .split(' ')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ');
+      }
+      return str;
     }
 
     // Update Auth subscription

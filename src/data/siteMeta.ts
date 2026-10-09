@@ -1,22 +1,62 @@
 // Category normalization mapping
-export function normalizeCategorySlug(categoryName: string): string {
+export function normalizeCategorySlug(categoryName: string | null | undefined): string {
+  if (!categoryName) return 'useless-websites';
+  const clean = categoryName.trim().toLowerCase();
+  
+  const validSlugs = new Set([
+    'useless-websites', 'weird-websites', 'silly-animals', 'interactive',
+    'mini-games', 'creative', 'visual-oddities', 'music-sounds',
+    'internet-nostalgia', 'funny-websites', 'time-wasters', 'internet-experiments',
+    'food-for-thought'
+  ]);
+  if (validSlugs.has(clean)) return clean;
+
   const map: Record<string, string> = {
-    'Silly animals': 'silly-animals',
-    'Internet nostalgia': 'internet-nostalgia',
-    'Creative': 'creative',
-    'Food for thought': 'food-for-thought',
-    'Music & sounds': 'music-sounds',
-    'Visual oddities': 'visual-oddities',
-    'Interactive': 'interactive',
-    'Useless': 'useless-websites',
-    'Time-wasters': 'time-wasters',
-    'Mini games': 'mini-games',
-    'Internet experiments': 'internet-experiments',
-    'Meme': 'internet-nostalgia',
-    'Funny': 'funny-websites',
-    'Weird': 'weird-websites',
+    'silly animals': 'silly-animals',
+    'silly-animals': 'silly-animals',
+    'animals': 'silly-animals',
+    'internet nostalgia': 'internet-nostalgia',
+    'internet-nostalgia': 'internet-nostalgia',
+    'nostalgia': 'internet-nostalgia',
+    'creative & art toys': 'creative',
+    'creative-&-art-toys': 'creative',
+    'creative': 'creative',
+    'art': 'creative',
+    'food for thought': 'food-for-thought',
+    'food-for-thought': 'food-for-thought',
+    'food': 'food-for-thought',
+    'music & sound buttons': 'music-sounds',
+    'music & sounds': 'music-sounds',
+    'music-sounds': 'music-sounds',
+    'music': 'music-sounds',
+    'sounds': 'music-sounds',
+    'visual oddities': 'visual-oddities',
+    'visual-oddities': 'visual-oddities',
+    'interactive web experiments': 'interactive',
+    'interactive': 'interactive',
+    'useless websites': 'useless-websites',
+    'useless-websites': 'useless-websites',
+    'useless': 'useless-websites',
+    'ultimate time wasters': 'time-wasters',
+    'time wasters': 'time-wasters',
+    'time-wasters': 'time-wasters',
+    'pointless mini games': 'mini-games',
+    'mini games': 'mini-games',
+    'mini-games': 'mini-games',
+    'games': 'mini-games',
+    'internet experiments': 'internet-experiments',
+    'internet-experiments': 'internet-experiments',
+    'experiments': 'internet-experiments',
+    'meme': 'internet-nostalgia',
+    'funny & humor websites': 'funny-websites',
+    'funny': 'funny-websites',
+    'funny-websites': 'funny-websites',
+    'humor': 'funny-websites',
+    'weird websites': 'weird-websites',
+    'weird': 'weird-websites',
+    'weird-websites': 'weird-websites',
   };
-  return map[categoryName] || 'useless-websites';
+  return map[clean] || map[clean.replace(/\s+/g, '-')] || 'useless-websites';
 }
 
 // Deterministic likes generator matching reference screenshot

@@ -9,7 +9,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     const { env } = context;
     const sql = getDb(env);
 
-    // Only return strictly approved & published submissions. Never expose private/privileged columns.
+    // Return strictly approved & published submissions. Never expose private/privileged columns.
     const rows = await sql`
       SELECT
         id,
@@ -24,7 +24,6 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         created_at
       FROM website_submissions
       WHERE (status = 'published' OR status = 'approved')
-        AND published_at IS NOT NULL
       ORDER BY published_at DESC NULLS LAST, created_at DESC;
     `;
 
@@ -37,7 +36,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=60',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=5, s-maxage=10, stale-while-revalidate=30',
         },
       }
     );

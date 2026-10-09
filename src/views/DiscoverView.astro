@@ -119,6 +119,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
     try {
       const publishedResponse = await fetch('/api/published', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(2500) });
       if (publishedResponse.ok) {
+        const publishedData = await publishedResponse.json();
         const getThemeSlugFromSite = (site: any) => {
           const raw = site.design_id || site.preview_info?.design_id || site.preview_info?.theme || 'cream';
           const map: Record<string, string> = {

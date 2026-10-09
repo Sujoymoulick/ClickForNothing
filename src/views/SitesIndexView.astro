@@ -66,6 +66,17 @@ const collectionSchema = {
     })),
   },
 };
+
+const categoryDataMap = Object.fromEntries([
+  ['all', { name: t('sites.all_pill', { count: enrichedWebsites.length }), icon: categoryIcons.all }],
+  ...categories.map((c) => [
+    c.slug,
+    {
+      name: t(`categories.${c.slug}`) || c.name,
+      icon: categoryIcons[c.slug] || categoryIcons.all,
+    },
+  ]),
+]);
 ---
 
 <SiteLayout {title} {description} {canonicalPath}>
