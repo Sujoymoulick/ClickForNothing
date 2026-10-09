@@ -81,10 +81,10 @@ const collectionSchema = {
         ];
         const c = colors[idx % colors.length];
         return (
-          <article class="category-card" style={`--card-bg: ${c.bg}; --card-accent: ${c.accent}; --card-light: ${c.light};`}>
+          <article class="category-card" data-category={cat.slug} style={`--card-bg: ${c.bg}; --card-accent: ${c.accent}; --card-light: ${c.light};`}>
             <div class="card-top">
               <span class="emoji-circle">{cat.emoji}</span>
-              <span class="count-badge">{t('categories_page.websites_count', { count })}</span>
+              <span class="count-badge" data-count={count}>{t('categories_page.websites_count', { count })}</span>
             </div>
             <h2><a href={catUrl}>{catName}</a></h2>
             <p>{catDesc}</p>
@@ -97,6 +97,55 @@ const collectionSchema = {
 
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+
+  <script is:inline>
+    (async function fetchCategoryCounts() {
+      try {
+        const res = await fetch('/api/published', { signal: AbortSignal.timeout(3000) });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data?.sites) || data.sites.length === 0) return;
+
+        const normalize = (c) => {
+          if (!c) return '';
+          const s = String(c).trim().toLowerCase();
+          const map = {
+            'creative & art toys': 'creative',
+            'silly animals': 'silly-animals',
+            'interactive web experiments': 'interactive',
+            'pointless mini games': 'mini-games',
+            'internet nostalgia': 'internet-nostalgia',
+            'visual oddities': 'visual-oddities',
+            'music & sounds': 'music-sounds',
+            'funny & humor websites': 'funny-websites',
+            'ultimate time wasters': 'time-wasters',
+            'food for thought': 'food-for-thought',
+            'internet experiments': 'internet-experiments',
+            'useless websites': 'useless-websites',
+          };
+          return map[s] || s;
+        };
+
+        const extraCounts = {};
+        data.sites.forEach((site) => {
+          const catSlug = normalize(site.category);
+          extraCounts[catSlug] = (extraCounts[catSlug] || 0) + 1;
+        });
+
+        document.querySelectorAll('.category-card').forEach((card) => {
+          const slug = card.getAttribute('data-category');
+          if (slug && extraCounts[slug]) {
+            const badge = card.querySelector('.count-badge');
+            if (badge) {
+              const current = parseInt(badge.getAttribute('data-count') || '0', 10);
+              const total = current + extraCounts[slug];
+              badge.textContent = badge.textContent.replace(/\d+/, String(total));
+            }
+          }
+        });
+      } catch {}
+    })();
+  </script>
 </SiteLayout>
 
 <style>
