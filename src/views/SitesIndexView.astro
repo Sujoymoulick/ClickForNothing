@@ -748,6 +748,17 @@ const categoryDataMap = Object.fromEntries([
         </div>
       `;
 
+      // Propagate Astro scoped attribute to the dynamic card and all child elements
+      const sampleCard = container.querySelector('.site-card');
+      const sampleEl = sampleCard || container;
+      const astroAttrs = Array.from(sampleEl.attributes).filter((a) =>
+        a.name.startsWith('data-astro-cid-')
+      );
+      for (const attr of astroAttrs) {
+        card.setAttribute(attr.name, attr.value);
+        card.querySelectorAll('*').forEach((el) => el.setAttribute(attr.name, attr.value));
+      }
+
       return card;
     }
 

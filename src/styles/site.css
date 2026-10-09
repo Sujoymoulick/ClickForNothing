@@ -963,3 +963,249 @@ a { color: inherit; }
     right: 16px;
   }
 }
+
+/* ==========================================================================
+   EXPLORE DIRECTORY CARDS (Global rules for static & dynamically injected cards)
+   ========================================================================== */
+.sites-container .site-card {
+  background: #ffffff;
+  border: 1.5px solid #e4e4e7;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.sites-container .site-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  border-color: #cbd5e1;
+}
+
+.sites-container .site-card.is-hidden {
+  display: none !important;
+}
+
+.sites-container .card-thumb-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #f4f4f5;
+  border-bottom: 1.5px solid #f4f4f5;
+}
+
+.sites-container .thumb-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+}
+
+.sites-container .thumb-media {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sites-container .card-thumb-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.sites-container .site-card:hover .card-thumb-svg {
+  transform: scale(1.03);
+}
+
+.sites-container .card-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.sites-container .card-ext-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #18181b;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition: all 0.15s ease;
+  z-index: 3;
+}
+
+.sites-container .card-ext-btn:hover {
+  background: #f20caf;
+  color: #ffffff;
+  border-color: #f20caf;
+  transform: scale(1.1);
+}
+
+.sites-container .card-body {
+  padding: 12px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.sites-container .card-title {
+  font-size: 0.975rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+
+.sites-container .card-title-link {
+  color: #09090b;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.sites-container .card-title-link:hover {
+  color: #f20caf;
+}
+
+.sites-container .card-description {
+  font-size: 0.8rem;
+  color: #52525b;
+  line-height: 1.4;
+  margin: 0 0 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.25em;
+}
+
+.sites-container .card-meta {
+  margin-bottom: 10px;
+}
+
+.sites-container .card-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  border-radius: 9999px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3f3f46;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sites-container .card-cat-badge:hover {
+  background: #e4e4e7;
+  color: #18181b;
+  border-color: #d4d4d8;
+}
+
+.sites-container .cat-badge-icon {
+  display: flex;
+  align-items: center;
+}
+
+.sites-container .cat-badge-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.sites-container .card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #f4f4f5;
+  margin-top: auto;
+}
+
+.sites-container .card-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #71717a;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.sites-container .card-like-btn:hover,
+.sites-container .card-like-btn.is-liked {
+  color: #f43f5e;
+}
+
+.sites-container .heart-icon {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sites-container .card-like-btn:hover .heart-icon,
+.sites-container .card-like-btn.is-liked .heart-icon {
+  transform: scale(1.2);
+}
+
+.sites-container .card-arrow-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f4f4f5;
+  color: #18181b;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.sites-container .card-arrow-btn:hover {
+  background: #18181b;
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.sites-container.is-list-mode .site-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.sites-container.is-list-mode .card-thumb-wrapper {
+  width: 200px;
+  min-width: 200px;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px 0 0 14px;
+  border-bottom: none;
+  border-right: 1.5px solid #f4f4f5;
+}
+
+.sites-container.is-list-mode .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
