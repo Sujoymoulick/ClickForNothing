@@ -119,8 +119,19 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
     try {
       const publishedResponse = await fetch('/api/published', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(2500) });
       if (publishedResponse.ok) {
-        const publishedData = await publishedResponse.json();
-        publishedSites = (publishedData.sites || []).map((site: any) => ({ ...site, id: `submission-${site.id}`, theme: site.preview_info?.theme || 'cream', verified: true }));
+        const getThemeSlugFromSite = (site: any) => {
+          const raw = site.design_id || site.preview_info?.design_id || site.preview_info?.theme || 'cream';
+          const map: Record<string, string> = {
+            'theme-01': 'cream', 'cream': 'cream',
+            'theme-02': 'pink', 'pink': 'pink',
+            'theme-03': 'cyan', 'cyan': 'cyan',
+            'theme-04': 'purple', 'purple': 'purple',
+            'theme-05': 'amber', 'amber': 'amber',
+            'theme-06': 'cyber', 'cyber': 'cyber',
+          };
+          return map[raw] || 'cream';
+        };
+        publishedSites = (publishedData.sites || []).map((site: any) => ({ ...site, id: `submission-${site.id}`, theme: getThemeSlugFromSite(site), verified: true }));
       }
     } catch { /* Curated sites remain available when the submissions API is offline. */ }
 
@@ -256,7 +267,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       const site = byId.get(siteId);
       if (!site || !targetCard) return;
 
-      targetCard.classList.remove('theme-cream', 'theme-pink', 'theme-cyan', 'theme-purple');
+      targetCard.classList.remove('theme-cream', 'theme-pink', 'theme-cyan', 'theme-purple', 'theme-amber', 'theme-cyber');
       if (site.id.startsWith('submission-')) targetCard.classList.add(`theme-${site.theme || 'cream'}`);
 
       const nameNode = targetCard.querySelector(`[data-${prefix}name]`);

@@ -9,6 +9,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     const { env } = context;
     const sql = getDb(env);
 
+    // Only return strictly approved & published submissions. Never expose private/privileged columns.
     const rows = await sql`
       SELECT
         id,
@@ -16,12 +17,14 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         name,
         description,
         category,
+        design_id,
         thumbnail_url,
         preview_info,
         published_at,
         created_at
       FROM website_submissions
-      WHERE status IN ('published', 'approved')
+      WHERE (status = 'published' OR status = 'approved')
+        AND published_at IS NOT NULL
       ORDER BY published_at DESC NULLS LAST, created_at DESC;
     `;
 

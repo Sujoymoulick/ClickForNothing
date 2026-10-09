@@ -168,6 +168,8 @@ a { color: inherit; }
 .card-stage .website-card.theme-cyan { background: #dffaff; }
 .card-stage .website-card.theme-purple { background: #eee3ff; }
 .card-stage .website-card.theme-cream { background: #fff9df; }
+.card-stage .website-card.theme-amber { background: #fef3c7; }
+.card-stage .website-card.theme-cyber { background: #18181b; color: #f4f4f5; }
 
 .card-inner {
   display: flex;

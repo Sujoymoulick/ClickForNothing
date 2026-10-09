@@ -2,6 +2,7 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import { categories } from '../data/categories.ts';
+import { CARD_DESIGNS } from '../data/cardDesigns.ts';
 import { useTranslations } from '../i18n';
 import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
 import type { SupportedLocale } from '../i18n/config';
@@ -144,144 +145,294 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
               </button>
             </div>
 
-            <!-- Submission Form -->
+            <!-- Interactive Stepper Progress Indicator -->
+            <nav class="submit-stepper" aria-label="Submission progress">
+              <div class="stepper-item active" id="step-nav-1" data-step="1">
+                <span class="step-circle">1</span>
+                <span class="step-text">Website Details</span>
+              </div>
+              <div class="stepper-connector" aria-hidden="true"></div>
+              <div class="stepper-item" id="step-nav-2" data-step="2">
+                <span class="step-circle">2</span>
+                <span class="step-text">Card Design</span>
+              </div>
+              <div class="stepper-connector" aria-hidden="true"></div>
+              <div class="stepper-item" id="step-nav-3" data-step="3">
+                <span class="step-circle">3</span>
+                <span class="step-text">Review & Submit</span>
+              </div>
+            </nav>
+
+            <!-- Multi-Step Submission Form Container -->
             <form class="main-submission-form" id="site-submit-form" novalidate>
-              <!-- Field 1: Website URL -->
-              <div class="form-field-group">
-                <label for="website-url">Website URL <span class="required-asterisk">*</span></label>
-                <div class="input-with-icon">
-                  <span class="field-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                    </svg>
-                  </span>
-                  <input
-                    type="url"
-                    id="website-url"
-                    name="url"
-                    placeholder="https://example.com"
-                    autocomplete="url"
-                    required
-                  />
+              <!-- ==========================================
+                   STEP 1: WEBSITE DETAILS
+                   ========================================== -->
+              <div class="step-pane" id="step-pane-1">
+                <!-- Field 1: Website URL -->
+                <div class="form-field-group">
+                  <label for="website-url">Website URL <span class="required-asterisk">*</span></label>
+                  <div class="input-with-icon">
+                    <span class="field-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      </svg>
+                    </span>
+                    <input
+                      type="url"
+                      id="website-url"
+                      name="url"
+                      placeholder="https://example.com"
+                      autocomplete="url"
+                      required
+                    />
+                  </div>
+                  <div class="field-hint" id="hint-url">Must start with https:// or http://. Locked permanently after submission.</div>
+                  <div class="field-error-msg" id="err-url" role="alert" aria-live="polite"></div>
                 </div>
-                <div class="field-hint" id="hint-url">Must be a valid, accessible URL.</div>
-                <div class="field-error-msg" id="err-url" role="alert" aria-live="polite"></div>
+
+                <!-- Field 2: Website Name -->
+                <div class="form-field-group">
+                  <label for="website-name">Website Name <span class="required-asterisk">*</span></label>
+                  <div class="input-with-icon">
+                    <span class="field-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 7 4 4 20 4 20 7"/>
+                        <line x1="9" x2="15" y1="20" y2="20"/>
+                        <line x1="12" x2="12" y1="4" y2="20"/>
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      id="website-name"
+                      name="name"
+                      placeholder="e.g. Send Virtual Gift"
+                      maxlength="80"
+                      required
+                    />
+                  </div>
+                  <div class="field-hint" id="hint-name">A short, catchy name for the website. Locked after submission.</div>
+                  <div class="field-error-msg" id="err-name" role="alert" aria-live="polite"></div>
+                </div>
+
+                <!-- Field 3: Short Description -->
+                <div class="form-field-group">
+                  <div class="label-with-counter">
+                    <label for="website-description">Short Description <span class="required-asterisk">*</span></label>
+                    <span class="char-counter" id="desc-char-counter">0/300</span>
+                  </div>
+                  <div class="input-with-icon textarea-wrap">
+                    <span class="field-icon textarea-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" x2="8" y1="13" y2="13"/>
+                        <line x1="16" x2="8" y1="17" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                      </svg>
+                    </span>
+                    <textarea
+                      id="website-description"
+                      name="description"
+                      rows="3"
+                      maxlength="300"
+                      placeholder="Explain why this website deserves to exist..."
+                      required
+                    ></textarea>
+                  </div>
+                  <div class="field-hint" id="hint-desc">Tell visitors what makes this website useless, weird, or interesting.</div>
+                  <div class="field-error-msg" id="err-desc" role="alert" aria-live="polite"></div>
+                </div>
+
+                <!-- Field 4: Category -->
+                <div class="form-field-group">
+                  <label for="website-category">Category <span class="required-asterisk">*</span></label>
+                  <div class="input-with-icon select-wrap">
+                    <span class="field-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+                        <circle cx="7" cy="7" r="1.5" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    <select id="website-category" name="category" required>
+                      <option value="">Select a category</option>
+                      {categories.map((cat) => (
+                        <option value={cat.slug}>{cat.name}</option>
+                      ))}
+                    </select>
+                    <span class="select-chevron" aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6"/>
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="field-hint" id="hint-cat">Choose the best category for this website.</div>
+                  <div class="field-error-msg" id="err-cat" role="alert" aria-live="polite"></div>
+                </div>
+
+                <!-- Step 1 Actions -->
+                <div class="form-actions-row">
+                  <button type="button" class="primary-submit-btn" id="to-step-2-btn">
+                    <span>Next: Choose Card Design</span>
+                    <span class="btn-arrow" aria-hidden="true">→</span>
+                  </button>
+                  <a href={discoverUrl} class="secondary-explore-btn">
+                    <span>Explore Random Sites</span>
+                  </a>
+                </div>
               </div>
 
-              <!-- Field 2: Website Name -->
-              <div class="form-field-group">
-                <label for="website-name">Website Name <span class="required-asterisk">*</span></label>
-                <div class="input-with-icon">
-                  <span class="field-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="4 7 4 4 20 4 20 7"/>
-                      <line x1="9" x2="15" y1="20" y2="20"/>
-                      <line x1="12" x2="12" y1="4" y2="20"/>
-                    </svg>
-                  </span>
-                  <input
-                    type="text"
-                    id="website-name"
-                    name="name"
-                    placeholder="Example Useless Website"
-                    maxlength="80"
-                    required
-                  />
+              <!-- ==========================================
+                   STEP 2: CHOOSE A CARD DESIGN
+                   ========================================== -->
+              <div class="step-pane" id="step-pane-2" style="display: none;">
+                <div class="step-pane-header">
+                  <h3 class="step-subheading">Choose Your Card Design</h3>
+                  <p class="step-subtext">Select a design for your card. Each design features distinct color palettes and neo-brutalist styling.</p>
                 </div>
-                <div class="field-hint" id="hint-name">A short, catchy name for the website.</div>
-                <div class="field-error-msg" id="err-name" role="alert" aria-live="polite"></div>
+
+                <div class="design-gallery-grid" id="design-gallery-grid">
+                  {CARD_DESIGNS.map((design) => (
+                    <article
+                      class={`design-option-card theme-${design.themeSlug} ${design.id === 'theme-04' ? 'is-selected' : ''}`}
+                      data-design-id={design.id}
+                      data-theme-slug={design.themeSlug}
+                      data-design-name={design.name}
+                    >
+                      <div class="design-card-topbar">
+                        <div class="design-tag-wrap">
+                          <span class="design-color-dot" style={`background: ${design.accentColor};`}></span>
+                          <span class="design-option-name">{design.name}</span>
+                        </div>
+                        <div class="design-selection-badge">
+                          <span class="badge-check-icon">✓</span>
+                          <span class="badge-text">Selected</span>
+                        </div>
+                      </div>
+
+                      <!-- Interactive Live Card Thumbnail -->
+                      <div class="design-card-visual" style={`background: ${design.bgColor};`}>
+                        <div class="card-art-box">
+                          <span class="art-emoji">{design.emoji}</span>
+                        </div>
+                        <h4 class="card-title-preview" data-card-preview-title>Example Website</h4>
+                        <p class="card-desc-preview" data-card-preview-desc>Website description preview will be displayed here...</p>
+                        <div class="card-footer-preview">
+                          <span class="preview-cat-tag" data-card-preview-cat>Creative</span>
+                          <span class="preview-visit-tag">Visit Website ↗</span>
+                        </div>
+                      </div>
+
+                      <!-- Actions Row inside design card -->
+                      <div class="design-card-actions">
+                        <button type="button" class="btn-preview-design" data-preview-id={design.id}>
+                          <span>👁 Preview Full Card</span>
+                        </button>
+                        <button type="button" class="btn-select-design" data-select-id={design.id}>
+                          <span>✓ Select Design</span>
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <div class="form-actions-row step-nav-row">
+                  <button type="button" class="dash-btn-white" id="back-to-step-1-btn">
+                    <span>← Edit Details</span>
+                  </button>
+                  <button type="button" class="primary-submit-btn" id="to-step-3-btn">
+                    <span>Next: Review & Submit</span>
+                    <span class="btn-arrow" aria-hidden="true">→</span>
+                  </button>
+                </div>
               </div>
 
-              <!-- Field 3: Short Description -->
-              <div class="form-field-group">
-                <div class="label-with-counter">
-                  <label for="website-description">Short Description <span class="required-asterisk">*</span></label>
-                  <span class="char-counter" id="desc-char-counter">0/300</span>
+              <!-- ==========================================
+                   STEP 3: REVIEW AND SUBMIT
+                   ========================================== -->
+              <div class="step-pane" id="step-pane-3" style="display: none;">
+                <div class="step-pane-header">
+                  <h3 class="step-subheading">Final Preview & Confirmation</h3>
+                  <p class="step-subtext">Review how your website card will appear to the community before submitting for moderation.</p>
                 </div>
-                <div class="input-with-icon textarea-wrap">
-                  <span class="field-icon textarea-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" x2="8" y1="13" y2="13"/>
-                      <line x1="16" x2="8" y1="17" y2="17"/>
-                      <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                  </span>
-                  <textarea
-                    id="website-description"
-                    name="description"
-                    rows="3"
-                    maxlength="300"
-                    placeholder="Explain why this website deserves to exist..."
-                    required
-                  ></textarea>
+
+                <!-- Final Card Display Stage -->
+                <div class="final-card-stage">
+                  <div class="final-card-render-box" id="final-card-render-box">
+                    <!-- Populated dynamically via JavaScript with selected theme & user details -->
+                  </div>
+
+                  <!-- Details Summary Table -->
+                  <div class="final-details-table">
+                    <div class="summary-row">
+                      <span class="summary-lbl">Website Name</span>
+                      <strong class="summary-val" id="sum-name">—</strong>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-lbl">Website URL</span>
+                      <a href="#" target="_blank" rel="noopener noreferrer" class="summary-link" id="sum-url">— ↗</a>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-lbl">Category</span>
+                      <span class="summary-val" id="sum-category">—</span>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-lbl">Selected Design</span>
+                      <span class="summary-val" id="sum-design">Theme 04 · Purple</span>
+                    </div>
+                    <div class="summary-row full">
+                      <span class="summary-lbl">Description</span>
+                      <p class="summary-desc" id="sum-desc">—</p>
+                    </div>
+                  </div>
                 </div>
-                <div class="field-hint" id="hint-desc">Tell us what makes this website useless, weird, or interesting.</div>
-                <div class="field-error-msg" id="err-desc" role="alert" aria-live="polite"></div>
-              </div>
 
-              <!-- Field 4: Category -->
-              <div class="form-field-group">
-                <label for="website-category">Category <span class="required-asterisk">*</span></label>
-                <div class="input-with-icon select-wrap">
-                  <span class="field-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
-                      <circle cx="7" cy="7" r="1.5" fill="currentColor"/>
-                    </svg>
-                  </span>
-                  <select id="website-category" name="category" required>
-                    <option value="">Select a category</option>
-                    {categories.map((cat) => (
-                      <option value={cat.slug}>{cat.name}</option>
-                    ))}
-                  </select>
-                  <span class="select-chevron" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="m6 9 6 6 6-6"/>
-                    </svg>
-                  </span>
+                <!-- Error Notice Banner (e.g. duplicate submission or network issue) -->
+                <div class="submission-error-notice" id="submit-error-banner" style="display: none;" role="alert"></div>
+
+                <!-- Step 3 Action Controls -->
+                <div class="form-actions-row step-nav-row review-actions">
+                  <button type="button" class="dash-btn-white" id="review-edit-btn">
+                    <span>✏️ Edit Details</span>
+                  </button>
+                  <button type="button" class="dash-btn-white" id="review-change-design-btn">
+                    <span>🎨 Change Design</span>
+                  </button>
+                  <button type="button" class="primary-submit-btn" id="final-submit-btn">
+                    <span class="btn-spinner" id="btn-spinner" aria-hidden="true" style="display: none;"></span>
+                    <span class="btn-send-icon" id="btn-send-icon" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m22 2-7 20-4-9-9-4Z"/>
+                        <path d="M22 2 11 13"/>
+                      </svg>
+                    </span>
+                    <span class="btn-text" id="btn-text">Submit for Approval</span>
+                    <span class="btn-arrow" aria-hidden="true">→</span>
+                  </button>
                 </div>
-                <div class="field-hint" id="hint-cat">Choose the best category for this website.</div>
-                <div class="field-error-msg" id="err-cat" role="alert" aria-live="polite"></div>
-              </div>
-
-              <!-- Form Buttons -->
-              <div class="form-actions-row">
-                <button type="submit" class="primary-submit-btn" id="submit-form-btn">
-                  <span class="btn-spinner" id="btn-spinner" aria-hidden="true"></span>
-                  <span class="btn-send-icon" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="m22 2-7 20-4-9-9-4Z"/>
-                      <path d="M22 2 11 13"/>
-                    </svg>
-                  </span>
-                  <span class="btn-text" id="btn-text">Submit to the Useless Web</span>
-                  <span class="btn-arrow" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                  </span>
-                </button>
-
-                <a href={discoverUrl} class="secondary-explore-btn">
-                  <span class="btn-explore-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect width="18" height="18" x="3" y="3" rx="3" ry="3"/>
-                      <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-                      <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/>
-                      <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-                      <circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/>
-                      <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/>
-                    </svg>
-                  </span>
-                  <span>Explore Random Sites</span>
-                </a>
               </div>
             </form>
+
+            <!-- Card Preview Modal -->
+            <div class="dash-modal-backdrop" id="design-preview-modal" role="dialog" aria-modal="true" style="display: none;">
+              <div class="dash-modal-box preview-modal-box">
+                <div class="dash-modal-header">
+                  <div class="modal-title-wrap">
+                    <span class="modal-title-icon">👁</span>
+                    <h3 class="dash-modal-title" id="preview-modal-title">Live Card Preview</h3>
+                  </div>
+                  <button type="button" class="modal-close-x" id="preview-modal-close" aria-label="Close preview">✕</button>
+                </div>
+                <div class="dash-modal-body modal-preview-stage-body" id="preview-modal-stage">
+                  <!-- Injected preview card -->
+                </div>
+                <div class="dash-modal-footer">
+                  <button type="button" class="dash-btn-white" id="preview-modal-done">Close Preview</button>
+                  <button type="button" class="dash-btn-magenta" id="preview-modal-select-this">Use This Design</button>
+                </div>
+              </div>
+            </div>
 
             <!-- Success State Message Card -->
             <div class="submission-success-card" id="submission-success" style="display: none;">
@@ -686,6 +837,70 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
     const errName = document.getElementById('err-name');
     const errDesc = document.getElementById('err-desc');
     const errCat = document.getElementById('err-cat');
+    const submitErrorBanner = document.getElementById('submit-error-banner');
+
+    // Stepper navigation elements
+    const stepNav1 = document.getElementById('step-nav-1');
+    const stepNav2 = document.getElementById('step-nav-2');
+    const stepNav3 = document.getElementById('step-nav-3');
+    const stepPane1 = document.getElementById('step-pane-1');
+    const stepPane2 = document.getElementById('step-pane-2');
+    const stepPane3 = document.getElementById('step-pane-3');
+
+    // Buttons
+    const toStep2Btn = document.getElementById('to-step-2-btn');
+    const backToStep1Btn = document.getElementById('back-to-step-1-btn');
+    const toStep3Btn = document.getElementById('to-step-3-btn');
+    const reviewEditBtn = document.getElementById('review-edit-btn');
+    const reviewChangeDesignBtn = document.getElementById('review-change-design-btn');
+    const finalSubmitBtn = document.getElementById('final-submit-btn') as HTMLButtonElement | null;
+    const finalCardRenderBox = document.getElementById('final-card-render-box');
+
+    // Summary fields
+    const sumName = document.getElementById('sum-name');
+    const sumUrl = document.getElementById('sum-url') as HTMLAnchorElement | null;
+    const sumCategory = document.getElementById('sum-category');
+    const sumDesign = document.getElementById('sum-design');
+    const sumDesc = document.getElementById('sum-desc');
+
+    // Modal elements
+    const designPreviewModal = document.getElementById('design-preview-modal');
+    const previewModalStage = document.getElementById('preview-modal-stage');
+    const previewModalTitle = document.getElementById('preview-modal-title');
+    const previewModalClose = document.getElementById('preview-modal-close');
+    const previewModalDone = document.getElementById('preview-modal-done');
+    const previewModalSelectThis = document.getElementById('preview-modal-select-this');
+
+    let currentStep = 1;
+    let selectedDesignId = 'theme-04';
+    let previewModalDesignId = 'theme-04';
+    let isSubmitting = false;
+
+    const designCatalogMeta: Record<string, { name: string; themeSlug: string; emoji: string; bgColor: string }> = {
+      'theme-01': { name: 'Theme 01 · Cream', themeSlug: 'cream', emoji: '🎁', bgColor: '#fff9df' },
+      'theme-02': { name: 'Theme 02 · Pink', themeSlug: 'pink', emoji: '💖', bgColor: '#ffe2f5' },
+      'theme-03': { name: 'Theme 03 · Cyan', themeSlug: 'cyan', emoji: '🚀', bgColor: '#dffaff' },
+      'theme-04': { name: 'Theme 04 · Purple', themeSlug: 'purple', emoji: '✨', bgColor: '#eee3ff' },
+      'theme-05': { name: 'Theme 05 · Amber', themeSlug: 'amber', emoji: '⚡', bgColor: '#fef3c7' },
+      'theme-06': { name: 'Theme 06 · Dark Matrix', themeSlug: 'cyber', emoji: '👾', bgColor: '#18181b' },
+    };
+
+    function escapeHtml(str: string): string {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getDomainFromUrl(rawUrl: string): string {
+      try {
+        return new URL(rawUrl).hostname.replace(/^www\./, '');
+      } catch {
+        return 'example.com';
+      }
+    }
 
     // 1. Reactive Auth State Manager
     function updateAuthStatus() {
@@ -713,7 +928,7 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
     $userStore.subscribe(updateAuthStatus);
     updateAuthStatus();
 
-    // 2. Character Counter on Description Textarea
+    // 2. Character Counter
     if (descInput && charCounter) {
       const updateCounter = () => {
         const count = descInput.value.length;
@@ -728,207 +943,435 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
       updateCounter();
     }
 
-    // Mini Sign In Banner click triggers Clerk modal
+    // Mini Sign In
     if (miniSignInBtn) {
       miniSignInBtn.addEventListener('click', () => {
-        if (window.Clerk) {
-          window.Clerk.openSignIn();
-        }
+        if (window.Clerk) window.Clerk.openSignIn();
       });
     }
 
     // Clear field errors on input
-    const inputsToClear = [
-      { el: urlInput, err: errUrl },
-      { el: nameInput, err: errName },
-      { el: descInput, err: errDesc },
-      { el: catSelect, err: errCat },
-    ];
-
-    inputsToClear.forEach(({ el, err }) => {
-      if (el && err) {
+    [urlInput, nameInput, descInput, catSelect].forEach((el) => {
+      if (el) {
         el.addEventListener('input', () => {
-          err.textContent = '';
+          const errEl = el === urlInput ? errUrl : el === nameInput ? errName : el === descInput ? errDesc : errCat;
+          if (errEl) errEl.textContent = '';
           el.removeAttribute('aria-invalid');
         });
         el.addEventListener('change', () => {
-          err.textContent = '';
+          const errEl = el === urlInput ? errUrl : el === nameInput ? errName : el === descInput ? errDesc : errCat;
+          if (errEl) errEl.textContent = '';
           el.removeAttribute('aria-invalid');
         });
       }
     });
 
-    // 3. Form Validation & Submission
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
+    // 3. Step Navigation Manager
+    function goToStep(step: number) {
+      currentStep = step;
 
+      // Update Nav Indicators
+      [
+        { el: stepNav1, num: 1 },
+        { el: stepNav2, num: 2 },
+        { el: stepNav3, num: 3 },
+      ].forEach(({ el, num }) => {
+        if (!el) return;
+        el.classList.remove('active', 'completed');
+        if (num === step) {
+          el.classList.add('active');
+        } else if (num < step) {
+          el.classList.add('completed');
+        }
+      });
+
+      // Toggle Step Panes
+      if (stepPane1) stepPane1.style.display = step === 1 ? 'block' : 'none';
+      if (stepPane2) stepPane2.style.display = step === 2 ? 'block' : 'none';
+      if (stepPane3) stepPane3.style.display = step === 3 ? 'block' : 'none';
+
+      window.scrollTo({ top: 320, behavior: 'smooth' });
+    }
+
+    // 4. Validate Step 1
+    function validateStep1(): boolean {
+      let hasError = false;
+
+      // URL
+      const urlVal = urlInput?.value.trim() || '';
+      let isValidUrl = false;
+      try {
+        const parsed = new URL(urlVal);
+        isValidUrl = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch {
+        isValidUrl = false;
+      }
+
+      if (!urlVal) {
+        if (errUrl) errUrl.textContent = 'Please enter a website URL.';
+        urlInput?.setAttribute('aria-invalid', 'true');
+        hasError = true;
+      } else if (!isValidUrl) {
+        if (errUrl) errUrl.textContent = 'Please enter a valid URL starting with https:// or http://';
+        urlInput?.setAttribute('aria-invalid', 'true');
+        hasError = true;
+      } else {
+        if (errUrl) errUrl.textContent = '';
+        urlInput?.removeAttribute('aria-invalid');
+      }
+
+      // Name
+      const nameVal = nameInput?.value.trim() || '';
+      if (!nameVal || nameVal.length < 2) {
+        if (errName) errName.textContent = 'Please enter a website name (at least 2 characters).';
+        nameInput?.setAttribute('aria-invalid', 'true');
+        hasError = true;
+      } else {
+        if (errName) errName.textContent = '';
+        nameInput?.removeAttribute('aria-invalid');
+      }
+
+      // Description
+      const descVal = descInput?.value.trim() || '';
+      if (!descVal || descVal.length < 10) {
+        if (errDesc) errDesc.textContent = 'Please provide a short description (at least 10 characters).';
+        descInput?.setAttribute('aria-invalid', 'true');
+        hasError = true;
+      } else {
+        if (errDesc) errDesc.textContent = '';
+        descInput?.removeAttribute('aria-invalid');
+      }
+
+      // Category
+      const catVal = catSelect?.value || '';
+      if (!catVal) {
+        if (errCat) errCat.textContent = 'Please select a category.';
+        catSelect?.setAttribute('aria-invalid', 'true');
+        hasError = true;
+      } else {
+        if (errCat) errCat.textContent = '';
+        catSelect?.removeAttribute('aria-invalid');
+      }
+
+      if (hasError) {
+        const firstInvalid = form?.querySelector('[aria-invalid="true"]') as HTMLElement | null;
+        firstInvalid?.focus();
+        return false;
+      }
+
+      return true;
+    }
+
+    // 5. Update Live Previews with User's Data
+    function updateLivePreviews() {
+      const nameVal = nameInput?.value.trim() || 'Example Website';
+      const descVal = descInput?.value.trim() || 'Your website description will appear here...';
+      const catVal = catSelect?.options[catSelect.selectedIndex]?.text || 'Creative';
+      const urlVal = urlInput?.value.trim() || 'https://example.com';
+      const domainVal = getDomainFromUrl(urlVal);
+
+      // Update gallery cards
+      document.querySelectorAll('[data-card-preview-title]').forEach((el) => {
+        el.textContent = nameVal;
+      });
+      document.querySelectorAll('[data-card-preview-desc]').forEach((el) => {
+        el.textContent = descVal;
+      });
+      document.querySelectorAll('[data-card-preview-cat]').forEach((el) => {
+        el.textContent = catVal;
+      });
+
+      // Update summary breakdown
+      if (sumName) sumName.textContent = nameVal;
+      if (sumUrl) {
+        sumUrl.textContent = `${domainVal} ↗`;
+        sumUrl.href = urlVal;
+      }
+      if (sumCategory) sumCategory.textContent = catVal;
+      if (sumDesc) sumDesc.textContent = descVal;
+
+      const designMeta = designCatalogMeta[selectedDesignId] || designCatalogMeta['theme-04'];
+      if (sumDesign) sumDesign.textContent = designMeta.name;
+
+      // Update Step 3 Final Card Render
+      if (finalCardRenderBox) {
+        finalCardRenderBox.innerHTML = `
+          <div class="live-theme-card theme-${designMeta.themeSlug}" style="width: 100%; max-width: 360px; margin: 0 auto;">
+            <div class="card-artwork-box">
+              <div class="default-gift-art">
+                <span class="art-emoji">${designMeta.emoji}</span>
+                <span class="art-heart">❤️</span>
+              </div>
+            </div>
+            <h3 class="card-inner-title">${escapeHtml(nameVal)}</h3>
+            <p class="card-inner-desc">${escapeHtml(descVal)}</p>
+            <div class="card-inner-pills-row">
+              <span class="pill-cat">${escapeHtml(catVal)}</span>
+              <span class="pill-visit">Visit Website ↗</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 6. Select Design
+    function selectDesign(designId: string) {
+      selectedDesignId = designId;
+      document.querySelectorAll('.design-option-card').forEach((card) => {
+        const id = card.getAttribute('data-design-id');
+        if (id === designId) {
+          card.classList.add('is-selected');
+        } else {
+          card.classList.remove('is-selected');
+        }
+      });
+      updateLivePreviews();
+    }
+
+    // Attach Gallery selection and preview listeners
+    document.querySelectorAll('.design-option-card').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        // If preview button clicked, do not select immediately
+        const target = e.target as HTMLElement;
+        if (target.closest('.btn-preview-design')) return;
+        const id = card.getAttribute('data-design-id');
+        if (id) selectDesign(id);
+      });
+    });
+
+    document.querySelectorAll('.btn-select-design').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-select-id');
+        if (id) selectDesign(id);
+      });
+    });
+
+    // 7. Preview Modal
+    function openPreviewModal(designId: string) {
+      previewModalDesignId = designId;
+      const meta = designCatalogMeta[designId] || designCatalogMeta['theme-04'];
+      const nameVal = nameInput?.value.trim() || 'Example Website';
+      const descVal = descInput?.value.trim() || 'Your website description will appear here...';
+      const catVal = catSelect?.options[catSelect.selectedIndex]?.text || 'Creative';
+      const urlVal = urlInput?.value.trim() || 'https://example.com';
+
+      if (previewModalTitle) {
+        previewModalTitle.textContent = `Preview — ${meta.name}`;
+      }
+
+      if (previewModalStage) {
+        previewModalStage.innerHTML = `
+          <div class="live-theme-card theme-${meta.themeSlug}" style="width: 100%; max-width: 380px;">
+            <div class="card-artwork-box">
+              <div class="default-gift-art">
+                <span class="art-emoji">${meta.emoji}</span>
+                <span class="art-heart">✨</span>
+              </div>
+            </div>
+            <h3 class="card-inner-title">${escapeHtml(nameVal)}</h3>
+            <p class="card-inner-desc">${escapeHtml(descVal)}</p>
+            <div class="card-inner-pills-row">
+              <span class="pill-cat">${escapeHtml(catVal)}</span>
+              <a href="${escapeHtml(urlVal)}" target="_blank" rel="noopener noreferrer" class="pill-visit" style="text-decoration:none;">Visit Website ↗</a>
+            </div>
+          </div>
+        `;
+      }
+
+      if (designPreviewModal) designPreviewModal.style.display = 'flex';
+    }
+
+    document.querySelectorAll('.btn-preview-design').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-preview-id');
+        if (id) openPreviewModal(id);
+      });
+    });
+
+    if (previewModalClose) {
+      previewModalClose.addEventListener('click', () => {
+        if (designPreviewModal) designPreviewModal.style.display = 'none';
+      });
+    }
+    if (previewModalDone) {
+      previewModalDone.addEventListener('click', () => {
+        if (designPreviewModal) designPreviewModal.style.display = 'none';
+      });
+    }
+    if (previewModalSelectThis) {
+      previewModalSelectThis.addEventListener('click', () => {
+        selectDesign(previewModalDesignId);
+        if (designPreviewModal) designPreviewModal.style.display = 'none';
+      });
+    }
+
+    // Step Nav Click Handlers
+    if (toStep2Btn) {
+      toStep2Btn.addEventListener('click', () => {
         const state = $authStore.get();
-        if (!state?.userId) {
-          if (window.Clerk) {
-            window.Clerk.openSignIn();
-          }
+        if (!state?.userId && window.Clerk) {
+          window.Clerk.openSignIn();
           return;
         }
-
-        let hasError = false;
-
-        // URL Validation
-        const urlVal = urlInput?.value.trim() || '';
-        let isValidUrl = false;
-        try {
-          const parsed = new URL(urlVal);
-          isValidUrl = parsed.protocol === 'http:' || parsed.protocol === 'https:';
-        } catch {
-          isValidUrl = false;
+        if (validateStep1()) {
+          updateLivePreviews();
+          goToStep(2);
         }
+      });
+    }
 
-        if (!urlVal) {
-          if (errUrl) errUrl.textContent = 'Please enter a website URL.';
-          urlInput?.setAttribute('aria-invalid', 'true');
-          hasError = true;
-        } else if (!isValidUrl) {
-          if (errUrl) errUrl.textContent = 'Please enter a valid website URL (starting with https:// or http://).';
-          urlInput?.setAttribute('aria-invalid', 'true');
-          hasError = true;
-        } else {
-          if (errUrl) errUrl.textContent = '';
-          urlInput?.removeAttribute('aria-invalid');
-        }
+    if (backToStep1Btn) {
+      backToStep1Btn.addEventListener('click', () => goToStep(1));
+    }
 
-        // Name Validation
-        const nameVal = nameInput?.value.trim() || '';
-        if (!nameVal || nameVal.length < 2) {
-          if (errName) errName.textContent = 'Please enter a website name (at least 2 characters).';
-          nameInput?.setAttribute('aria-invalid', 'true');
-          hasError = true;
-        } else {
-          if (errName) errName.textContent = '';
-          nameInput?.removeAttribute('aria-invalid');
-        }
+    if (toStep3Btn) {
+      toStep3Btn.addEventListener('click', () => {
+        updateLivePreviews();
+        goToStep(3);
+      });
+    }
 
-        // Description Validation
-        const descVal = descInput?.value.trim() || '';
-        if (!descVal || descVal.length < 10) {
-          if (errDesc) errDesc.textContent = 'Please explain in at least 10 characters why this website deserves to exist.';
-          descInput?.setAttribute('aria-invalid', 'true');
-          hasError = true;
-        } else {
-          if (errDesc) errDesc.textContent = '';
-          descInput?.removeAttribute('aria-invalid');
-        }
+    if (reviewEditBtn) {
+      reviewEditBtn.addEventListener('click', () => goToStep(1));
+    }
 
-        // Category Validation
-        const catVal = catSelect?.value || '';
-        if (!catVal) {
-          if (errCat) errCat.textContent = 'Please choose a category.';
-          catSelect?.setAttribute('aria-invalid', 'true');
-          hasError = true;
-        } else {
-          if (errCat) errCat.textContent = '';
-          catSelect?.removeAttribute('aria-invalid');
-        }
+    if (reviewChangeDesignBtn) {
+      reviewChangeDesignBtn.addEventListener('click', () => goToStep(2));
+    }
 
-        if (hasError) {
-          const firstInvalid = form.querySelector('[aria-invalid="true"]') as HTMLElement | null;
-          firstInvalid?.focus();
-          return;
-        }
-
-        // Loading state
-        if (formBtn) formBtn.disabled = true;
-        if (btnSpinner) btnSpinner.style.display = 'inline-block';
-        if (btnText) btnText.textContent = 'Submitting to database...';
-
-        const user = $userStore.get();
-        const payload = {
-          url: urlVal,
-          name: nameVal,
-          description: descVal,
-          category: catVal,
-          user_id: state?.userId || null,
-          user_email: user?.primaryEmailAddress?.emailAddress || null,
-          user_name: user?.username || user?.firstName || null,
-        };
-
-        // Modal handlers
+    // Modal close on Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (designPreviewModal) designPreviewModal.style.display = 'none';
         const confirmModal = document.getElementById('submission-confirm-modal');
-        const confirmCloseBtn = document.getElementById('confirm-close-btn');
-        const confirmModalCloseBtn = document.getElementById('confirm-modal-close-btn');
+        if (confirmModal) confirmModal.style.display = 'none';
+      }
+    });
 
-        if (confirmCloseBtn && confirmModal) {
-          confirmCloseBtn.addEventListener('click', () => { confirmModal.style.display = 'none'; });
-        }
-        if (confirmModalCloseBtn && confirmModal) {
-          confirmModalCloseBtn.addEventListener('click', () => { confirmModal.style.display = 'none'; });
-        }
-        window.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && confirmModal) {
-            confirmModal.style.display = 'none';
+    // 8. Submit for Approval (Step 3 Submission)
+    async function submitForApproval() {
+      if (isSubmitting) return;
+
+      const state = $authStore.get();
+      if (!state?.userId) {
+        if (window.Clerk) window.Clerk.openSignIn();
+        return;
+      }
+
+      if (!validateStep1()) {
+        goToStep(1);
+        return;
+      }
+
+      isSubmitting = true;
+      if (finalSubmitBtn) finalSubmitBtn.disabled = true;
+      if (btnSpinner) btnSpinner.style.display = 'inline-block';
+      if (btnText) btnText.textContent = 'Submitting to Neon...';
+      if (submitErrorBanner) submitErrorBanner.style.display = 'none';
+
+      const urlVal = urlInput?.value.trim() || '';
+      const nameVal = nameInput?.value.trim() || '';
+      const descVal = descInput?.value.trim() || '';
+      const catVal = catSelect?.value || 'creative';
+
+      const payload = {
+        url: urlVal,
+        name: nameVal,
+        description: descVal,
+        category: catVal,
+        designId: selectedDesignId,
+      };
+
+      try {
+        let token: string | null = null;
+        for (let i = 0; i < 3; i++) {
+          if ((window as any).Clerk?.session) {
+            try {
+              token = await (window as any).Clerk.session.getToken();
+              if (token) break;
+            } catch (e) {
+              console.warn('Could not retrieve Clerk token:', e);
+            }
           }
+          if (i < 2) await new Promise((r) => setTimeout(r, 200));
+        }
+
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/submit', {
+          method: 'POST',
+          headers,
+          credentials: 'include',
+          body: JSON.stringify(payload),
         });
 
-        // Get authenticated Clerk session token
-        (async () => {
-          try {
-            let token: string | null = null;
-            for (let i = 0; i < 3; i++) {
-              if ((window as any).Clerk?.session) {
-                try {
-                  token = await (window as any).Clerk.session.getToken();
-                  if (token) break;
-                } catch (e) {
-                  console.warn('Could not retrieve Clerk token:', e);
-                }
-              }
-              if (i < 2) {
-                await new Promise((r) => setTimeout(r, 200));
-              }
-            }
+        const data = await res.json().catch(() => ({}));
 
-            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-            if (token) {
-              headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            const res = await fetch('/api/submit', {
-              method: 'POST',
-              headers,
-              credentials: 'include',
-              body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-              const data = await res.json().catch(() => ({}));
-              throw new Error(data.error || 'Failed to save submission to database.');
-            }
-
-            form.style.display = 'none';
-            if (signedOutNotice) signedOutNotice.style.display = 'none';
-            if (successCard) successCard.style.display = 'block';
-
-            if (successDetail) {
-              successDetail.textContent = `Thank you for submitting "${nameVal}"! Your website was saved to our Neon database and our team will review it shortly.`;
-            }
-
-            // Show Confirmation Popup Modal (Requirement 3 & 12)
-            if (confirmModal) {
-              confirmModal.style.display = 'flex';
-            }
-
-            form.reset();
-            if (charCounter) charCounter.textContent = '0/300';
-          } catch (err: any) {
-            console.error('Submission error:', err);
-            if (errDesc) {
-              errDesc.textContent = err?.message || 'Submission failed. Please check your details and try again.';
-            }
-          } finally {
-            if (formBtn) formBtn.disabled = false;
-            if (btnSpinner) btnSpinner.style.display = 'none';
-            if (btnText) btnText.textContent = 'Submit to the Useless Web';
+        if (!res.ok) {
+          if (res.status === 409) {
+            throw new Error(data.error || 'This website was recently submitted and is already pending review.');
           }
-        })();
+          throw new Error(data.error || 'Failed to save submission to Neon database.');
+        }
+
+        // Success: hide form & show success views
+        if (form) form.style.display = 'none';
+        if (signedOutNotice) signedOutNotice.style.display = 'none';
+        if (successCard) successCard.style.display = 'block';
+
+        if (successDetail) {
+          successDetail.textContent = `Thank you for submitting "${nameVal}"! Your website was saved to our Neon database and our team will review it shortly.`;
+        }
+
+        // Show Confirmation Modal
+        const confirmModal = document.getElementById('submission-confirm-modal');
+        if (confirmModal) confirmModal.style.display = 'flex';
+
+        form?.reset();
+        if (charCounter) charCounter.textContent = '0/300';
+      } catch (err: any) {
+        console.error('Submission failed:', err);
+        if (submitErrorBanner) {
+          submitErrorBanner.style.display = 'block';
+          submitErrorBanner.textContent = err?.message || 'Submission could not be completed. Please try again.';
+        }
+      } finally {
+        isSubmitting = false;
+        if (finalSubmitBtn) finalSubmitBtn.disabled = false;
+        if (btnSpinner) btnSpinner.style.display = 'none';
+        if (btnText) btnText.textContent = 'Submit for Approval';
+      }
+    }
+
+    if (finalSubmitBtn) {
+      finalSubmitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        submitForApproval();
+      });
+    }
+
+    // Confirmation Modal Close Handlers
+    const confirmModal = document.getElementById('submission-confirm-modal');
+    const confirmCloseBtn = document.getElementById('confirm-close-btn');
+    const confirmModalCloseBtn = document.getElementById('confirm-modal-close-btn');
+
+    if (confirmCloseBtn && confirmModal) {
+      confirmCloseBtn.addEventListener('click', () => { confirmModal.style.display = 'none'; });
+    }
+    if (confirmModalCloseBtn && confirmModal) {
+      confirmModalCloseBtn.addEventListener('click', () => { confirmModal.style.display = 'none'; });
+    }
+
+    if (submitAnotherBtn && form && successCard) {
+      submitAnotherBtn.addEventListener('click', () => {
+        successCard.style.display = 'none';
+        form.style.display = 'block';
+        goToStep(1);
+        updateAuthStatus();
+        urlInput?.focus();
       });
     }
 
@@ -2387,6 +2830,391 @@ const dashboardUrl = getLocalizedPath('/dashboard/', currentLocale);
     gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
+  }
+
+  /* =========================================
+     3-STEP SUBMISSION WIZARD STYLES
+     ========================================= */
+  .submit-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    padding: 12px 18px;
+    margin-bottom: 24px;
+    box-shadow: 3px 3px 0 var(--ink);
+    gap: 8px;
+  }
+
+  .stepper-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: #64748b;
+    user-select: none;
+  }
+
+  .stepper-item.active {
+    color: var(--pink);
+  }
+
+  .stepper-item.completed {
+    color: #16a34a;
+  }
+
+  .step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 0.95rem;
+    background: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .stepper-item.active .step-circle {
+    background: var(--pink);
+    color: #ffffff;
+    border-color: var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .stepper-item.completed .step-circle {
+    background: #22c55e;
+    color: #ffffff;
+    border-color: var(--ink);
+  }
+
+  .stepper-connector {
+    flex: 1;
+    height: 2px;
+    background: #cbd5e1;
+    min-width: 12px;
+  }
+
+  .step-pane-header {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .step-subheading {
+    margin: 0 0 6px;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.55rem;
+    color: var(--ink);
+  }
+
+  .step-subtext {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  /* Gallery Grid of Designs */
+  .design-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .design-option-card {
+    background: #ffffff;
+    border: 2.5px solid var(--ink);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 3px 3px 0 var(--ink);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    position: relative;
+  }
+
+  .design-option-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .design-option-card.is-selected {
+    border-color: var(--pink);
+    box-shadow: 4px 4px 0 var(--pink);
+    outline: 2px solid var(--pink);
+  }
+
+  .design-card-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .design-tag-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .design-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+  }
+
+  .design-option-name {
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
+
+  .design-selection-badge {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: var(--pink);
+    color: #ffffff;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .design-option-card.is-selected .design-selection-badge {
+    display: inline-flex;
+  }
+
+  .design-card-visual {
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .card-art-box {
+    width: 100%;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1.5px solid var(--ink);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+  }
+
+  .card-title-preview {
+    margin: 0;
+    font-family: 'Lilita One', system-ui, sans-serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-desc-preview {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #334155;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .preview-cat-tag {
+    background: #ffffff;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  .preview-visit-tag {
+    color: #2563eb;
+  }
+
+  .design-card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .btn-preview-design,
+  .btn-select-design {
+    background: #ffffff;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+    transition: transform 0.1s ease, background 0.1s ease;
+  }
+
+  .btn-preview-design:hover {
+    background: #f1f5f9;
+    transform: translateY(-1px);
+  }
+
+  .btn-select-design {
+    background: var(--lime);
+  }
+
+  .design-option-card.is-selected .btn-select-design {
+    background: var(--pink);
+    color: #ffffff;
+  }
+
+  .step-nav-row {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  /* Step 3 Final Review Stage */
+  .final-card-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .final-details-table {
+    background: #f8fafc;
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 3px 3px 0 var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
+  }
+
+  .summary-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .summary-row.full {
+    grid-column: 1 / -1;
+  }
+
+  .summary-lbl {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.04em;
+  }
+
+  .summary-val {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .summary-link {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  .summary-desc {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #334155;
+    line-height: 1.45;
+  }
+
+  .submission-error-notice {
+    background: #fef2f2;
+    border: 2px solid #ef4444;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #b91c1c;
+    margin-bottom: 16px;
+  }
+
+  .review-actions {
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  /* Preview Modal Dialog */
+  .dash-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(9, 8, 12, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .preview-modal-box {
+    background: #ffffff;
+    border: 3px solid var(--ink);
+    border-radius: 24px;
+    box-shadow: 8px 8px 0 var(--ink);
+    max-width: 520px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .modal-preview-stage-body {
+    padding: 24px 20px;
+    display: flex;
+    justify-content: center;
+    background: #fff9df;
+  }
+
+  .dash-modal-footer {
+    padding: 14px 20px;
+    background: #f8fafc;
+    border-top: 2px solid var(--ink);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
   }
 
   @media (prefers-reduced-motion: reduce) {
