@@ -378,6 +378,7 @@ const categoryDataMap = Object.fromEntries([
 
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+  <script is:inline id="directory-meta-data" type="application/json" set:html={JSON.stringify({ categoryData: categoryDataMap })} />
 </SiteLayout>
 
 <!-- Client Interactive Logic -->
@@ -402,8 +403,8 @@ const categoryDataMap = Object.fromEntries([
 
     if (!container) return;
 
-    const cards = Array.from(container.querySelectorAll('.site-card'));
-    const totalOriginalCount = cards.length;
+    let cards = Array.from(container.querySelectorAll('.site-card'));
+    const categoryData = JSON.parse(document.getElementById('directory-meta-data')?.textContent || '{}').categoryData || {};
 
     // Likes state persisted in localStorage
     const likedSites = new Set(JSON.parse(localStorage.getItem('cfn_liked_sites') || '[]'));
@@ -418,6 +419,193 @@ const categoryDataMap = Object.fromEntries([
         if (heartSvg) heartSvg.setAttribute('fill', '#f43f5e');
       }
     });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function normalizeCat(cat) {
+      if (!cat) return 'useless-websites';
+      const clean = String(cat).trim().toLowerCase();
+      const valid = ['useless-websites', 'weird-websites', 'silly-animals', 'interactive', 'mini-games', 'creative', 'visual-oddities', 'music-sounds', 'internet-nostalgia', 'funny-websites', 'time-wasters', 'internet-experiments', 'food-for-thought'];
+      if (valid.includes(clean)) return clean;
+      const map = {
+        'silly animals': 'silly-animals',
+        'silly-animals': 'silly-animals',
+        'internet nostalgia': 'internet-nostalgia',
+        'creative & art toys': 'creative',
+        'creative': 'creative',
+        'art': 'creative',
+        'food for thought': 'food-for-thought',
+        'music & sounds': 'music-sounds',
+        'music & sound buttons': 'music-sounds',
+        'visual oddities': 'visual-oddities',
+        'interactive web experiments': 'interactive',
+        'interactive': 'interactive',
+        'useless websites': 'useless-websites',
+        'ultimate time wasters': 'time-wasters',
+        'pointless mini games': 'mini-games',
+        'internet experiments': 'internet-experiments',
+        'funny & humor websites': 'funny-websites',
+        'weird websites': 'weird-websites',
+        'meme': 'internet-nostalgia',
+        'funny': 'funny-websites',
+        'weird': 'weird-websites',
+      };
+      return map[clean] || map[clean.replace(/\s+/g, '-')] || 'useless-websites';
+    }
+
+    function generateThumbSvg(name, catSlug, designId) {
+      const themes = {
+        'theme-01': { bg: '#fff9df', accent: '#f59e0b', text: '#b45309' },
+        'theme-02': { bg: '#ffe2f5', accent: '#f20caf', text: '#be185d' },
+        'theme-03': { bg: '#dffaff', accent: '#0d9488', text: '#0f766e' },
+        'theme-04': { bg: '#eee3ff', accent: '#7025ed', text: '#6d28d9' },
+        'theme-05': { bg: '#fef3c7', accent: '#d97706', text: '#c2410c' },
+        'theme-06': { bg: '#18181b', accent: '#facc15', text: '#f7fa27' },
+      };
+      const theme = themes[designId] || themes['theme-02'];
+      return `<svg viewBox="0 0 240 150" class="card-thumb-svg" xmlns="http://www.w3.org/2000/svg">
+        <rect width="240" height="150" fill="${theme.bg}"/>
+        <circle cx="120" cy="65" r="34" fill="${theme.accent}" opacity="0.25"/>
+        <circle cx="120" cy="65" r="26" fill="none" stroke="#18181b" stroke-width="2" stroke-dasharray="4,4"/>
+        <circle cx="120" cy="65" r="14" fill="${theme.accent}"/>
+        <text x="120" y="70" font-family="'Lilita One', cursive, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">★</text>
+        <text x="120" y="125" font-family="'Lilita One', system-ui, sans-serif" font-size="13" font-weight="900" fill="${theme.text}" text-anchor="middle" letter-spacing="0.5">${escapeHtml(name.slice(0, 18))}</text>
+      </svg>`;
+    }
+
+    function createCardElement(site, index) {
+      const card = document.createElement('article');
+      const siteId = String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`;
+      const catSlug = normalizeCat(site.category);
+      const catObj = categoryData[catSlug] || { name: site.category || 'Useless Websites', icon: categoryData['all']?.icon || '' };
+      const likesRaw = 1200 + (String(site.name).length * 137 % 3800);
+      const likesFormatted = (likesRaw / 1000).toFixed(1) + 'K';
+      const isLiked = likedSites.has(siteId);
+
+      card.className = 'site-card is-hidden';
+      card.setAttribute('data-site-id', siteId);
+      card.setAttribute('data-name', site.name || '');
+      card.setAttribute('data-category', catSlug);
+      card.setAttribute('data-likes', String(likesRaw));
+      card.setAttribute('data-index', String(index));
+
+      let thumbMedia = '';
+      if (site.thumbnail_url && /^https?:\/\//i.test(site.thumbnail_url)) {
+        thumbMedia = `<img src="${escapeHtml(site.thumbnail_url)}" alt="${escapeHtml(site.name)}" class="card-thumb-img" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />`;
+      } else {
+        thumbMedia = generateThumbSvg(site.name || '', catSlug, site.design_id || site.preview_info?.design_id || 'theme-02');
+      }
+
+      card.innerHTML = `
+        <div class="card-thumb-wrapper">
+          <a href="${escapeHtml(site.url)}" target="_blank" rel="noopener noreferrer" class="thumb-link" aria-label="View details for ${escapeHtml(site.name)}" tabindex="-1">
+            <div class="thumb-media">${thumbMedia}</div>
+          </a>
+          <a href="${escapeHtml(site.url)}" target="_blank" rel="noopener noreferrer" class="card-ext-btn" title="Open ${escapeHtml(site.name)} directly ↗" aria-label="Open ${escapeHtml(site.name)} in a new tab">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </a>
+        </div>
+        <div class="card-body">
+          <h2 class="card-title">
+            <a href="${escapeHtml(site.url)}" target="_blank" rel="noopener noreferrer" class="card-title-link">${escapeHtml(site.name)}</a>
+          </h2>
+          <p class="card-description">${escapeHtml(site.description || '')}</p>
+          <div class="card-meta">
+            <button type="button" class="card-cat-badge" data-category-trigger="${catSlug}" title="Filter by ${escapeHtml(catObj.name)}">
+              <span class="cat-badge-icon">${catObj.icon}</span>
+              <span>${escapeHtml(catObj.name)}</span>
+            </button>
+          </div>
+          <div class="card-footer">
+            <button type="button" class="card-like-btn ${isLiked ? 'is-liked' : ''}" data-like-target="${siteId}" aria-label="Like ${escapeHtml(site.name)}">
+              <svg class="heart-icon" width="15" height="15" viewBox="0 0 24 24" fill="${isLiked ? '#f43f5e' : 'none'}" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span class="like-number">${likesFormatted}</span>
+            </button>
+            <a href="${escapeHtml(site.url)}" target="_blank" rel="noopener noreferrer" class="card-arrow-btn" aria-label="Open ${escapeHtml(site.name)}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    function updatePillCounts() {
+      const allCount = cards.length;
+      const allPill = document.querySelector('.filter-pill[data-category="all"] .pill-name');
+      if (allPill) {
+        allPill.textContent = allPill.textContent.replace(/\(\d+\)/, `(${allCount})`);
+      }
+
+      pills.forEach((pill) => {
+        const cat = pill.getAttribute('data-category');
+        if (cat && cat !== 'all') {
+          const count = cards.filter((c) => c.getAttribute('data-category') === cat).length;
+          let countSpan = pill.querySelector('.pill-count');
+          if (count > 0) {
+            if (!countSpan) {
+              countSpan = document.createElement('span');
+              countSpan.className = 'pill-count';
+              pill.appendChild(countSpan);
+            }
+            countSpan.textContent = `(${count})`;
+          } else if (countSpan) {
+            countSpan.remove();
+          }
+        }
+      });
+    }
+
+    async function fetchAndMergePublishedSites() {
+      try {
+        const res = await fetch('/api/published', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(3000) });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data?.sites) || data.sites.length === 0) return;
+
+        const existingIds = new Set(cards.map((c) => c.getAttribute('data-site-id')));
+        const existingNames = new Set(cards.map((c) => (c.getAttribute('data-name') || '').toLowerCase().trim()));
+
+        let added = 0;
+        data.sites.forEach((site, i) => {
+          const siteId = String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`;
+          const siteName = (site.name || '').toLowerCase().trim();
+          if (!existingIds.has(siteId) && !existingNames.has(siteName)) {
+            const newIndex = -100 + i;
+            const cardEl = createCardElement(site, newIndex);
+            container.prepend(cardEl);
+            cards.unshift(cardEl);
+            existingIds.add(siteId);
+            existingNames.add(siteName);
+            added++;
+          }
+        });
+
+        if (added > 0) {
+          updatePillCounts();
+          renderCards();
+        }
+      } catch (e) {
+        // Silently continue with static directory
+      }
+    }
 
     // Delegate like button clicks
     container.addEventListener('click', (e) => {
@@ -615,6 +803,9 @@ const categoryDataMap = Object.fromEntries([
 
     // Initial render
     renderCards();
+
+    // Fetch dynamic published submissions from Neon DB in realtime
+    fetchAndMergePublishedSites();
   })();
 </script>
 
