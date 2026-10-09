@@ -153,26 +153,14 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       return map[raw] || 'pink';
     };
 
-    let publishedSites: any[] = [];
-    try {
-      const publishedResponse = await fetch('/api/published?_t=' + Date.now(), {
-        headers: { Accept: 'application/json' },
-        cache: 'no-store',
-        signal: AbortSignal.timeout(5000)
-      });
-      if (publishedResponse.ok) {
-        const publishedData = await publishedResponse.json();
-        publishedSites = (publishedData.sites || []).map((site: any) => ({
-          ...site,
-          id: String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`,
-          theme: getThemeSlugFromSite(site),
-          category: formatCategoryName(site.category),
-          verified: true
-        }));
-      }
-    } catch { /* Curated sites remain available when the submissions API is offline. */ }
+    const slugify = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
 
-    const safeSites = [...websites, ...publishedSites].flatMap((site) => {
+    // Initial safe sites pool containing curated websites
+    let safeSites: any[] = websites.flatMap((site) => {
       if (!site.verified) return [];
       try {
         const url = new URL(site.url);
@@ -183,16 +171,9 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       }
     });
 
-
-    const slugify = (text: string) =>
-      text
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
-
-    const byId = new Map(safeSites.map((site) => [site.id, site]));
-    const bySlug = new Map(safeSites.map((site) => [slugify(site.name), site]));
-    const positionById = new Map(safeSites.map((site, index) => [site.id, index + 1]));
+    const byId = new Map<string, any>(safeSites.map((site) => [site.id, site]));
+    const bySlug = new Map<string, any>(safeSites.map((site) => [slugify(site.name), site]));
+    const positionById = new Map<string, number>(safeSites.map((site, index) => [site.id, index + 1]));
 
     const cardStage = document.querySelector('[data-card-stage]') as HTMLElement | null;
     const ofLabel = cardStage?.dataset.ofLabel || 'of';
@@ -213,6 +194,93 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       cycle: [],
       cursor: 0,
     };
+
+    function mergePublishedSites(sites: any[]) {
+      if (!Array.isArray(sites) || sites.length === 0) return;
+      let added = 0;
+      let updated = false;
+
+      for (const site of sites) {
+        if (!site || !site.url) continue;
+        try {
+          const url = new URL(site.url);
+          if (url.protocol !== 'https:' && url.protocol !== 'http:') continue;
+        } catch {
+          continue;
+        }
+
+        const siteId = String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`;
+        const theme = getThemeSlugFromSite(site);
+        const category = formatCategoryName(site.category);
+        const normalizedSite = {
+          ...site,
+          id: siteId,
+          theme,
+          category,
+          verified: true,
+        };
+
+        if (!byId.has(siteId)) {
+          safeSites.push(normalizedSite);
+          byId.set(siteId, normalizedSite);
+          bySlug.set(slugify(normalizedSite.name), normalizedSite);
+          positionById.set(siteId, safeSites.length);
+
+          // Insert newly approved site into the active cycle right ahead of the cursor so user encounters it
+          if (navState.cycle.length > 0) {
+            const insertPos = Math.min(navState.cursor + 1, navState.cycle.length);
+            navState.cycle.splice(insertPos, 0, siteId);
+          } else {
+            navState.cycle.push(siteId);
+          }
+          added++;
+        } else {
+          const existing = byId.get(siteId);
+          Object.assign(existing, normalizedSite);
+          updated = true;
+        }
+      }
+
+      if (added > 0 || updated) {
+        updateControlButtons();
+        const currentId = navState.history[navState.index];
+        if (currentId) {
+          const positionNode = currentCard?.querySelector(`[data-position]`);
+          if (positionNode) positionNode.textContent = getPositionText(currentId);
+        }
+
+        // If URL requested a specific site that just arrived
+        const urlParams = new URL(window.location.href).searchParams;
+        const rawParam = urlParams.get('name') || urlParams.get('site') || urlParams.get('id');
+        if (rawParam) {
+          const cleanParam = rawParam.trim().toLowerCase();
+          const target = byId.get(cleanParam) || byId.get(`submission-${cleanParam}`) || bySlug.get(cleanParam);
+          if (target && navState.history[navState.index] !== target.id) {
+            renderDirect(target.id);
+            navState.history.push(target.id);
+            navState.index = navState.history.length - 1;
+            saveState();
+          }
+        }
+      }
+    }
+
+    async function fetchAndMergePublishedSites() {
+      try {
+        const res = await fetch('/api/published?_t=' + Date.now(), {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(4000),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data?.sites)) {
+          mergePublishedSites(data.sites);
+        }
+      } catch (e) {
+        /* Curated sites remain available when the submissions API is offline */
+      }
+    }
 
     function initTypewriter() {
       const titleEl = document.querySelector('[data-typewriter]');
@@ -593,6 +661,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
     if (previousButton && nextButton && surpriseButton) {
       initialize();
       initDiscoverShare();
+      fetchAndMergePublishedSites();
 
       const visitBtn = document.querySelector('[data-visit]') as HTMLAnchorElement | null;
       if (visitBtn) {
@@ -621,29 +690,7 @@ const canonicalPath = getLocalizedPath('/discover/', currentLocale);
       // Listen for cross-tab or dashboard template updates
       window.addEventListener('storage', (event) => {
         if (event.key === 'cfn_submission_updated') {
-          fetch('/api/published?_t=' + Date.now(), {
-            headers: { Accept: 'application/json' },
-            cache: 'no-store'
-          })
-            .then((res) => (res.ok ? res.json() : null))
-            .then((data) => {
-              if (!Array.isArray(data?.sites)) return;
-              const updatedPublished = data.sites.map((site: any) => ({
-                ...site,
-                id: String(site.id).startsWith('submission-') ? String(site.id) : `submission-${site.id}`,
-                theme: getThemeSlugFromSite(site),
-                category: formatCategoryName(site.category),
-                verified: true
-              }));
-              for (const site of updatedPublished) {
-                byId.set(site.id, site);
-              }
-              const currentId = navState.history[navState.index];
-              if (currentId && currentId.startsWith('submission-')) {
-                renderDirect(currentId);
-              }
-            })
-            .catch(() => {});
+          fetchAndMergePublishedSites();
         }
       });
 

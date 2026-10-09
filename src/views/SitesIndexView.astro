@@ -438,25 +438,47 @@ const categoryDataMap = Object.fromEntries([
       const map = {
         'silly animals': 'silly-animals',
         'silly-animals': 'silly-animals',
+        'animals': 'silly-animals',
         'internet nostalgia': 'internet-nostalgia',
+        'internet-nostalgia': 'internet-nostalgia',
+        'nostalgia': 'internet-nostalgia',
         'creative & art toys': 'creative',
+        'creative-&-art-toys': 'creative',
         'creative': 'creative',
         'art': 'creative',
         'food for thought': 'food-for-thought',
-        'music & sounds': 'music-sounds',
+        'food-for-thought': 'food-for-thought',
+        'food': 'food-for-thought',
         'music & sound buttons': 'music-sounds',
+        'music & sounds': 'music-sounds',
+        'music-sounds': 'music-sounds',
+        'music': 'music-sounds',
+        'sounds': 'music-sounds',
         'visual oddities': 'visual-oddities',
+        'visual-oddities': 'visual-oddities',
         'interactive web experiments': 'interactive',
         'interactive': 'interactive',
         'useless websites': 'useless-websites',
+        'useless-websites': 'useless-websites',
+        'useless': 'useless-websites',
         'ultimate time wasters': 'time-wasters',
+        'time wasters': 'time-wasters',
+        'time-wasters': 'time-wasters',
         'pointless mini games': 'mini-games',
+        'mini games': 'mini-games',
+        'mini-games': 'mini-games',
+        'games': 'mini-games',
         'internet experiments': 'internet-experiments',
-        'funny & humor websites': 'funny-websites',
-        'weird websites': 'weird-websites',
+        'internet-experiments': 'internet-experiments',
+        'experiments': 'internet-experiments',
         'meme': 'internet-nostalgia',
+        'funny & humor websites': 'funny-websites',
         'funny': 'funny-websites',
+        'funny-websites': 'funny-websites',
+        'humor': 'funny-websites',
+        'weird websites': 'weird-websites',
         'weird': 'weird-websites',
+        'weird-websites': 'weird-websites',
       };
       return map[clean] || map[clean.replace(/\s+/g, '-')] || 'useless-websites';
     }
@@ -862,6 +884,9 @@ const categoryDataMap = Object.fromEntries([
           updatePillCounts();
           renderCards();
         }
+      } catch (err) {
+        console.error('Error fetching published websites:', err);
+      }
     }
 
     // Listen for cross-tab or dashboard template updates

@@ -22,14 +22,14 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       });
     }
 
-    if (!body || (!body.id && !body.siteId)) {
+    if (!body || (!body.id && !body.siteId && !body.submission_id && !body.submissionId)) {
       return new Response(JSON.stringify({ error: 'Submission ID is required.' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
     }
 
-    const rawId = body.id || body.siteId;
+    const rawId = body.id || body.siteId || body.submission_id || body.submissionId;
     const cleanId = String(rawId).replace(/^submission-/, '').trim();
     const subId = parseInt(cleanId, 10);
 

@@ -5,6 +5,10 @@ import {
 } from '../functions/api/submissions';
 import { onRequestPost as createSubmission } from '../functions/api/submit';
 import { onRequestGet as getPublishedSites } from '../functions/api/published';
+import {
+  onRequestGet as getInteractions,
+  onRequestPost as recordInteraction,
+} from '../functions/api/interactions';
 
 type Env = {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -69,6 +73,25 @@ export default {
       return new Response('Method Not Allowed', {
         status: 405,
         headers: { Allow: 'GET, OPTIONS' },
+      });
+    }
+
+    if (pathname === '/api/interactions') {
+      if (request.method === 'GET') return getInteractions({ request, env });
+      if (request.method === 'POST') return recordInteraction({ request, env });
+      if (request.method === 'OPTIONS') {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            Allow: 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+          },
+        });
+      }
+      return new Response('Method Not Allowed', {
+        status: 405,
+        headers: { Allow: 'GET, POST, OPTIONS' },
       });
     }
 
