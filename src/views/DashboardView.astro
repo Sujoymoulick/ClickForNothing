@@ -17,7 +17,7 @@ const discoverUrl = getLocalizedPath('/discover/', currentLocale);
 const homeUrl = getLocalizedPath('/', currentLocale);
 ---
 
-<SiteLayout {title} {description} canonicalPath="/dashboard/">
+<SiteLayout {title} {description} canonicalPath="/dashboard/" noindex={true}>
   <SiteHeader activeNav="none" />
 
   <div class="dash-page-wrapper">

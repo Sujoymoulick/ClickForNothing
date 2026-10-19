@@ -12,7 +12,7 @@ const title = `${t('search.title')} | ClickForNothing`;
 const description = t('search.lead');
 const homeUrl = getLocalizedPath('/', currentLocale);
 ---
-<SiteLayout {title} {description} canonicalPath="/search/">
+<SiteLayout {title} {description} canonicalPath="/search/" noindex={true}>
   <main class="search-container">
     <nav class="breadcrumbs" aria-label="Breadcrumbs" style="display: flex; gap: 8px; font-size: 0.9rem; color: #a1a1aa; margin-bottom: 20px;">
       <a href={homeUrl} style="color: #f7fa27; text-decoration: none;">{t('nav.home')}</a> <span>/</span> <span aria-current="page" style="color: #fff;">{t('nav.search')}</span>

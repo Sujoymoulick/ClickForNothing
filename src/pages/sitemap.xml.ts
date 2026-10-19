@@ -7,7 +7,6 @@ import { SUPPORTED_LOCALES } from '../i18n/config.ts';
 import { getLocalizedPath } from '../i18n/routing.ts';
 
 const baseUrl = 'https://clickfornothing.com';
-const lastmod = new Date().toISOString().split('T')[0];
 
 export const GET: APIRoute = () => {
   const staticRoutes: { path: string; priority: string; changefreq: string }[] = [
@@ -19,7 +18,6 @@ export const GET: APIRoute = () => {
     { path: '/articles/', priority: '0.8', changefreq: 'daily' },
     { path: '/random/', priority: '0.8', changefreq: 'daily' },
     { path: '/about/', priority: '0.7', changefreq: 'weekly' },
-    { path: '/search/', priority: '0.7', changefreq: 'weekly' },
     { path: '/submit/', priority: '0.7', changefreq: 'weekly' },
     { path: '/contact/', priority: '0.5', changefreq: 'monthly' },
     { path: '/privacy-policy/', priority: '0.5', changefreq: 'monthly' },
@@ -71,7 +69,6 @@ export const GET: APIRoute = () => {
       return `  <url>
     <loc>${locUrl}</loc>
 ${alternatesXml}
-    <lastmod>${lastmod}</lastmod>
     <changefreq>${base.changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
