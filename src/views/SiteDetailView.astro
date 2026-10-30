@@ -68,7 +68,7 @@ const itemPageSchema = {
   },
 };
 ---
-<SiteLayout {title} {description} {canonicalPath}>
+<SiteLayout {title} {description} {canonicalPath} noindex={currentLocale !== 'en'} hreflang={false}>
   <main class="site-detail-container">
     <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
       <a href={homeUrl}>{t('nav.home')}</a> <span>/</span>

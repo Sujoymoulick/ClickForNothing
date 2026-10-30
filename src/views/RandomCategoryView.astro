@@ -22,7 +22,7 @@ const description = t('random_page.finding_category_site', { name: catName });
 const categoryUrl = getLocalizedPath(`/categories/${categoryObj.slug}/`, currentLocale);
 const discoverUrl = getLocalizedPath('/discover/', currentLocale);
 ---
-<SiteLayout {title} {description} canonicalPath={`/random/${categoryObj.slug}/`} noindex={categorySites.length === 0}>
+<SiteLayout {title} {description} canonicalPath={`/random/${categoryObj.slug}/`} noindex>
   <main class="random-landing-container">
     <div class="card-box">
       <span class="emoji">{categoryObj.emoji}</span>

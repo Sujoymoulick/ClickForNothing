@@ -29,21 +29,18 @@ export const GET: APIRoute = () => {
     { path: '/cookie-policy/', priority: '0.5', changefreq: 'monthly' },
   ];
 
-  const basePaths: { path: string; priority: string; changefreq: string }[] = [
+  // englishOnly: translations are noindex, so list only the English URL with no hreflang cluster
+  const basePaths: { path: string; priority: string; changefreq: string; englishOnly?: boolean }[] = [
     ...staticRoutes,
     ...websites.map((w: any) => ({
       path: `/sites/${w.slug || w.id}/`,
       priority: '0.8',
       changefreq: 'weekly',
+      englishOnly: true,
     })),
     ...populatedCategories.map((c) => ({
       path: `/categories/${c.slug}/`,
       priority: '0.8',
-      changefreq: 'weekly',
-    })),
-    ...populatedCategories.map((c) => ({
-      path: `/random/${c.slug}/`,
-      priority: '0.7',
       changefreq: 'weekly',
     })),
     ...collections.map((col) => ({
@@ -59,6 +56,12 @@ export const GET: APIRoute = () => {
   ];
 
   const xmlEntries = basePaths.flatMap((base) => {
+    if (base.englishOnly) {
+      return [`  <url>
+    <loc>${baseUrl}${base.path}</loc>
+  </url>`];
+    }
+
     const alternatesXml = [
       `    <xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}${getLocalizedPath(base.path, 'en')}" />`,
       ...SUPPORTED_LOCALES.map(
