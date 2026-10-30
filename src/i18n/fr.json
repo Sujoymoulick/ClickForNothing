@@ -27,7 +27,8 @@
     "share_on_reddit": "Partager sur Reddit",
     "verified_active": "✓ Destination active vérifiée",
     "items_count": "{count} Éléments",
-    "websites_count": "{count} sites web"
+    "websites_count": "{count} sites web",
+    "select_language": "Choisir la langue"
   },
   "nav": {
     "home": "Accueil",
@@ -89,7 +90,23 @@
     "visit_original": "Visiter l'original ↗",
     "cta_title": "Vous vous sentez chanceux ?",
     "cta_desc": "Laissez notre moteur vous emmener vers une destination inutile aléatoire dès maintenant.",
-    "cta_btn": "Emmène-moi vers l'inutile 🎲"
+    "cta_btn": "Emmène-moi vers l'inutile 🎲",
+    "showing_count": "{visible} sites sur {total} affichés",
+    "showing_all": "Les {total} sites sont affichés",
+    "sort_newest": "Plus récents",
+    "sort_popular": "Plus populaires",
+    "sort_name": "Nom (A-Z)",
+    "view_grid": "Grille",
+    "view_list": "Liste",
+    "load_more": "Charger plus ({count})",
+    "loading": "Chargement...",
+    "end_of_web": "Vous avez atteint le bout du web inutile.",
+    "empty_title": "Aucun site inutile trouvé.",
+    "empty_desc": "Félicitations. Vous êtes peut-être devenu productif par accident.",
+    "reset_filters": "Réinitialiser les filtres",
+    "error_title": "Un problème est survenu.",
+    "error_desc": "Même les sites inutiles ont des soucis techniques.",
+    "try_again": "Réessayer"
   },
   "site_detail": {
     "seo_title": "{name} — Avis et guide | ClickForNothing",

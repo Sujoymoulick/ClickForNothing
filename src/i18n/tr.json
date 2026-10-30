@@ -27,7 +27,8 @@
     "share_on_reddit": "Reddit'te Paylaş",
     "verified_active": "✓ Doğrulanmış Aktif Site",
     "items_count": "{count} Öğe",
-    "websites_count": "{count} web sitesi"
+    "websites_count": "{count} web sitesi",
+    "select_language": "Dil seçin"
   },
   "nav": {
     "home": "Ana Sayfa",
@@ -89,7 +90,23 @@
     "visit_original": "Orijinalini Aç ↗",
     "cta_title": "Şanslı Hissediyor musunuz?",
     "cta_desc": "Keşif motorumuzun sizi hemen rastgele yararsız bir siteye götürmesine izin verin.",
-    "cta_btn": "Beni Yararsız Bir Yere Götür 🎲"
+    "cta_btn": "Beni Yararsız Bir Yere Götür 🎲",
+    "showing_count": "{total} siteden {visible} tanesi gösteriliyor",
+    "showing_all": "{total} sitenin tamamı gösteriliyor",
+    "sort_newest": "En yeni",
+    "sort_popular": "En popüler",
+    "sort_name": "Ad (A-Z)",
+    "view_grid": "Izgara",
+    "view_list": "Liste",
+    "load_more": "Daha fazla yükle ({count})",
+    "loading": "Yükleniyor...",
+    "end_of_web": "Yararsız internetin sonuna ulaştınız.",
+    "empty_title": "Yararsız site bulunamadı.",
+    "empty_desc": "Tebrikler. Yanlışlıkla üretken olmuş olabilirsiniz.",
+    "reset_filters": "Filtreleri sıfırla",
+    "error_title": "Bir şeyler ters gitti.",
+    "error_desc": "Yararsız sitelerin bile teknik sorunları olur.",
+    "try_again": "Tekrar dene"
   },
   "site_detail": {
     "seo_title": "{name} — İnceleme ve Rehber | ClickForNothing",

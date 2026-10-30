@@ -27,7 +27,8 @@
     "share_on_reddit": "Reddit でシェア",
     "verified_active": "✓ 動作確認済み",
     "items_count": "{count} 件",
-    "websites_count": "{count} 個のサイト"
+    "websites_count": "{count} 個のサイト",
+    "select_language": "言語を選択"
   },
   "nav": {
     "home": "ホーム",
@@ -89,7 +90,23 @@
     "visit_original": "オリジナルを開く ↗",
     "cta_title": "運試ししてみる？",
     "cta_desc": "ディスカバリーエンジンで、今すぐランダムな無駄サイトへ飛びましょう。",
-    "cta_btn": "どこか無駄な場所へ行く 🎲"
+    "cta_btn": "どこか無駄な場所へ行く 🎲",
+    "showing_count": "{total}件中{visible}件のサイトを表示中",
+    "showing_all": "全{total}件のサイトを表示中",
+    "sort_newest": "新しい順",
+    "sort_popular": "人気順",
+    "sort_name": "名前順 (A-Z)",
+    "view_grid": "グリッド",
+    "view_list": "リスト",
+    "load_more": "さらに表示 ({count})",
+    "loading": "読み込み中...",
+    "end_of_web": "無駄なウェブの果てにたどり着きました。",
+    "empty_title": "無駄なサイトが見つかりませんでした。",
+    "empty_desc": "おめでとうございます。うっかり生産的になってしまったかもしれません。",
+    "reset_filters": "フィルターをリセット",
+    "error_title": "問題が発生しました。",
+    "error_desc": "無駄なサイトにも技術的なトラブルはあります。",
+    "try_again": "もう一度試す"
   },
   "site_detail": {
     "seo_title": "{name} — レビューと紹介 | ClickForNothing",

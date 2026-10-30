@@ -27,7 +27,8 @@
     "share_on_reddit": "分享至 Reddit",
     "verified_active": "✓ 已验证正常在线",
     "items_count": "{count} 个项目",
-    "websites_count": "{count} 个网站"
+    "websites_count": "{count} 个网站",
+    "select_language": "选择语言"
   },
   "nav": {
     "home": "首页",
@@ -89,7 +90,23 @@
     "visit_original": "访问原站 ↗",
     "cta_title": "想碰碰运气？",
     "cta_desc": "让我们的探索引擎立即带你前往一个随机的奇妙无用网站。",
-    "cta_btn": "带我去无用之地 🎲"
+    "cta_btn": "带我去无用之地 🎲",
+    "showing_count": "显示 {visible} / {total} 个网站",
+    "showing_all": "显示全部 {total} 个网站",
+    "sort_newest": "最新优先",
+    "sort_popular": "最受欢迎",
+    "sort_name": "名称 (A-Z)",
+    "view_grid": "网格",
+    "view_list": "列表",
+    "load_more": "加载更多 ({count})",
+    "loading": "加载中...",
+    "end_of_web": "你已到达无用网络的尽头。",
+    "empty_title": "没有找到无用网站。",
+    "empty_desc": "恭喜。你可能不小心变得高效了。",
+    "reset_filters": "重置筛选",
+    "error_title": "出错了。",
+    "error_desc": "就连无用网站也会遇到技术问题。",
+    "try_again": "重试"
   },
   "site_detail": {
     "seo_title": "{name} — 评测与指南 | ClickForNothing",

@@ -1,3 +1,5 @@
+import { websites } from './websites';
+
 export type WebsiteCollection = {
   slug: string;
   title: string;
@@ -9,14 +11,14 @@ export type WebsiteCollection = {
   featured?: boolean;
 };
 
-export const collections: WebsiteCollection[] = [
+const collectionEntries: WebsiteCollection[] = [
   {
     slug: '100-useless-websites',
-    title: '100 Most Useless Websites on the Internet',
+    title: '{count} Most Useless Websites on the Internet',
     subtitle: 'The ultimate hall of fame for completely unnecessary, hilarious, and bizarre web creations.',
     description: 'A hand-curated master list of the top useless websites ever built. From cat bounce physics to wrong calculators, explore the web’s finest time-wasters.',
-    seoTitle: '100 Most Useless Websites on the Internet (2026 List) — ClickForNothing',
-    seoDescription: 'Discover 100 hilarious, bizarre, and useless websites to waste time when bored. Hand-curated directory of pointless web destinations.',
+    seoTitle: '{count} Most Useless Websites on the Internet (2026 List) — ClickForNothing',
+    seoDescription: 'Discover {count} hilarious, bizarre, and useless websites to waste time when bored. Hand-curated directory of pointless web destinations.',
     siteIds: [
       'cat-bounce', 'pointer-pointer', 'eel-slap', 'koalas-to-the-max', 'long-doge-challenge',
       'windows-93', 'weave-silk', 'patatap', 'hackertyper', 'invisible-cow',
@@ -34,11 +36,11 @@ export const collections: WebsiteCollection[] = [
   },
   {
     slug: 'websites-to-visit-when-bored',
-    title: '50 Websites to Visit When You Are Extremely Bored',
+    title: '{count} Websites to Visit When You Are Extremely Bored',
     subtitle: 'Immediate cure for study break fatigue, slow workdays, and afternoon boredom.',
     description: 'Stuck in a boredom loop? Jump into interactive art toys, random street view journeys, city radio drives, and funny games designed for quick relief.',
-    seoTitle: '50 Websites to Visit When Bored (Kill Boredom Online) — ClickForNothing',
-    seoDescription: 'Bored online? Explore 50 amazing, funny, and entertaining websites to visit when you have free time.',
+    seoTitle: '{count} Websites to Visit When Bored (Kill Boredom Online) — ClickForNothing',
+    seoDescription: 'Bored online? Explore {count} amazing, funny, and entertaining websites to visit when you have free time.',
     siteIds: [
       'bored-button', 'map-crunch', 'drive-and-listen', 'pointer-pointer', 'invisible-cow',
       'quick-draw', 'neal-fun', 'deep-sea-scroll', 'space-is-cool', 'user-inyerface',
@@ -86,3 +88,18 @@ export const collections: WebsiteCollection[] = [
     featured: true,
   }
 ];
+
+const knownSiteIds = new Set(websites.map((site) => site.id));
+
+// Drop ids of removed sites and fill {count} so headline numbers always match the actual list
+export const collections: WebsiteCollection[] = collectionEntries.map((collection) => {
+  const siteIds = collection.siteIds.filter((id) => knownSiteIds.has(id));
+  const withCount = (text: string) => text.replaceAll('{count}', String(siteIds.length));
+  return {
+    ...collection,
+    siteIds,
+    title: withCount(collection.title),
+    seoTitle: withCount(collection.seoTitle),
+    seoDescription: withCount(collection.seoDescription),
+  };
+});

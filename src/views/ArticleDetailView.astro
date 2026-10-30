@@ -47,9 +47,19 @@ const articleSchema = {
   headline: article.title,
   description: article.description,
   author: { '@type': 'Organization', name: article.author },
-  publisher: { '@type': 'Organization', name: 'ClickForNothing', url: `${siteOrigin}/` },
+  publisher: {
+    '@type': 'Organization',
+    '@id': `${siteOrigin}/#organization`,
+    name: 'ClickForNothing',
+    url: `${siteOrigin}/`,
+    logo: { '@type': 'ImageObject', url: `${siteOrigin}/android-chrome-512x512.png` },
+  },
+  image: `${siteOrigin}/og-image.png`,
   datePublished: article.publishDate,
+  dateModified: article.publishDate,
+  inLanguage: currentLocale,
   mainEntityOfPage: fullCanonicalUrl,
+  isPartOf: { '@id': `${siteOrigin}/#website` },
 };
 ---
 

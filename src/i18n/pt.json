@@ -27,7 +27,8 @@
     "share_on_reddit": "Compartilhar no Reddit",
     "verified_active": "✓ Destino ativo verificado",
     "items_count": "{count} Itens",
-    "websites_count": "{count} sites"
+    "websites_count": "{count} sites",
+    "select_language": "Selecionar idioma"
   },
   "nav": {
     "home": "Início",
@@ -89,7 +90,23 @@
     "visit_original": "Visitar original ↗",
     "cta_title": "Sentindo-se com sorte?",
     "cta_desc": "Deixe nosso motor levar você a um destino inútil agora mesmo.",
-    "cta_btn": "Leve-me para algum lugar inútil 🎲"
+    "cta_btn": "Leve-me para algum lugar inútil 🎲",
+    "showing_count": "Mostrando {visible} de {total} sites",
+    "showing_all": "Mostrando todos os {total} sites",
+    "sort_newest": "Mais recentes",
+    "sort_popular": "Mais populares",
+    "sort_name": "Nome (A-Z)",
+    "view_grid": "Grade",
+    "view_list": "Lista",
+    "load_more": "Carregar mais ({count})",
+    "loading": "Carregando...",
+    "end_of_web": "Você chegou ao fim da web inútil.",
+    "empty_title": "Nenhum site inútil encontrado.",
+    "empty_desc": "Parabéns. Talvez você tenha ficado produtivo sem querer.",
+    "reset_filters": "Redefinir filtros",
+    "error_title": "Algo deu errado.",
+    "error_desc": "Até sites inúteis têm problemas técnicos.",
+    "try_again": "Tentar novamente"
   },
   "site_detail": {
     "seo_title": "{name} — Análise e guia | ClickForNothing",

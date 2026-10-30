@@ -18,7 +18,13 @@ const { t } = await useTranslations(currentLocale);
 
 const title = t('site_detail.seo_title', { name: site.name });
 const baseDesc = t('site_detail.seo_desc_template', { name: site.name, desc: site.description });
-const description = baseDesc.length > 155 ? `${baseDesc.slice(0, 151)}...` : baseDesc;
+// Keep metas under 155 chars without cutting words: fall back to the site-specific part, then trim at a word boundary
+const shortDesc = `${site.name}: ${site.description}`;
+const description = baseDesc.length <= 155
+  ? baseDesc
+  : shortDesc.length <= 155
+    ? shortDesc
+    : `${shortDesc.slice(0, 152).replace(/\s+\S*$/, '')}…`;
 const canonicalPath = `/sites/${site.slug}/`;
 
 const relatedSites = websites
@@ -98,10 +104,12 @@ const itemPageSchema = {
           <p>{site.whyItIsUseless || t('site_detail.why_useless_default')}</p>
         </div>
 
-        <div class="info-block">
-          <h2>{t('site_detail.what_happens_heading')}</h2>
-          <p>{site.whatHappens || site.description}</p>
-        </div>
+        {site.whatHappens && (
+          <div class="info-block">
+            <h2>{t('site_detail.what_happens_heading')}</h2>
+            <p>{site.whatHappens}</p>
+          </div>
+        )}
 
         {(site.tags || []).length > 0 && (
           <div class="tags-block">

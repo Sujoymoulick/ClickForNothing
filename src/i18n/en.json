@@ -27,7 +27,8 @@
     "share_on_reddit": "Share on Reddit",
     "verified_active": "✓ Verified Active Destination",
     "items_count": "{count} Items",
-    "websites_count": "{count} websites"
+    "websites_count": "{count} websites",
+    "select_language": "Select language"
   },
   "nav": {
     "home": "Home",

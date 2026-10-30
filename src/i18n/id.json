@@ -27,7 +27,8 @@
     "share_on_reddit": "Bagikan di Reddit",
     "verified_active": "✓ Situs Aktif & Terverifikasi",
     "items_count": "{count} Butir",
-    "websites_count": "{count} situs web"
+    "websites_count": "{count} situs web",
+    "select_language": "Pilih bahasa"
   },
   "nav": {
     "home": "Beranda",
@@ -89,7 +90,23 @@
     "visit_original": "Kunjungi Sumber Asli ↗",
     "cta_title": "Merasa Beruntung?",
     "cta_desc": "Biarkan mesin penjelajah kami membawa Anda ke destinasi acak sekarang juga.",
-    "cta_btn": "Bawa Saya ke Tempat Tak Berguna 🎲"
+    "cta_btn": "Bawa Saya ke Tempat Tak Berguna 🎲",
+    "showing_count": "Menampilkan {visible} dari {total} situs",
+    "showing_all": "Menampilkan semua {total} situs",
+    "sort_newest": "Terbaru",
+    "sort_popular": "Terpopuler",
+    "sort_name": "Nama (A-Z)",
+    "view_grid": "Kisi",
+    "view_list": "Daftar",
+    "load_more": "Muat lebih banyak ({count})",
+    "loading": "Memuat...",
+    "end_of_web": "Kamu sudah sampai di ujung web tak berguna.",
+    "empty_title": "Tidak ada situs tak berguna yang ditemukan.",
+    "empty_desc": "Selamat. Kamu mungkin tidak sengaja jadi produktif.",
+    "reset_filters": "Atur ulang filter",
+    "error_title": "Terjadi kesalahan.",
+    "error_desc": "Situs tak berguna pun punya masalah teknis.",
+    "try_again": "Coba lagi"
   },
   "site_detail": {
     "seo_title": "{name} — Ulasan & Panduan | ClickForNothing",

@@ -27,7 +27,8 @@
     "share_on_reddit": "Auf Reddit teilen",
     "verified_active": "✓ Verifiziertes aktives Ziel",
     "items_count": "{count} Einträge",
-    "websites_count": "{count} Webseiten"
+    "websites_count": "{count} Webseiten",
+    "select_language": "Sprache wählen"
   },
   "nav": {
     "home": "Startseite",
@@ -89,7 +90,23 @@
     "visit_original": "Original besuchen ↗",
     "cta_title": "Glückstag?",
     "cta_desc": "Lass dich von unserer Zufallsmaschine direkt zu einem sinnlosen Ziel bringen.",
-    "cta_btn": "Bring mich ins Nirgendwo 🎲"
+    "cta_btn": "Bring mich ins Nirgendwo 🎲",
+    "showing_count": "{visible} von {total} Websites werden angezeigt",
+    "showing_all": "Alle {total} Websites werden angezeigt",
+    "sort_newest": "Neueste zuerst",
+    "sort_popular": "Am beliebtesten",
+    "sort_name": "Name (A-Z)",
+    "view_grid": "Raster",
+    "view_list": "Liste",
+    "load_more": "Mehr laden ({count})",
+    "loading": "Wird geladen...",
+    "end_of_web": "Du hast das Ende des nutzlosen Webs erreicht.",
+    "empty_title": "Keine nutzlosen Websites gefunden.",
+    "empty_desc": "Glückwunsch. Du bist vielleicht versehentlich produktiv geworden.",
+    "reset_filters": "Filter zurücksetzen",
+    "error_title": "Etwas ist schiefgelaufen.",
+    "error_desc": "Auch nutzlose Websites haben technische Probleme.",
+    "try_again": "Erneut versuchen"
   },
   "site_detail": {
     "seo_title": "{name} — Test & Ratgeber | ClickForNothing",

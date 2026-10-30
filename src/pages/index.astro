@@ -7,6 +7,8 @@ import { categories } from '../data/categories';
 import { collections } from '../data/collections';
 import { articles } from '../data/articles';
 
+const topCollectionCount = collections.find((col) => col.slug === '100-useless-websites')?.siteIds.length ?? 0;
+
 const title = "The Useless Web: Random Useless Websites | ClickForNothing";
 const description = "Discover the useless web with our random website generator! Explore 100+ funny and useless websites to pass time in office. Click now to start exploring!";
 const canonicalPath = "/";
@@ -122,7 +124,7 @@ const toolSchema = {
           <span>Or explore:</span>
           <a href="/sites/">All 100+ Sites</a> •
           <a href="/categories/">Categories</a> •
-          <a href="/collections/100-useless-websites/">Top 100 List</a>
+          <a href="/collections/100-useless-websites/">Top {topCollectionCount} List</a>
         </div>
         <div class="hero-account-actions">
           <a class="hero-account-link hero-submit-link" href="/submit/">Submit Your Useless Project <span aria-hidden="true">↗</span></a>
@@ -250,7 +252,7 @@ const toolSchema = {
             <div class="step-number">4</div>
             <h3>Filter by Category or Explore Curated Listicles</h3>
             <p>
-              Looking for something specific? Dive into <a href="/categories/silly-animals/">Silly Animals</a>, <a href="/categories/interactive/">Interactive Canvas Toys</a>, or browse our <a href="/collections/100-useless-websites/">100 Most Useless Websites List</a>.
+              Looking for something specific? Dive into <a href="/categories/silly-animals/">Silly Animals</a>, <a href="/categories/interactive/">Interactive Canvas Toys</a>, or browse our <a href="/collections/100-useless-websites/">{topCollectionCount} Most Useless Websites List</a>.
             </p>
           </div>
         </div>

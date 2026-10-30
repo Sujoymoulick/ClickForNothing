@@ -18,7 +18,7 @@ export type EditorialArticle = {
   }[];
 };
 
-export const articlesByLocale: Record<SupportedLocale, EditorialArticle[]> = {
+const articleEntriesByLocale: Record<SupportedLocale, EditorialArticle[]> = {
   en: [
     {
       slug: 'top-useless-websites-of-all-time',
@@ -1774,6 +1774,27 @@ export const articlesByLocale: Record<SupportedLocale, EditorialArticle[]> = {
     },
   ],
 };
+
+// Derive the read-time number from the real text so the label never overstates article length
+function estimateReadMinutes(article: EditorialArticle, locale: SupportedLocale): number {
+  const text = article.sections.flatMap((section) => [section.heading, ...section.content]).join(' ');
+  const units = locale === 'ja' || locale === 'zh' ? text.replace(/\s+/g, '').length / 2 : text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(units / 200));
+}
+
+export const articlesByLocale = Object.fromEntries(
+  Object.entries(articleEntriesByLocale).map(([locale, list]) => [
+    locale,
+    list.map((article) => ({
+      ...article,
+      readTime: article.readTime.replace(/[0-9০-৯٠-٩]+/, (digits) => {
+        const minutes = estimateReadMinutes(article, locale as SupportedLocale);
+        // Keep native numerals (e.g. Bengali ৬) when the source label used them
+        return /[0-9]/.test(digits) ? String(minutes) : new Intl.NumberFormat(locale).format(minutes);
+      }),
+    })),
+  ])
+) as Record<SupportedLocale, EditorialArticle[]>;
 
 export const articles: EditorialArticle[] = articlesByLocale.en;
 

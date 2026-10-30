@@ -59,7 +59,7 @@ const collectionSchema = {
   },
 };
 ---
-<SiteLayout {title} {description} {canonicalPath}>
+<SiteLayout {title} {description} {canonicalPath} noindex={categoryWebsites.length === 0}>
   <main class="category-detail-container">
     <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
       <a href={homeUrl}>{t('nav.home')}</a> <span>/</span>
@@ -85,7 +85,7 @@ const collectionSchema = {
             <h3><a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)}>{site.name}</a></h3>
             <p>{site.description}</p>
             <div class="tags">
-              {site.tags.map(tag => <span class="tag">#{tag}</span>)}
+              {(site.tags || []).map(tag => <span class="tag">#{tag}</span>)}
             </div>
             <div class="card-actions">
               <a href={getLocalizedPath(`/sites/${site.slug}/`, currentLocale)} class="detail-link">{t('category_detail.details_and_review')}</a>

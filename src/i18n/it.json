@@ -27,7 +27,8 @@
     "share_on_reddit": "Condividi su Reddit",
     "verified_active": "✓ Destinazione attiva verificata",
     "items_count": "{count} Elementi",
-    "websites_count": "{count} siti web"
+    "websites_count": "{count} siti web",
+    "select_language": "Seleziona lingua"
   },
   "nav": {
     "home": "Home",
@@ -89,7 +90,23 @@
     "visit_original": "Visita l'originale ↗",
     "cta_title": "Ti senti fortunato?",
     "cta_desc": "Lascia che il nostro motore ti porti subito a una destinazione inutile a caso.",
-    "cta_btn": "Portami in un posto inutile 🎲"
+    "cta_btn": "Portami in un posto inutile 🎲",
+    "showing_count": "Visualizzati {visible} di {total} siti",
+    "showing_all": "Visualizzati tutti i {total} siti",
+    "sort_newest": "Più recenti",
+    "sort_popular": "Più popolari",
+    "sort_name": "Nome (A-Z)",
+    "view_grid": "Griglia",
+    "view_list": "Elenco",
+    "load_more": "Carica altri ({count})",
+    "loading": "Caricamento...",
+    "end_of_web": "Hai raggiunto la fine del web inutile.",
+    "empty_title": "Nessun sito inutile trovato.",
+    "empty_desc": "Complimenti. Forse sei diventato produttivo per sbaglio.",
+    "reset_filters": "Reimposta filtri",
+    "error_title": "Qualcosa è andato storto.",
+    "error_desc": "Anche i siti inutili hanno problemi tecnici.",
+    "try_again": "Riprova"
   },
   "site_detail": {
     "seo_title": "{name} — Recensione e guida | ClickForNothing",

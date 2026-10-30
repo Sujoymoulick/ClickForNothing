@@ -75,8 +75,9 @@ const currentUrl = new URL(getLocalizedPath('/', currentLocale), siteUrl).href;
     </section>
   </main>
   <script type="application/ld+json" set:html={JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'WebSite', name: 'ClickForNothing',
-    url: currentUrl, description,
+    '@context': 'https://schema.org', '@type': 'WebPage', '@id': `${currentUrl}#webpage`,
+    name: title, url: currentUrl, description, inLanguage: currentLocale,
+    isPartOf: { '@id': 'https://clickfornothing.com/#website' },
   })} />
 
   <script>

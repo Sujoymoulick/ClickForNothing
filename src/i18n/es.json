@@ -27,7 +27,8 @@
     "share_on_reddit": "Compartir en Reddit",
     "verified_active": "✓ Destino activo verificado",
     "items_count": "{count} Elementos",
-    "websites_count": "{count} sitios web"
+    "websites_count": "{count} sitios web",
+    "select_language": "Seleccionar idioma"
   },
   "nav": {
     "home": "Inicio",
@@ -89,7 +90,23 @@
     "visit_original": "Visitar original ↗",
     "cta_title": "¿Te sientes con suerte?",
     "cta_desc": "Deja que nuestro motor te lleve a un destino inútil al azar en este instante.",
-    "cta_btn": "Llévame a un lugar inútil 🎲"
+    "cta_btn": "Llévame a un lugar inútil 🎲",
+    "showing_count": "Mostrando {visible} de {total} sitios web",
+    "showing_all": "Mostrando los {total} sitios web",
+    "sort_newest": "Más recientes",
+    "sort_popular": "Más populares",
+    "sort_name": "Nombre (A-Z)",
+    "view_grid": "Cuadrícula",
+    "view_list": "Lista",
+    "load_more": "Cargar más ({count})",
+    "loading": "Cargando...",
+    "end_of_web": "Has llegado al final de la web inútil.",
+    "empty_title": "No se encontraron sitios inútiles.",
+    "empty_desc": "Felicidades. Puede que te hayas vuelto productivo sin querer.",
+    "reset_filters": "Restablecer filtros",
+    "error_title": "Algo salió mal.",
+    "error_desc": "Hasta los sitios inútiles tienen problemas técnicos.",
+    "try_again": "Intentar de nuevo"
   },
   "site_detail": {
     "seo_title": "{name} — Reseña y guía | ClickForNothing",

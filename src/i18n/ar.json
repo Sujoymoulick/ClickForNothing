@@ -27,7 +27,8 @@
     "share_on_reddit": "مشاركة على ريديت",
     "verified_active": "✓ موقع نشط ومُتحقق منه",
     "items_count": "{count} عنصر",
-    "websites_count": "{count} موقع"
+    "websites_count": "{count} موقع",
+    "select_language": "اختر اللغة"
   },
   "nav": {
     "home": "الرئيسية",
@@ -89,7 +90,23 @@
     "visit_original": "زيارة الموقع الأصلي ↗",
     "cta_title": "هل تشعر بالحظ؟",
     "cta_desc": "دع محرك الاستكشاف يأخذك إلى وجهة عشوائية ممتعة ولا فائدة منها على الفور.",
-    "cta_btn": "خذني إلى مكان غير مفيد 🎲"
+    "cta_btn": "خذني إلى مكان غير مفيد 🎲",
+    "showing_count": "عرض {visible} من أصل {total} موقعًا",
+    "showing_all": "عرض جميع المواقع ({total})",
+    "sort_newest": "الأحدث أولًا",
+    "sort_popular": "الأكثر شيوعًا",
+    "sort_name": "الاسم (A-Z)",
+    "view_grid": "شبكة",
+    "view_list": "قائمة",
+    "load_more": "تحميل المزيد ({count})",
+    "loading": "جارٍ التحميل...",
+    "end_of_web": "لقد وصلت إلى نهاية الويب عديم الفائدة.",
+    "empty_title": "لم يتم العثور على مواقع عديمة الفائدة.",
+    "empty_desc": "تهانينا. ربما أصبحت منتجًا عن طريق الخطأ.",
+    "reset_filters": "إعادة ضبط الفلاتر",
+    "error_title": "حدث خطأ ما.",
+    "error_desc": "حتى المواقع عديمة الفائدة تواجه مشكلات تقنية.",
+    "try_again": "حاول مرة أخرى"
   },
   "site_detail": {
     "seo_title": "{name} — مراجعة ودليل | ClickForNothing",

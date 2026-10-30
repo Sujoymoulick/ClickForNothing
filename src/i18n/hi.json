@@ -27,7 +27,8 @@
     "share_on_reddit": "Reddit पर साझा करें",
     "verified_active": "✓ सत्यापित सक्रिय गंतव्य",
     "items_count": "{count} आइटम",
-    "websites_count": "{count} वेबसाइटें"
+    "websites_count": "{count} वेबसाइटें",
+    "select_language": "भाषा चुनें"
   },
   "nav": {
     "home": "होम",
@@ -89,7 +90,23 @@
     "visit_original": "मूल वेबसाइट पर जाएं ↗",
     "cta_title": "भाग्यशाली महसूस कर रहे हैं?",
     "cta_desc": "हमारे डिस्कवरी इंजन को अभी आपको एक यादृच्छिक बेकार गंतव्य पर ले जाने दें।",
-    "cta_btn": "मुझे किसी बेकार जगह ले चलो 🎲"
+    "cta_btn": "मुझे किसी बेकार जगह ले चलो 🎲",
+    "showing_count": "{total} में से {visible} वेबसाइटें दिखाई जा रही हैं",
+    "showing_all": "सभी {total} वेबसाइटें दिखाई जा रही हैं",
+    "sort_newest": "नई पहले",
+    "sort_popular": "सबसे लोकप्रिय",
+    "sort_name": "नाम (A-Z)",
+    "view_grid": "ग्रिड",
+    "view_list": "सूची",
+    "load_more": "और देखें ({count})",
+    "loading": "लोड हो रहा है...",
+    "end_of_web": "आप बेकार वेब के अंत तक पहुँच गए हैं।",
+    "empty_title": "कोई बेकार वेबसाइट नहीं मिली।",
+    "empty_desc": "बधाई हो। शायद आप गलती से प्रोडक्टिव हो गए हैं।",
+    "reset_filters": "फ़िल्टर रीसेट करें",
+    "error_title": "कुछ गलत हो गया।",
+    "error_desc": "बेकार वेबसाइटों में भी तकनीकी दिक्कतें आती हैं।",
+    "try_again": "फिर से कोशिश करें"
   },
   "site_detail": {
     "seo_title": "{name} — समीक्षा और गाइड | ClickForNothing",

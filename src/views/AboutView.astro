@@ -219,35 +219,6 @@ const contactUrl = getLocalizedPath('/contact/', currentLocale);
 
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': 'Organization',
-    '@id': 'https://clickfornothing.com/#organization',
-    'name': 'ClickForNothing',
-    'url': 'https://clickfornothing.com/',
-    'description': 'An entertainment website for discovering funny, weird, random, useless, pointless and unnecessary websites from around the internet.',
-    'logo': 'https://clickfornothing.com/favicon.svg',
-    'sameAs': [
-      'https://clickfornothing.com/'
-    ]
-  })} />
-
-  <script type="application/ld+json" set:html={JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    '@id': 'https://clickfornothing.com/#website',
-    'url': 'https://clickfornothing.com/',
-    'name': 'ClickForNothing',
-    'description': 'Discover the weird, pointless and wonderfully useless websites on the internet.',
-    'potentialAction': {
-      '@type': 'SearchAction',
-      'target': {
-        '@type': 'EntryPoint',
-        'urlTemplate': 'https://clickfornothing.com/discover/'
-      }
-    }
-  })} />
-
-  <script type="application/ld+json" set:html={JSON.stringify({
-    '@context': 'https://schema.org',
     '@type': 'AboutPage',
     '@id': 'https://clickfornothing.com/about/#webpage',
     'url': 'https://clickfornothing.com/about/',

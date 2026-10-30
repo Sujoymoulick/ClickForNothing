@@ -110,9 +110,9 @@ const categoryDataMap = Object.fromEntries([
         <!-- Center Hero Content -->
         <div class="directory-hero-center">
           <h1 class="directory-hero-title">
-            <span class="directory-title-top">Directory of</span>
+            {currentLocale === 'en' && <span class="directory-title-top">Directory of</span>}
             <span class="directory-title-bottom">
-              Useless Websites
+              {currentLocale === 'en' ? 'Useless Websites' : t('sites.heading')}
               <svg class="brush-stroke" viewBox="0 0 260 16" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <path d="M6 11 Q 130 3 254 11" stroke="#facc15" stroke-width="9" stroke-linecap="round"/>
               </svg>

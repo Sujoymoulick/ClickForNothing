@@ -8,6 +8,9 @@ import { getLocalizedPath } from '../i18n/routing.ts';
 
 const baseUrl = 'https://clickfornothing.com';
 
+// Empty categories render noindex, so keep them out of the sitemap too
+const populatedCategories = categories.filter((c) => websites.some((w) => w.categorySlug === c.slug));
+
 export const GET: APIRoute = () => {
   const staticRoutes: { path: string; priority: string; changefreq: string }[] = [
     { path: '/', priority: '1.0', changefreq: 'daily' },
@@ -33,12 +36,12 @@ export const GET: APIRoute = () => {
       priority: '0.8',
       changefreq: 'weekly',
     })),
-    ...categories.map((c) => ({
+    ...populatedCategories.map((c) => ({
       path: `/categories/${c.slug}/`,
       priority: '0.8',
       changefreq: 'weekly',
     })),
-    ...categories.map((c) => ({
+    ...populatedCategories.map((c) => ({
       path: `/random/${c.slug}/`,
       priority: '0.7',
       changefreq: 'weekly',
@@ -65,12 +68,10 @@ export const GET: APIRoute = () => {
 
     return SUPPORTED_LOCALES.map((locale) => {
       const locUrl = `${baseUrl}${getLocalizedPath(base.path, locale)}`;
-      const priority = locale === 'en' ? base.priority : (parseFloat(base.priority) * 0.9).toFixed(1);
+      // changefreq/priority are ignored by Google, so they are not emitted
       return `  <url>
     <loc>${locUrl}</loc>
 ${alternatesXml}
-    <changefreq>${base.changefreq}</changefreq>
-    <priority>${priority}</priority>
   </url>`;
     });
   });

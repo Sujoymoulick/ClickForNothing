@@ -1,15 +1,22 @@
+import { normalizeCategorySlug } from './siteMeta';
+
 export type UselessWebsite = {
   id: string;
   name: string;
   url: string;
   description: string;
   category: string;
+  categorySlug: string;
+  slug: string;
+  tags?: string[];
+  whyItIsUseless?: string;
+  whatHappens?: string;
   verified: boolean;
 };
 
 // Every destination returned HTTP 200 over HTTPS on 2026-10-05. URLs are kept
 // here so the homepage and discovery flow share one curated source of truth.
-export const websites: UselessWebsite[] = [
+const websiteEntries: Omit<UselessWebsite, 'categorySlug' | 'slug'>[] = [
   { id: 'cat-bounce', name: 'Cat Bounce', url: 'https://cat-bounce.com/', description: 'Throw a few cats around and let a tiny physics playground do its thing.', category: 'Silly animals', verified: true },
   { id: 'long-doge-challenge', name: 'The Long Doge Challenge', url: 'https://longdogechallenge.com/', description: 'Click your way along a very long doge and collect the wows.', category: 'Internet nostalgia', verified: true },
   { id: 'mondrian-and-me', name: 'Mondrian and Me', url: 'https://mondrianandme.com/', description: 'Make a little abstract color-block art by dragging lines around.', category: 'Creative', verified: true },
@@ -107,3 +114,10 @@ export const websites: UselessWebsite[] = [
   { id: 'squoosh', name: 'Squoosh', url: 'https://squoosh.app/', description: 'Compare image compression algorithms side-by-side right inside your browser.', category: 'Creative', verified: true },
   { id: 'photopea', name: 'Photopea', url: 'https://www.photopea.com/', description: 'A surprisingly comprehensive graphic editor running entirely in the browser.', category: 'Creative', verified: true },
 ];
+
+// Views link and filter by slug/categorySlug, so derive both once here
+export const websites: UselessWebsite[] = websiteEntries.map((site) => ({
+  ...site,
+  slug: site.id,
+  categorySlug: normalizeCategorySlug(site.category),
+}));

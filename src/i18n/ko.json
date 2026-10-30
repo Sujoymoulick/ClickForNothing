@@ -27,7 +27,8 @@
     "share_on_reddit": "Reddit에 공유",
     "verified_active": "✓ 정상 작동 확인됨",
     "items_count": "{count}개 항목",
-    "websites_count": "{count}개 웹사이트"
+    "websites_count": "{count}개 웹사이트",
+    "select_language": "언어 선택"
   },
   "nav": {
     "home": "홈",
@@ -89,7 +90,23 @@
     "visit_original": "원본 방문 ↗",
     "cta_title": "오늘 운이 좋으신가요?",
     "cta_desc": "발견 엔진을 통해 지금 즉시 랜덤한 쓸모없는 사이트로 이동해 보세요.",
-    "cta_btn": "어딘가 쓸모없는 곳으로 이동 🎲"
+    "cta_btn": "어딘가 쓸모없는 곳으로 이동 🎲",
+    "showing_count": "{total}개 중 {visible}개 사이트 표시 중",
+    "showing_all": "{total}개 사이트 모두 표시 중",
+    "sort_newest": "최신순",
+    "sort_popular": "인기순",
+    "sort_name": "이름순 (A-Z)",
+    "view_grid": "그리드",
+    "view_list": "목록",
+    "load_more": "더 보기 ({count})",
+    "loading": "불러오는 중...",
+    "end_of_web": "쓸모없는 웹의 끝에 도달했습니다.",
+    "empty_title": "쓸모없는 사이트를 찾지 못했습니다.",
+    "empty_desc": "축하합니다. 실수로 생산적이 되었을지도 몰라요.",
+    "reset_filters": "필터 초기화",
+    "error_title": "문제가 발생했습니다.",
+    "error_desc": "쓸모없는 사이트에도 기술적인 문제는 생깁니다.",
+    "try_again": "다시 시도"
   },
   "site_detail": {
     "seo_title": "{name} — 리뷰 및 가이드 | ClickForNothing",
