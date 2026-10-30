@@ -158,11 +158,20 @@ export function initMemeMovement() {
   function tick(timestamp: number) {
     if (!isRunning || !inView || document.visibilityState === 'hidden') return;
 
+    // Cap at ~60fps so high-refresh displays don't multiply the per-frame work
+    if (lastTimestamp && timestamp - lastTimestamp < 15) {
+      animFrameId = window.requestAnimationFrame(tick);
+      return;
+    }
+
     if (!lastTimestamp) lastTimestamp = timestamp;
     const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.1); // Clamp to avoid huge jumps on tab switch
     lastTimestamp = timestamp;
 
     const timeSec = timestamp * 0.001;
+
+    // Batch all layout reads before any style writes to avoid a forced reflow per element
+    const rects = isMouseActive ? entities.map((e) => e.el.getBoundingClientRect()) : null;
 
     for (let i = 0; i < entities.length; i++) {
       const e = entities[i];
@@ -187,8 +196,8 @@ export function initMemeMovement() {
       let finalRot = e.currentRot;
 
       // Mouse Proximity Reaction: gentle interactive nudge if pointer is nearby
-      if (isMouseActive) {
-        const rect = e.el.getBoundingClientRect();
+      if (rects) {
+        const rect = rects[i];
         const centerX = rect.left + rect.width * 0.5;
         const centerY = rect.top + rect.height * 0.5;
         const dx = centerX - mouseX;

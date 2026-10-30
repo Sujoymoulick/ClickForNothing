@@ -35,6 +35,18 @@ const pagePath = getLocalizedPath(basePath, currentLocale);
 const { canonicalUrl, alternates } = getAlternateLinks(pagePath, siteUrl);
 const imageURL = new URL(image, siteUrl).href;
 
+// Load only the script font the current locale needs; the full CJK/Indic set is ~660KB of render-blocking CSS
+const localeFontFamilies: Partial<Record<SupportedLocale, string>> = {
+  ar: 'Noto+Sans+Arabic:wght@600;700',
+  bn: 'Noto+Sans+Bengali:wght@600;700',
+  hi: 'Noto+Sans+Devanagari:wght@600;700',
+  ja: 'Noto+Sans+JP:wght@600;700',
+  ko: 'Noto+Sans+KR:wght@600;700',
+  zh: 'Noto+Sans+SC:wght@600;700',
+};
+const localeFont = localeFontFamilies[currentLocale];
+const fontsHref = `https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lilita+One${localeFont ? `&family=${localeFont}` : ''}&display=swap`;
+
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -133,7 +145,7 @@ const websiteSchema = {
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lilita+One&family=Noto+Sans+Arabic:wght@600;700&family=Noto+Sans+Bengali:wght@600;700&family=Noto+Sans+Devanagari:wght@600;700&family=Noto+Sans+JP:wght@600;700&family=Noto+Sans+KR:wght@600;700&family=Noto+Sans+SC:wght@600;700&display=swap" rel="stylesheet" />
+    <link href={fontsHref} rel="stylesheet" />
 
     <!-- Deferred Google tag (gtag.js) for non-blocking initial page load -->
     <script is:inline>

@@ -398,7 +398,14 @@
       try {
         three = await import('three');
         const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
-        GLTFLoaderClass = GLTFLoader;
+        // Models are meshopt-compressed; the decoder must be attached to every loader instance
+        const { MeshoptDecoder } = await import('three/examples/jsm/libs/meshopt_decoder.module.js');
+        GLTFLoaderClass = class extends GLTFLoader {
+          constructor(...args) {
+            super(...args);
+            this.setMeshoptDecoder(MeshoptDecoder);
+          }
+        };
         if (disposed) return;
         const { AmbientLight, DirectionalLight, PerspectiveCamera, Scene, SRGBColorSpace, WebGLRenderer } = three;
         renderer = new WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'low-power', stencil: false, depth: true });
