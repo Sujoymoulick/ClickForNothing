@@ -1,4 +1,5 @@
 import { getAuthenticatedUser } from './_auth';
+import { checkIsAdmin } from './_admin';
 import { getDb, logServerError, sanitizeText, validateUrl } from './_db';
 import { isValidDesignId, normalizeDesignId, getThemeSlug } from './_cardDesigns';
 
@@ -6,28 +7,7 @@ interface Env {
   DATABASE_URL?: string;
   CLERK_SECRET_KEY?: string;
   ADMIN_SECRET_KEY?: string;
-}
-
-/** Check whether the request carries verified admin authorization */
-async function checkIsAdmin(request: Request, env: Env): Promise<{ isAdmin: boolean; adminEmail: string }> {
-  const adminKey = request.headers.get('x-admin-key');
-  const expectedAdminKey = env.ADMIN_SECRET_KEY;
-
-  if (expectedAdminKey && adminKey === expectedAdminKey) {
-    return { isAdmin: true, adminEmail: 'admin-key@clickfornothing.com' };
-  }
-
-  const authUser = await getAuthenticatedUser(request, env);
-  const role =
-    authUser?.claims?.role ||
-    authUser?.claims?.org_role ||
-    authUser?.claims?.public_metadata?.role;
-
-  if (role === 'admin') {
-    return { isAdmin: true, adminEmail: authUser?.email || 'admin-clerk@clickfornothing.com' };
-  }
-
-  return { isAdmin: false, adminEmail: '' };
+  ADMIN_EMAIL?: string;
 }
 
 /**
@@ -206,6 +186,26 @@ export async function onRequestPut(context: { request: Request; env: Env }) {
         JSON.stringify({ error: 'Rejected submissions cannot be edited.' }),
         { status: 403, headers: { 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Owner publishes their own submission once an admin has approved it
+    if (body.publish === true) {
+      if (existing.status !== 'approved') {
+        return new Response(
+          JSON.stringify({ error: 'Only approved submissions can be published.' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      const published = await sql`
+        UPDATE website_submissions
+        SET status = 'published', published_at = NOW(), updated_at = NOW()
+        WHERE id = ${existing.id} AND user_id = ${authUser.userId} AND status = 'approved'
+        RETURNING id, url, name, description, category, status, published_at, created_at;
+      `;
+      return new Response(JSON.stringify({ success: true, submission: published[0] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // 3. Security: Reject attempts to tamper with protected/immutable fields
@@ -418,6 +418,32 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
     const { id, status, rejection_reason } = body;
     const subId = Number(id);
 
+    // Site of the day: admin picks one published submission (stored in preview_info.featured_at)
+    if (body.featured === true) {
+      if (!Number.isSafeInteger(subId) || subId <= 0) {
+        return new Response(
+          JSON.stringify({ error: 'Valid submission ID is required.' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      const featured = await getDb(env)`
+        UPDATE website_submissions
+        SET preview_info = COALESCE(preview_info, '{}'::jsonb) || jsonb_build_object('featured_at', NOW())
+        WHERE id = ${subId} AND status = 'published'
+        RETURNING id, name, url;
+      `;
+      if (!featured.length) {
+        return new Response(
+          JSON.stringify({ error: 'Only published submissions can be site of the day.' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(JSON.stringify({ success: true, submission: featured[0] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     if (!Number.isSafeInteger(subId) || subId <= 0 || !status) {
       return new Response(
         JSON.stringify({ error: 'Missing or invalid submission ID or status.' }),
@@ -457,9 +483,24 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
     let auditAction = 'Updated Status';
     let newStatusLabel = status;
 
-    if (status === 'approved' || status === 'published') {
-      // Step 5: Automatic Publication After Approval!
-      // Atomically approve and publish the submission in a single operation
+    if (status === 'approved') {
+      // Approval only: the owner publishes it from their dashboard
+      result = await sql`
+        UPDATE website_submissions
+        SET
+          status = 'approved',
+          reviewed_at = NOW(),
+          published_at = NULL,
+          rejection_reason = NULL,
+          reviewed_by = ${adminCheck.adminEmail},
+          updated_at = NOW()
+        WHERE id = ${subId}
+        RETURNING id, url, name, description, category, status, design_id, submitted_at, created_at, updated_at,
+                  reviewed_at, published_at, rejection_reason, thumbnail_url, preview_info, reviewed_by;
+      `;
+      auditAction = 'Approved Submission';
+      newStatusLabel = 'Approved';
+    } else if (status === 'published') {
       result = await sql`
         UPDATE website_submissions
         SET
@@ -473,7 +514,7 @@ export async function onRequestPatch(context: { request: Request; env: Env }) {
         RETURNING id, url, name, description, category, status, design_id, submitted_at, created_at, updated_at,
                   reviewed_at, published_at, rejection_reason, thumbnail_url, preview_info, reviewed_by;
       `;
-      auditAction = 'Approved & Published Submission';
+      auditAction = 'Published Submission';
       newStatusLabel = 'Published';
     } else if (status === 'rejected') {
       const cleanReason = sanitizeText(rejection_reason || 'Does not meet submission guidelines');

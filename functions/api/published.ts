@@ -31,7 +31,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
         published_at,
         created_at
       FROM website_submissions
-      WHERE (status = 'published' OR status = 'approved')
+      WHERE status = 'published'
       ORDER BY published_at DESC NULLS LAST, created_at DESC
       LIMIT ${limit} OFFSET ${offset};
     `;

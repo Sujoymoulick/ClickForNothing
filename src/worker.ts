@@ -5,6 +5,8 @@ import {
   onRequestDelete as deleteSubmission,
 } from '../functions/api/submissions';
 import { onRequestGet as getStats } from '../functions/api/stats';
+import { onRequestGet as getAdminUsers } from '../functions/api/admin-users';
+import { onRequestGet as getSiteOfTheDay } from '../functions/api/site-of-the-day';
 import { onRequestPost as createSubmission } from '../functions/api/submit';
 import { onRequestGet as getPublishedSites } from '../functions/api/published';
 import {
@@ -17,6 +19,7 @@ type Env = {
   DATABASE_URL?: string;
   CLERK_SECRET_KEY?: string;
   ADMIN_SECRET_KEY?: string;
+  ADMIN_EMAIL?: string;
 };
 
 export default {
@@ -42,6 +45,16 @@ export default {
         status: 405,
         headers: { Allow: 'GET, PUT, PATCH, DELETE, OPTIONS' },
       });
+    }
+
+    if (pathname === '/api/admin/users') {
+      if (request.method === 'GET') return getAdminUsers({ request, env });
+      return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
+    }
+
+    if (pathname === '/api/site-of-the-day') {
+      if (request.method === 'GET') return getSiteOfTheDay({ request, env });
+      return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
     }
 
     if (pathname === '/api/stats') {

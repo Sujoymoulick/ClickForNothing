@@ -1,0 +1,245 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import TopBar from '../components/TopBar.astro';
+import { Show, SignInButton } from '@clerk/astro/components';
+---
+
+<SiteLayout title="Admin — ClickForNothing" description="Admin" canonicalPath="/admin/" noindex hreflang={false} hideFooter>
+  <TopBar />
+  <main class="admin">
+    <Show when="signed-out">
+      <div class="box"><p>Sign in with the admin account.</p><SignInButton mode="modal" class="act solid">Sign in</SignInButton></div>
+    </Show>
+    <Show when="signed-in">
+      <p class="note" id="note">Loading…</p>
+      <section id="panel" hidden>
+        <div class="tabs">
+          <button type="button" class="tab on" data-tab="subs">Submissions <span id="n-subs"></span></button>
+          <button type="button" class="tab" data-tab="users">Users <span id="n-users"></span></button>
+          <select id="filter" aria-label="Filter by status">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="published">Published</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="scroll" id="tab-subs">
+          <table><thead><tr><th>Site</th><th>Submitted by</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="subs"></tbody></table>
+        </div>
+        <div class="scroll" id="tab-users" hidden>
+          <table><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Last sign-in</th></tr></thead><tbody id="users"></tbody></table>
+        </div>
+      </section>
+    </Show>
+  </main>
+</SiteLayout>
+
+<style>
+  :global(html), :global(body) { height: 100%; overflow: hidden; }
+  .admin {
+    position: fixed; inset: 0; padding: 72px 20px 20px; background: #f7f6f3;
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111;
+    display: flex; flex-direction: column;
+  }
+  .box { margin: auto; align-self: center; width: 100%; max-width: 340px; background: #fff; border: 1px solid #e6e5e0; border-radius: 12px; padding: 20px; text-align: center; }
+  .note { color: #888; margin: 0; }
+  #panel { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+  #panel[hidden] { display: none; }
+  .tabs { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .tab { border: 1px solid #e2e1dc; background: #fff; border-radius: 999px; padding: 7px 14px; font: inherit; cursor: pointer; color: #666; }
+  .tab.on { background: #111; color: #fff; border-color: #111; }
+  .tab span { opacity: 0.6; margin-left: 2px; }
+  select { margin-left: auto; font: inherit; padding: 6px 10px; border: 1px solid #e2e1dc; border-radius: 8px; background: #fff; }
+  .scroll { overflow: auto; background: #fff; border: 1px solid #e6e5e0; border-radius: 12px; flex: 1; min-height: 0; }
+  .scroll[hidden] { display: none; }
+  table { width: 100%; border-collapse: collapse; }
+  th { position: sticky; top: 0; background: #fbfbfa; text-align: left; font-weight: 600; font-size: 12px; color: #888; }
+  th, :global(td) { padding: 10px 14px; border-bottom: 1px solid #f0efe9; vertical-align: top; }
+  :global(td a) { color: #111; font-weight: 600; text-decoration: none; }
+  :global(td a:hover) { text-decoration: underline; }
+  :global(td small) { display: block; color: #999; font-size: 12px; margin-top: 2px; max-width: 360px; overflow-wrap: anywhere; }
+  :global(.pill) { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; background: #f1f0ec; color: #666; text-transform: capitalize; white-space: nowrap; }
+  :global(.pill.published) { background: #e8f5ec; color: #1a7f37; }
+  :global(.pill.approved) { background: #eaf1fb; color: #1d4ed8; }
+  :global(.pill.rejected) { background: #fdecea; color: #b42318; }
+  :global(.acts) { display: flex; gap: 6px; flex-wrap: wrap; }
+  :global(.act) { font: 500 12px/1 inherit; font-family: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid #e2e1dc; background: #fff; color: #111; cursor: pointer; }
+  :global(.act:hover) { border-color: #111; }
+  :global(.act.solid) { background: #111; color: #fff; border-color: #111; }
+  :global(.act.red) { color: #b42318; }
+  :global(.act:disabled) { opacity: 0.4; cursor: default; }
+  :global(.act.star:disabled) { opacity: 1; background: #fff7e0; border-color: #f0d68a; color: #8a6200; }
+  @media (max-width: 720px) {
+    .admin { padding: 64px 10px 10px; }
+    th, :global(td) { padding: 8px 10px; }
+  }
+</style>
+
+<script>
+  type Sub = { preview_info?: any; id: number; name: string; url: string; description?: string; status: string; user_email?: string; user_name?: string; created_at?: string; rejection_reason?: string };
+  type User = { id: string; name: string; email: string; createdAt?: number; lastSignInAt?: number | null };
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const fmt = (d?: string | number | null) => (d ? new Date(d).toLocaleDateString() : '—');
+  let subs: Sub[] = [];
+  let featuredId: number | null = null;
+  const pickFeatured = () => {
+    let best = 0;
+    featuredId = null;
+    for (const s of subs) {
+      const t = Date.parse(s.preview_info?.featured_at || '');
+      if (s.status === 'published' && t > best) { best = t; featuredId = s.id; }
+    }
+  };
+
+  async function feature(s: Sub) {
+    try {
+      await api('PATCH', '/api/submissions', { id: s.id, featured: true });
+      s.preview_info = { ...(s.preview_info || {}), featured_at: new Date().toISOString() };
+      renderSubs();
+    } catch (e: any) {
+      alert(e.message);
+    }
+  }
+
+  async function api(method: string, path: string, body?: unknown) {
+    const token = await (window as any).Clerk?.session?.getToken();
+    const res = await fetch(path, {
+      method,
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(data.error || 'Request failed.'), { status: res.status });
+    return data;
+  }
+
+  function cell(...nodes: (Node | string)[]) {
+    const td = document.createElement('td');
+    td.append(...nodes);
+    return td;
+  }
+  function small(text: string) {
+    const s = document.createElement('small');
+    s.textContent = text;
+    return s;
+  }
+  function btn(label: string, cls: string, on: () => void, disabled = false) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `act ${cls}`;
+    b.textContent = label;
+    b.disabled = disabled;
+    b.addEventListener('click', on);
+    return b;
+  }
+
+  async function setStatus(s: Sub, status: string) {
+    let rejection_reason: string | undefined;
+    if (status === 'rejected') {
+      const r = prompt(`Reject "${s.name}"? Optional reason:`, '');
+      if (r === null) return;
+      rejection_reason = r.trim() || undefined;
+    }
+    try {
+      await api('PATCH', '/api/submissions', { id: s.id, status, rejection_reason });
+      s.status = status;
+      if (status === 'rejected') s.rejection_reason = rejection_reason;
+      renderSubs();
+    } catch (e: any) {
+      alert(e.message);
+    }
+  }
+
+  function renderSubs() {
+    const f = ($('filter') as HTMLSelectElement).value;
+    pickFeatured();
+    const rows = subs.filter((s) => !f || s.status === f);
+    const tb = $('subs');
+    tb.replaceChildren();
+    for (const s of rows) {
+      const tr = document.createElement('tr');
+      const a = document.createElement('a');
+      a.href = s.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = s.name;
+      const pill = document.createElement('span');
+      pill.className = `pill ${s.status}`;
+      pill.textContent = s.status;
+      const acts = document.createElement('div');
+      acts.className = 'acts';
+      acts.append(
+        btn('Approve', '', () => setStatus(s, 'approved'), s.status === 'approved'),
+        btn('Publish', 'solid', () => setStatus(s, 'published'), s.status === 'published'),
+        btn('Reject', 'red', () => setStatus(s, 'rejected'), s.status === 'rejected'),
+        btn('Pending', '', () => setStatus(s, 'pending'), s.status === 'pending'),
+      );
+      if (s.status === 'published') {
+        acts.append(
+          s.id === featuredId
+            ? btn('★ Site of the day', 'star', () => {}, true)
+            : btn('☆ Make site of the day', '', () => feature(s))
+        );
+      }
+      tr.append(
+        cell(a, small(s.url), small(s.description || '')),
+        cell(s.user_name || '—', small(s.user_email || '')),
+        cell(fmt(s.created_at)),
+        cell(pill, ...(s.status === 'rejected' && s.rejection_reason ? [small(s.rejection_reason)] : [])),
+        cell(acts),
+      );
+      tb.append(tr);
+    }
+    $('n-subs').textContent = String(subs.length);
+  }
+
+  function renderUsers(users: User[], total: number) {
+    const tb = $('users');
+    tb.replaceChildren();
+    for (const u of users) {
+      const tr = document.createElement('tr');
+      tr.append(cell(u.name || '—'), cell(u.email || '—'), cell(fmt(u.createdAt)), cell(fmt(u.lastSignInAt)));
+      tb.append(tr);
+    }
+    $('n-users').textContent = String(total);
+  }
+
+  let tries = 0;
+  async function load() {
+    const note = document.getElementById('note');
+    if (!note || note.dataset.ready) return;
+    if (!(window as any).Clerk?.session) { if ((tries += 1) < 40) setTimeout(load, 250); return; }
+    note.dataset.ready = '1';
+    try {
+      const [s, u] = await Promise.all([
+        api('GET', '/api/submissions?all=true'),
+        api('GET', '/api/admin/users'),
+      ]);
+      subs = s.submissions || [];
+      renderSubs();
+      renderUsers(u.users || [], u.total ?? (u.users || []).length);
+      note.hidden = true;
+      $('panel').hidden = false;
+    } catch (e: any) {
+      note.textContent = e.status === 403 ? 'This account is not allowed here.' : 'Could not load. Refresh to try again.';
+    }
+
+    $('filter').addEventListener('change', renderSubs);
+    document.querySelectorAll<HTMLButtonElement>('.tab').forEach((t) =>
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('on', x === t));
+        const users = t.dataset.tab === 'users';
+        $('tab-users').hidden = !users;
+        $('tab-subs').hidden = users;
+        ($('filter') as HTMLSelectElement).style.visibility = users ? 'hidden' : 'visible';
+      })
+    );
+  }
+
+  load();
+  new MutationObserver(load).observe(document.body, { childList: true, subtree: true });
+</script>

@@ -13,7 +13,8 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
 <SiteLayout {title} {description} canonicalPath="/" hideFooter>
   <TopBar />
   <main class="stage" id="stage">
-    <section class="panel" id="panel" aria-labelledby="panel-title">
+    <div class="side" id="panel">
+    <section class="panel" aria-labelledby="panel-title">
       <div class="counter" aria-label="Total sites submitted">
         <strong id="sub-count">…</strong>
         <span>submitted</span>
@@ -39,6 +40,12 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
         </form>
       </Show>
     </section>
+    <a class="sotd" id="sotd" href="#" target="_blank" rel="noopener noreferrer" hidden>
+      <span class="sotd-label">Site of the day</span>
+      <strong id="sotd-name"></strong>
+      <span class="sotd-desc" id="sotd-desc"></span>
+    </a>
+    </div>
   </main>
   <script id="ball-seed" type="application/json" set:html={JSON.stringify(seed)} />
 </SiteLayout>
@@ -53,12 +60,35 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     touch-action: none;
   }
-  .panel {
+  .side {
     position: absolute;
     left: 24px;
     top: 50%;
     transform: translateY(-50%);
     width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 5;
+    touch-action: auto;
+  }
+  .sotd {
+    display: block;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #e6e5e0;
+    border-radius: 14px;
+    color: #111;
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+  }
+  .sotd[hidden] { display: none; }
+  .sotd:hover { border-color: #111; }
+  .sotd-label { display: block; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #a07a00; margin-bottom: 4px; }
+  .sotd strong { display: block; font-size: 15px; font-weight: 650; }
+  .sotd-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 3px; font-size: 12.5px; color: #777; line-height: 1.4; }
+  .panel {
+    position: relative;
     padding: 22px;
     background: #fff;
     border: 1px solid #e6e5e0;
@@ -155,7 +185,10 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
   :global(.ball.dragging) { cursor: grabbing; z-index: 3; }
 
   @media (max-width: 720px) {
-    .panel { left: 12px; right: 12px; top: 64px; width: auto; transform: none; padding: 16px; }
+    .side { left: 12px; right: 12px; top: 64px; width: auto; transform: none; gap: 8px; }
+    .panel { padding: 16px; }
+    .sotd { padding: 10px 14px; }
+    .sotd-desc { display: none; }
     .counter { top: 12px; right: 12px; width: 58px; height: 58px; }
     .counter strong { font-size: 16px; }
     .counter span { font-size: 8px; }
@@ -426,7 +459,21 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
     }
   }
 
-  const boot = () => { init(); bindForm(); loadCount(); };
+  async function loadSiteOfTheDay() {
+    const card = document.getElementById('sotd') as HTMLAnchorElement | null;
+    if (!card || card.dataset.ready) return;
+    card.dataset.ready = '1';
+    try {
+      const { site } = await (await fetch('/api/site-of-the-day')).json();
+      if (!site?.url || !/^https?:\/\//i.test(site.url)) return;
+      card.href = site.url;
+      document.getElementById('sotd-name')!.textContent = site.name;
+      document.getElementById('sotd-desc')!.textContent = site.description || '';
+      card.hidden = false;
+    } catch {}
+  }
+
+  const boot = () => { init(); bindForm(); loadCount(); loadSiteOfTheDay(); };
   boot();
   document.addEventListener('astro:page-load', boot);
   // Clerk renders <Show> content after load
