@@ -1,0 +1,553 @@
+---
+import { websites } from '../data/websites';
+
+interface Props {
+  limit?: number;
+}
+
+const { limit = 40 } = Astro.props;
+
+// Seed websites from static curated data for zero-latency initial render
+const seedSites = websites.slice(0, limit).map((site) => ({
+  id: site.id,
+  name: site.name,
+  url: site.url,
+  description: site.description,
+  category: site.category,
+}));
+---
+
+<div class="falling-stage-container" id="falling-stage-container">
+  <div class="falling-stage-header">
+    <span class="stage-label">Recent Useless Finds</span>
+    <span class="stage-status" aria-hidden="true">
+      <span class="pulse-dot"></span> live stream
+    </span>
+  </div>
+
+  <div class="falling-cards-canvas" id="falling-canvas" role="region" aria-label="Continuously falling website cards">
+    <!-- Static fallback grid for no-JS and prefers-reduced-motion -->
+    <noscript>
+      <div class="static-cards-grid">
+        {seedSites.slice(0, 12).map((site) => (
+          <a href={site.url} target="_blank" rel="noopener noreferrer" class="falling-card-item static-card">
+            <div class="card-top-row">
+              <span class="card-name">{site.name}</span>
+              <span class="card-arrow" aria-hidden="true">&nearr;</span>
+            </div>
+            {site.category && <span class="card-category">{site.category}</span>}
+            <p class="card-desc">{site.description}</p>
+          </a>
+        ))}
+      </div>
+    </noscript>
+  </div>
+</div>
+
+<!-- Embedded seed data for fast initialization -->
+<script id="falling-cards-seed" type="application/json" set:html={JSON.stringify(seedSites)} />
+
+<script>
+  interface WebsiteItem {
+    id: string | number;
+    name: string;
+    url: string;
+    description: string;
+    category?: string;
+  }
+
+  interface ActiveCard {
+    id: string;
+    x: number;
+    y: number;
+    vy: number;
+    scale: number;
+    targetY: number;
+    width: number;
+    height: number;
+    state: 'falling' | 'settled' | 'fading';
+    isHovered: boolean;
+    settledAt?: number;
+    el: HTMLElement;
+  }
+
+  function initFallingCards() {
+    const container = document.getElementById('falling-stage-container');
+    const canvas = document.getElementById('falling-canvas');
+    const seedScript = document.getElementById('falling-cards-seed');
+    if (!container || !canvas) return;
+
+    // Clean any prior instance
+    canvas.innerHTML = '';
+
+    let queue: WebsiteItem[] = [];
+    const seenIds = new Set<string>();
+
+    try {
+      if (seedScript && seedScript.textContent) {
+        queue = JSON.parse(seedScript.textContent);
+      }
+    } catch {
+      queue = [];
+    }
+
+    // Shuffle initial queue
+    for (let i = queue.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [queue[i], queue[j]] = [queue[j], queue[i]];
+    }
+
+    // Dynamically fetch approved submissions from /api/published
+    async function loadPublishedSites() {
+      try {
+        const res = await fetch('/api/published');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.sites) && data.sites.length > 0) {
+            const newSites: WebsiteItem[] = data.sites.map((s: any) => ({
+              id: s.id || s.slug || s.url,
+              name: s.name,
+              url: s.url,
+              description: s.description,
+              category: s.category,
+            }));
+            // Prepend new published sites to top of queue
+            const freshSites = newSites.filter((s) => !seenIds.has(String(s.id)));
+            queue = [...freshSites, ...queue];
+          }
+        }
+      } catch {
+        // Fallback to existing queue seamlessly
+      }
+    }
+
+    loadPublishedSites();
+
+    // Motion preference check
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      canvas.classList.add('reduced-motion-grid');
+      const staticSlice = queue.slice(0, 12);
+      staticSlice.forEach((site) => {
+        const cardEl = createCardElement(site);
+        cardEl.classList.add('is-static');
+        canvas.appendChild(cardEl);
+      });
+      return;
+    }
+
+    let isVisible = true;
+    let isTabActive = !document.hidden;
+    const isMobile = window.innerWidth < 640;
+    const maxActive = isMobile ? 8 : 16;
+    const maxSettled = isMobile ? 4 : 8;
+
+    let activeCards: ActiveCard[] = [];
+    let lastSpawnTime = 0;
+    let lastFrameTime = performance.now();
+    let animFrameId: number;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          isVisible = entry.isIntersecting;
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(container);
+
+    const onVisibilityChange = () => {
+      isTabActive = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    function createCardElement(site: WebsiteItem): HTMLElement {
+      const card = document.createElement('a');
+      card.href = site.url;
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.className = 'falling-card-item';
+      card.setAttribute('data-id', String(site.id));
+      card.setAttribute('aria-label', `${site.name} - ${site.description}`);
+
+      const topRow = document.createElement('div');
+      topRow.className = 'card-top-row';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'card-name';
+      nameSpan.textContent = site.name;
+
+      const arrowSpan = document.createElement('span');
+      arrowSpan.className = 'card-arrow';
+      arrowSpan.setAttribute('aria-hidden', 'true');
+      arrowSpan.innerHTML = '&nearr;';
+
+      topRow.appendChild(nameSpan);
+      topRow.appendChild(arrowSpan);
+      card.appendChild(topRow);
+
+      if (site.category) {
+        const catSpan = document.createElement('span');
+        catSpan.className = 'card-category';
+        catSpan.textContent = site.category;
+        card.appendChild(catSpan);
+      }
+
+      const descP = document.createElement('p');
+      descP.className = 'card-desc';
+      descP.textContent = site.description;
+      card.appendChild(descP);
+
+      return card;
+    }
+
+    function spawnCard() {
+      if (queue.length === 0) return;
+      if (activeCards.length >= maxActive) return;
+
+      const canvasWidth = canvas.clientWidth || 800;
+      const canvasHeight = canvas.clientHeight || 500;
+
+      // Card geometry
+      const cardWidth = isMobile ? 220 : 260;
+      const cardHeight = isMobile ? 96 : 108;
+
+      // Pop next unique site
+      let nextSite: WebsiteItem | undefined;
+      for (let i = 0; i < queue.length; i++) {
+        const item = queue[i];
+        if (!seenIds.has(String(item.id))) {
+          nextSite = item;
+          seenIds.add(String(item.id));
+          queue.splice(i, 1);
+          break;
+        }
+      }
+
+      // If all sites were seen, re-cycle unseen subset
+      if (!nextSite && queue.length > 0) {
+        nextSite = queue.shift()!;
+      }
+      if (!nextSite) return;
+
+      const cardEl = createCardElement(nextSite);
+      canvas.appendChild(cardEl);
+
+      // Random horizontal position bounded inside canvas
+      const minX = 16;
+      const maxX = Math.max(minX, canvasWidth - cardWidth - 16);
+      const x = minX + Math.random() * (maxX - minX);
+
+      // Natural vertical spawn slightly above container
+      const y = -cardHeight - 10;
+
+      // Varied speed (calm, slightly drifting)
+      const vy = isMobile ? 0.5 + Math.random() * 0.4 : 0.65 + Math.random() * 0.55;
+
+      // Slight scale variance
+      const scale = 0.96 + Math.random() * 0.08;
+
+      // Calculate bottom accumulation target
+      const bottomFloor = canvasHeight - cardHeight - 16;
+      const bottomSpread = isMobile ? 70 : 110;
+      const targetY = bottomFloor - Math.random() * bottomSpread;
+
+      const activeObj: ActiveCard = {
+        id: String(nextSite.id),
+        x,
+        y,
+        vy,
+        scale,
+        targetY,
+        width: cardWidth,
+        height: cardHeight,
+        state: 'falling',
+        isHovered: false,
+        el: cardEl,
+      };
+
+      cardEl.addEventListener('mouseenter', () => {
+        activeObj.isHovered = true;
+        cardEl.classList.add('is-hovered');
+      });
+
+      cardEl.addEventListener('mouseleave', () => {
+        activeObj.isHovered = false;
+        cardEl.classList.remove('is-hovered');
+      });
+
+      cardEl.addEventListener('focus', () => {
+        activeObj.isHovered = true;
+        cardEl.classList.add('is-hovered');
+      });
+
+      cardEl.addEventListener('blur', () => {
+        activeObj.isHovered = false;
+        cardEl.classList.remove('is-hovered');
+      });
+
+      activeCards.push(activeObj);
+    }
+
+    function step(now: number) {
+      const delta = Math.min((now - lastFrameTime) / 16.67, 2);
+      lastFrameTime = now;
+
+      if (isVisible && isTabActive) {
+        // Spawning cycle (approx every 2.2 - 2.8s)
+        if (now - lastSpawnTime > 2400) {
+          spawnCard();
+          lastSpawnTime = now;
+        }
+
+        // Manage settled accumulation limit
+        const settledCards = activeCards.filter((c) => c.state === 'settled');
+        if (settledCards.length > maxSettled) {
+          const oldest = settledCards[0];
+          if (!oldest.isHovered && oldest.state === 'settled') {
+            oldest.state = 'fading';
+            oldest.el.classList.add('is-fading');
+            setTimeout(() => {
+              oldest.el.remove();
+              activeCards = activeCards.filter((c) => c !== oldest);
+            }, 600);
+          }
+        }
+
+        // Update physics
+        for (let i = 0; i < activeCards.length; i++) {
+          const card = activeCards[i];
+          if (card.state === 'falling') {
+            if (!card.isHovered) {
+              card.y += card.vy * delta;
+              if (card.y >= card.targetY) {
+                card.y = card.targetY;
+                card.state = 'settled';
+                card.settledAt = now;
+                card.el.classList.add('is-settled');
+              }
+            }
+          }
+
+          if (card.state !== 'fading') {
+            card.el.style.transform = `translate3d(${card.x.toFixed(1)}px, ${card.y.toFixed(1)}px, 0) scale(${card.isHovered ? 1.02 : card.scale})`;
+          }
+        }
+      }
+
+      animFrameId = requestAnimationFrame(step);
+    }
+
+    animFrameId = requestAnimationFrame(step);
+
+    // Initial kickstart: spawn 3 cards immediately
+    spawnCard();
+    setTimeout(spawnCard, 500);
+    setTimeout(spawnCard, 1100);
+
+    // Clean up on Astro page transition
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        cancelAnimationFrame(animFrameId);
+        observer.disconnect();
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+      },
+      { once: true }
+    );
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFallingCards);
+  } else {
+    initFallingCards();
+  }
+  document.addEventListener('astro:page-load', initFallingCards);
+</script>
+
+<style is:global>
+  .falling-stage-container {
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    border: 1px solid var(--border, #e6e5e0);
+    border-radius: var(--radius-lg, 12px);
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+  }
+
+  .falling-stage-header {
+    height: 38px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle, #f0efe9);
+    background: #fdfdfc;
+    font-size: 0.78rem;
+    color: var(--text-muted, #666666);
+    user-select: none;
+  }
+
+  .stage-label {
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .stage-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #555555;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    display: inline-block;
+  }
+
+  .falling-cards-canvas {
+    position: relative;
+    width: 100%;
+    height: clamp(440px, 58vh, 620px);
+    overflow: hidden;
+    background: #fbfbfa;
+  }
+
+  .falling-card-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 260px;
+    padding: 12px 14px;
+    background: #ffffff;
+    border: 1px solid var(--border, #e6e5e0);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    will-change: transform;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.6s ease;
+    z-index: 10;
+  }
+
+  .falling-card-item.is-settled {
+    z-index: 12;
+  }
+
+  .falling-card-item:hover,
+  .falling-card-item.is-hovered {
+    z-index: 50;
+    border-color: #bbbbba;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .falling-card-item.is-fading {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .card-top-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-name {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text, #1a1a1a);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-arrow {
+    font-size: 0.85rem;
+    color: #888888;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+
+  .falling-card-item:hover .card-arrow {
+    color: #1a1a1a;
+    transform: translate(1px, -1px);
+  }
+
+  .card-category {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: #666666;
+    background: #f4f3ef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.01em;
+  }
+
+  .card-desc {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #555555;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .falling-card-item:hover .card-desc,
+  .falling-card-item.is-hovered .card-desc {
+    -webkit-line-clamp: 4;
+  }
+
+  /* Reduced motion & no-JS static fallback */
+  .static-cards-grid,
+  .reduced-motion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    padding: 20px;
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .static-card,
+  .falling-card-item.is-static {
+    position: static;
+    width: 100%;
+    transform: none !important;
+  }
+
+  @media (max-width: 640px) {
+    .falling-card-item {
+      width: 220px;
+      padding: 10px 12px;
+      gap: 5px;
+    }
+    .card-name {
+      font-size: 0.86rem;
+    }
+    .card-desc {
+      font-size: 0.76rem;
+    }
+    .falling-cards-canvas {
+      height: 420px;
+    }
+  }
+</style>

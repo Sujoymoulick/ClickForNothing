@@ -1,250 +1,99 @@
 ---
-import LocaleSwitcher from './LocaleSwitcher.astro';
-import { useTranslations } from '../i18n';
 import { getLocalizedPath, getLocaleFromUrl } from '../i18n/routing';
 import type { SupportedLocale } from '../i18n/config';
 
 const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
-const { t } = await useTranslations(currentLocale);
 
 const homeUrl = getLocalizedPath('/', currentLocale);
-const discoverUrl = getLocalizedPath('/discover/', currentLocale);
-const sitesUrl = getLocalizedPath('/sites/', currentLocale);
-const categoriesUrl = getLocalizedPath('/categories/', currentLocale);
-const collectionsUrl = getLocalizedPath('/collections/', currentLocale);
-const randomUrl = getLocalizedPath('/random/', currentLocale);
-const articlesUrl = getLocalizedPath('/articles/', currentLocale);
-const searchUrl = getLocalizedPath('/search/', currentLocale);
 const submitUrl = getLocalizedPath('/submit/', currentLocale);
-const aboutUrl = getLocalizedPath('/about/', currentLocale);
-const contactUrl = getLocalizedPath('/contact/', currentLocale);
 const privacyUrl = getLocalizedPath('/privacy-policy/', currentLocale);
 const termsUrl = getLocalizedPath('/terms-and-conditions/', currentLocale);
-const disclaimerUrl = getLocalizedPath('/disclaimer/', currentLocale);
-const cookiePolicyUrl = getLocalizedPath('/cookie-policy/', currentLocale);
+const currentYear = new Date().getFullYear();
 ---
 
-<footer class="site-footer">
-  <div class="footer-top">
-    <div class="footer-brand">
-      <a class="wordmark" href={homeUrl} aria-label={t('footer.brand_desc')}>
-        <span>Click</span><span>For</span><span>Nothing</span><i aria-hidden="true">✳</i>
-      </a>
-      <p>{t('footer.brand_desc')}</p>
-    </div>
-
-    <div class="footer-nav-groups">
-      <div class="footer-nav-col">
-        <span class="footer-heading">{t('footer.explore_heading')}</span>
-        <nav aria-label={t('footer.explore_heading')}>
-          <a href={discoverUrl}>{t('footer.randomizer')}</a>
-          <a href={sitesUrl}>{t('footer.all_websites')}</a>
-          <a href={categoriesUrl}>{t('footer.categories')}</a>
-          <a href={collectionsUrl}>{t('footer.collections')}</a>
-          <a href={randomUrl}>{t('footer.instant_jump')}</a>
-        </nav>
-      </div>
-
-      <div class="footer-nav-col">
-        <span class="footer-heading">{t('footer.discover_heading')}</span>
-        <nav aria-label={t('footer.discover_heading')}>
-          <a href={articlesUrl}>{t('footer.articles_guides')}</a>
-          <a href={searchUrl}>{t('footer.search_directory')}</a>
-          <a href={submitUrl}>{t('footer.submit_site')}</a>
-          <a href={aboutUrl}>{t('footer.about')}</a>
-        </nav>
-      </div>
-
-      <div class="footer-nav-col">
-        <span class="footer-heading">{t('footer.legal_heading')}</span>
-        <nav aria-label={t('footer.legal_heading')}>
-          <a href={contactUrl}>{t('footer.contact')}</a>
-          <a href={privacyUrl}>{t('footer.privacy')}</a>
-          <a href={termsUrl}>{t('footer.terms')}</a>
-          <a href={disclaimerUrl}>{t('footer.disclaimer')}</a>
-          <a href={cookiePolicyUrl}>{t('footer.cookie_policy')}</a>
-        </nav>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <div class="footer-actions">
-      <LocaleSwitcher variant="footer" />
-    </div>
-
-    <div class="footer-legal-bar">
-      <p class="copyright">{t('footer.copyright')}</p>
-      <button type="button" class="cookie-settings-btn" id="footer-cookie-settings-btn">
-        {t('footer.cookie_settings')}
-      </button>
+<footer class="minimal-footer" role="contentinfo">
+  <div class="footer-inner">
+    <nav class="footer-nav" aria-label="Footer links">
+      <a href={homeUrl} class="footer-brand-link">Click For Nothing</a>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      <a href={submitUrl}>Submit a Website</a>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      <a href={privacyUrl}>Privacy Policy</a>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      <a href={termsUrl}>Terms</a>
+    </nav>
+    <div class="footer-copy">
+      <span>&copy; {currentYear} ClickForNothing</span>
     </div>
   </div>
 </footer>
 
-<script is:inline>
-  document.getElementById('footer-cookie-settings-btn')?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('cfn:open-cookie-banner'));
-  });
-</script>
-
-<style is:global>
-  .site-footer {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-    padding: 36px clamp(24px, 4vw, 64px) 28px;
-    background: #fff9df;
-    color: #17141a;
-    border-top: 3px solid var(--ink, #09080c);
+<style>
+  .minimal-footer {
+    width: 100%;
+    background: var(--bg, #faf9f6);
+    border-top: 1px solid var(--border, #e6e5e0);
+    padding: 24px 20px;
+    margin-top: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
-  .footer-top {
+  .footer-inner {
+    max-width: 900px;
+    margin: 0 auto;
     display: flex;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 36px;
-  }
-
-  .footer-brand {
-    flex: 0 1 340px;
-  }
-
-  .wordmark {
-    display: inline-flex;
     align-items: center;
-    gap: 0;
-    color: #111;
-    font: 800 1.7rem/1 'Lilita One', system-ui, sans-serif;
-    letter-spacing: -.06em;
-    text-decoration: none;
-    -webkit-text-stroke: 1px #101014;
-    paint-order: stroke fill;
-    filter: drop-shadow(2px 2px 0 #101014);
+    justify-content: space-between;
+    gap: 12px 20px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #666666);
   }
 
-  .wordmark span:first-child { color: #f20caf; }
-  .wordmark span:nth-child(2) { color: #fff; }
-  .wordmark span:nth-child(3) { color: #7025ed; }
-  .wordmark i {
-    margin-left: 6px;
-    color: #101014;
-    font: 900 1.2rem/1 system-ui, sans-serif;
-    -webkit-text-stroke: 0;
-  }
-
-  [dir="rtl"] .wordmark i {
-    margin-left: 0;
-    margin-right: 6px;
-  }
-
-  .footer-brand p {
-    max-width: 320px;
-    margin: 10px 0 0;
-    font: 500 .94rem/1.4 'Baloo 2', system-ui, sans-serif;
-    color: #3f3c44;
-  }
-
-  .footer-nav-groups {
+  .footer-nav {
     display: flex;
     flex-wrap: wrap;
-    gap: 36px 48px;
-  }
-
-  .footer-nav-col {
-    display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 8px;
   }
 
-  .footer-heading {
-    font-family: 'Lilita One', system-ui, sans-serif;
-    font-size: 1.1rem;
-    color: #7025ed;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
-
-  .footer-nav-col nav {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .footer-nav-col a {
-    color: #17141a;
-    font: 600 .92rem/1.3 'Baloo 2', system-ui, sans-serif;
+  .footer-brand-link {
+    font-weight: 600;
+    color: var(--text, #1a1a1a);
     text-decoration: none;
-    transition: color 0.15s ease, transform 0.15s ease;
   }
 
-  .footer-nav-col a:hover,
-  .footer-nav-col a:focus-visible {
-    color: #f20caf;
+  .footer-nav a {
+    color: var(--text-muted, #666666);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-nav a:hover {
+    color: var(--text, #1a1a1a);
     text-decoration: underline;
-    text-underline-offset: 3px;
+    text-underline-offset: 2px;
   }
 
-  .footer-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(23, 20, 26, 0.15);
+  .sep {
+    color: #b0afab;
+    user-select: none;
   }
 
-  .footer-actions {
-    display: flex;
-    align-items: center;
+  .footer-copy {
+    color: var(--text-dim, #888888);
+    font-size: 0.82rem;
   }
 
-  .footer-legal-bar {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .copyright {
-    margin: 0;
-    font: 500 .88rem/1 'Baloo 2', system-ui, sans-serif;
-    color: #625e68;
-  }
-
-  .cookie-settings-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    color: #7025ed;
-    font: 600 .88rem/1 'Baloo 2', system-ui, sans-serif;
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .cookie-settings-btn:hover {
-    color: #f20caf;
-  }
-
-  @media (max-width: 768px) {
-    .site-footer {
-      padding: 28px 20px 24px;
-      gap: 24px;
-    }
-    .footer-top {
+  @media (max-width: 600px) {
+    .footer-inner {
       flex-direction: column;
-      gap: 24px;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
     }
-    .footer-nav-groups {
-      gap: 24px 36px;
-    }
-    .footer-bottom {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 14px;
+    .footer-nav {
+      justify-content: center;
     }
   }
 </style>
