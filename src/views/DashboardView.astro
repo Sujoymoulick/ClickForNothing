@@ -14,7 +14,10 @@ const home = getLocalizedPath('/', locale);
   <main class="dash">
     <div class="box">
       <div class="head">
-        <h1>Your submissions</h1>
+        <div class="dtabs" role="tablist">
+          <button type="button" class="dtab on" data-pane="subs" role="tab">Submissions</button>
+          <button type="button" class="dtab" data-pane="msgs" role="tab">Messages <span class="badge" id="unread" hidden></span></button>
+        </div>
         <a href={home} class="link">+ Submit</a>
       </div>
 
@@ -24,7 +27,17 @@ const home = getLocalizedPath('/', locale);
       </Show>
 
       <Show when="signed-in">
-        <ul class="list" id="list" aria-live="polite"><li class="muted">Loading…</li></ul>
+        <div class="pane" id="pane-subs">
+          <ul class="list" id="list" aria-live="polite"><li class="muted">Loading…</li></ul>
+        </div>
+        <div class="pane" id="pane-msgs" hidden>
+          <div class="chat" id="chat" aria-live="polite"><p class="muted" id="chat-empty">No messages yet. Say hi, or use the <a href="/contact/">contact page</a>.</p></div>
+          <form class="chat-form" id="chat-form">
+            <textarea id="chat-input" rows="1" maxlength="1900" placeholder="Write a message…" aria-label="Message"></textarea>
+            <button type="submit" class="send" aria-label="Send">Send</button>
+          </form>
+          <p class="chat-status" id="chat-status"></p>
+        </div>
       </Show>
     </div>
   </main>
@@ -45,6 +58,7 @@ const home = getLocalizedPath('/', locale);
     width: 100%;
     max-width: 560px;
     max-height: 100%;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     background: #fff;
@@ -54,6 +68,27 @@ const home = getLocalizedPath('/', locale);
   }
   .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
   h1 { margin: 0; font-size: 18px; font-weight: 650; color: #111; }
+  .box.chatting { height: min(640px, 100%); }
+  .dtabs { display: flex; gap: 4px; background: #f3f2ee; padding: 3px; border-radius: 999px; }
+  .dtab { border: 0; background: none; padding: 7px 13px; border-radius: 999px; font: 500 13.5px/1 inherit; font-family: inherit; color: #777; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .dtab.on { background: #fff; color: #111; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
+  .badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #b42318; color: #fff; font-size: 11px; display: inline-grid; place-items: center; }
+  .badge[hidden] { display: none; }
+  .pane { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+  .pane[hidden] { display: none; }
+  .chat { flex: 1; min-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 2px 10px; }
+  .chat .muted a { color: #111; }
+  :global(.bubble) { max-width: 80%; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+  :global(.bubble.user) { align-self: flex-end; background: #111; color: #fff; border-bottom-right-radius: 4px; }
+  :global(.bubble.admin) { align-self: flex-start; background: #f1f0ec; color: #111; border-bottom-left-radius: 4px; }
+  :global(.bubble time) { display: block; margin-top: 4px; font-size: 10.5px; opacity: 0.6; }
+  .chat-form { display: flex; gap: 8px; align-items: flex-end; border-top: 1px solid #f0efe9; padding-top: 10px; }
+  .chat-form textarea { flex: 1; resize: none; max-height: 120px; padding: 10px 12px; font: inherit; font-size: 14px; border: 1px solid #e2e1dc; border-radius: 12px; color: #111; }
+  .chat-form textarea:focus { outline: none; border-color: #111; }
+  .chat-form .send { padding: 10px 16px; border: 0; border-radius: 999px; background: #111; color: #fff; font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; }
+  .chat-form .send:disabled { opacity: 0.5; }
+  .chat-status { margin: 6px 0 0; font-size: 12px; color: #b42318; min-height: 0; }
+  .chat-status:empty { display: none; }
   .link { font-size: 14px; color: #111; text-decoration: none; }
   .link:hover { text-decoration: underline; }
   .muted { color: #888; font-size: 13.5px; margin: 0 0 14px; }
@@ -237,4 +272,126 @@ const home = getLocalizedPath('/', locale);
   load();
   document.addEventListener('astro:page-load', load);
   new MutationObserver(load).observe(document.body, { childList: true, subtree: true });
+</script>
+
+<script>
+  type Msg = { id: number; sender: 'user' | 'admin'; body: string; created_at: string };
+
+  let lastId = 0;
+  let unread = 0;
+  let polling = 0;
+  let chatOpen = false;
+  let busy = false;
+
+  async function call(method: string, body?: unknown) {
+    const token = await (window as any).Clerk?.session?.getToken();
+    const res = await fetch(method === 'GET' ? `/api/messages?after=${lastId}` : '/api/messages', {
+      method,
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+    return data;
+  }
+
+  function addMessages(list: Msg[], fromPoll: boolean) {
+    const chat = document.getElementById('chat');
+    if (!chat || !list.length) return;
+    document.getElementById('chat-empty')?.remove();
+    const nearBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 80;
+    for (const m of list) {
+      if (m.id <= lastId) continue;
+      lastId = m.id;
+      const b = document.createElement('div');
+      b.className = `bubble ${m.sender}`;
+      b.textContent = m.body;
+      const t = document.createElement('time');
+      t.textContent = `${m.sender === 'admin' ? 'Admin · ' : ''}${new Date(m.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}`;
+      b.appendChild(t);
+      chat.appendChild(b);
+      if (fromPoll && m.sender === 'admin' && !chatOpen) unread++;
+    }
+    if (nearBottom || !fromPoll) chat.scrollTop = chat.scrollHeight;
+    const badge = document.getElementById('unread');
+    if (badge) { badge.hidden = unread === 0; badge.textContent = String(unread); }
+  }
+
+  async function poll(first = false) {
+    if (busy || document.hidden) return;
+    busy = true;
+    try {
+      const { messages } = await call('GET');
+      addMessages(messages || [], !first);
+    } catch {} finally { busy = false; }
+  }
+
+  function showPane(name: string) {
+    document.querySelectorAll<HTMLElement>('.dtab').forEach((t) => t.classList.toggle('on', t.dataset.pane === name));
+    document.getElementById('pane-subs')!.hidden = name !== 'subs';
+    document.getElementById('pane-msgs')!.hidden = name !== 'msgs';
+    document.querySelector('.box')?.classList.toggle('chatting', name === 'msgs');
+    chatOpen = name === 'msgs';
+    if (chatOpen) {
+      unread = 0;
+      const badge = document.getElementById('unread');
+      if (badge) badge.hidden = true;
+      const chat = document.getElementById('chat');
+      if (chat) chat.scrollTop = chat.scrollHeight;
+      poll();
+    }
+  }
+
+  let tries2 = 0;
+  function setupChat() {
+    const form = document.getElementById('chat-form') as HTMLFormElement | null;
+    if (!form || form.dataset.ready) return;
+    if (!(window as any).Clerk?.session) { if ((tries2 += 1) < 40) setTimeout(setupChat, 250); return; }
+    form.dataset.ready = '1';
+
+    document.querySelectorAll<HTMLElement>('.dtab').forEach((t) => t.addEventListener('click', () => {
+      showPane(t.dataset.pane!);
+      history.replaceState(null, '', t.dataset.pane === 'msgs' ? '#messages' : location.pathname);
+    }));
+
+    const input = document.getElementById('chat-input') as HTMLTextAreaElement;
+    const status = document.getElementById('chat-status')!;
+    input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = `${Math.min(120, input.scrollHeight)}px`; });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+    });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      const btn = form.querySelector('button') as HTMLButtonElement;
+      btn.disabled = true;
+      status.textContent = '';
+      try {
+        const { message } = await call('POST', { body: text });
+        input.value = '';
+        input.style.height = 'auto';
+        addMessages([message], false);
+      } catch (err: any) {
+        status.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        input.focus();
+      }
+    });
+
+    poll(true);
+    clearInterval(polling);
+    polling = window.setInterval(() => poll(), 4000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+    if (location.hash === '#messages') showPane('msgs');
+  }
+
+  setupChat();
+  new MutationObserver(setupChat).observe(document.body, { childList: true, subtree: true });
 </script>

@@ -1,48 +1,61 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import { useTranslations } from '../i18n';
-import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
-import type { SupportedLocale } from '../i18n/config';
+import TopBar from '../components/TopBar.astro';
+import ContactForm from '../components/ContactForm.astro';
 
+interface Section { h: string; p: string[] }
 interface Props {
   title: string;
   description: string;
   heading: string;
-  paragraphs: string[];
+  intro?: string;
+  sections?: Section[];
   slug: string;
 }
 
-const { title, description, heading, paragraphs, slug } = Astro.props;
-
-const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
-const { t } = await useTranslations(currentLocale);
-
-const homeUrl = getLocalizedPath('/', currentLocale);
-const canonicalPath = `/${slug}/`;
-
-const siteOrigin = (Astro.site?.href || 'https://clickfornothing.com/').replace(/\/$/, '');
-const currentPath = getLocalizedPath(canonicalPath, currentLocale);
-const fullCanonicalUrl = `${siteOrigin}${currentPath}`;
-
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: t('nav.home') || 'Home', item: `${siteOrigin}${homeUrl}` },
-    { '@type': 'ListItem', position: 2, name: heading, item: fullCanonicalUrl },
-  ],
-};
+const { title, description, heading, intro, sections = [], slug } = Astro.props;
 ---
-<SiteLayout {title} {description} {canonicalPath}>
-  <main class="policy-page">
-    <nav class="breadcrumbs" aria-label="Breadcrumbs" style="margin-bottom: 24px; font-size: 0.95rem; font-weight: 700;">
-      <a href={homeUrl} style="color: #7025ed; text-decoration: none;">{t('nav.home') || 'Home'}</a> <span style="color: #09080c;">/</span> <span style="color: #09080c;" aria-current="page">{heading}</span>
-    </nav>
-    <article>
+
+<SiteLayout {title} {description} canonicalPath={`/${slug}/`} hideFooter>
+  <TopBar />
+  <main class="doc">
+    <article class="card">
       <h1>{heading}</h1>
-      {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
-      <p style="margin-top: 32px;"><a href={homeUrl} style="color: #7025ed; font-weight: 800; text-decoration: underline;">← {t('error_404.back_home') || 'Back to The Useless Web'}</a></p>
+      {intro && <p class="intro">{intro}</p>}
+      {slug === 'contact' && <ContactForm />}
+      {sections.map((s) => (
+        <section>
+          <h2>{s.h}</h2>
+          {s.p.map((t) => <p>{t}</p>)}
+        </section>
+      ))}
     </article>
   </main>
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
 </SiteLayout>
+
+<style>
+  .doc {
+    min-height: 100vh;
+    padding: 84px 16px 48px;
+    background: #f7f6f3;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #111;
+  }
+  .card {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px;
+    background: #fff;
+    border: 1px solid #e6e5e0;
+    border-radius: 18px;
+  }
+  h1 { margin: 0 0 8px; font-size: clamp(24px, 4vw, 30px); font-weight: 700; letter-spacing: -0.02em; }
+  .intro { margin: 0 0 8px; color: #888; font-size: 14.5px; line-height: 1.5; }
+  section { margin-top: 26px; }
+  h2 { margin: 0 0 8px; font-size: 16px; font-weight: 650; }
+  p { margin: 0 0 10px; font-size: 15px; line-height: 1.65; color: #444; }
+  @media (max-width: 560px) {
+    .doc { padding: 72px 10px 32px; }
+    .card { padding: 22px 18px; border-radius: 14px; }
+  }
+</style>

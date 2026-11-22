@@ -16,6 +16,7 @@ import { Show, SignInButton } from '@clerk/astro/components';
         <div class="tabs">
           <button type="button" class="tab on" data-tab="subs">Submissions <span id="n-subs"></span></button>
           <button type="button" class="tab" data-tab="users">Users <span id="n-users"></span></button>
+          <button type="button" class="tab" data-tab="msgs">Messages <span id="n-msgs"></span></button>
           <select id="filter" aria-label="Filter by status">
             <option value="">All</option>
             <option value="pending">Pending</option>
@@ -26,6 +27,21 @@ import { Show, SignInButton } from '@clerk/astro/components';
         </div>
         <div class="scroll" id="tab-subs">
           <table><thead><tr><th>Site</th><th>Submitted by</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="subs"></tbody></table>
+        </div>
+        <div class="inbox" id="tab-msgs" hidden>
+          <aside class="threads" id="threads"><p class="empty">No messages yet.</p></aside>
+          <div class="divider" aria-hidden="true"></div>
+          <section class="thread" id="thread">
+            <div class="thread-head">
+              <button type="button" class="act back" id="thread-back">← Back</button>
+              <div><strong id="thread-name">Select a user</strong><small id="thread-email"></small></div>
+            </div>
+            <div class="msgs" id="msgs"></div>
+            <form class="reply" id="reply" hidden>
+              <textarea id="reply-input" rows="2" maxlength="2000" placeholder="Reply…" aria-label="Reply"></textarea>
+              <button type="submit" class="act solid">Send</button>
+            </form>
+          </section>
         </div>
         <div class="scroll" id="tab-users" hidden>
           <table><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Last sign-in</th></tr></thead><tbody id="users"></tbody></table>
@@ -53,6 +69,38 @@ import { Show, SignInButton } from '@clerk/astro/components';
   select { margin-left: auto; font: inherit; padding: 6px 10px; border: 1px solid #e2e1dc; border-radius: 8px; background: #fff; }
   .scroll { overflow: auto; background: #fff; border: 1px solid #e6e5e0; border-radius: 12px; flex: 1; min-height: 0; }
   .scroll[hidden] { display: none; }
+  .inbox { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px 1px 1fr; background: #fff; border: 1px solid #e6e5e0; border-radius: 12px; overflow: hidden; }
+  .inbox[hidden] { display: none; }
+  .divider { background: #e6e5e0; }
+  .threads { overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .empty { color: #999; font-size: 13px; padding: 10px; margin: 0; }
+  :global(.uw) { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 0; border-radius: 10px; background: none; text-align: left; font: inherit; cursor: pointer; color: #111; width: 100%; }
+  :global(.uw:hover) { background: #f6f5f2; }
+  :global(.uw.on) { background: #f1f0ec; }
+  :global(.uw .av) { width: 36px; height: 36px; border-radius: 50%; background: #111; color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 14px; }
+  :global(.uw b) { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :global(.uw small) { display: block; font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; max-width: none; }
+  :global(.uw .dot) { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #b42318; color: #fff; font-size: 11px; display: grid; place-items: center; }
+  .thread { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .thread-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f0efe9; }
+  .thread-head small { display: block; color: #888; font-size: 12px; }
+  .back { display: none; }
+  .msgs { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  :global(.bub) { max-width: 75%; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+  :global(.bub.admin) { align-self: flex-end; background: #111; color: #fff; border-bottom-right-radius: 4px; }
+  :global(.bub.user) { align-self: flex-start; background: #f1f0ec; border-bottom-left-radius: 4px; }
+  :global(.bub time) { display: block; font-size: 10.5px; opacity: 0.6; margin-top: 4px; }
+  .reply { display: flex; gap: 8px; align-items: flex-end; padding: 10px 12px; border-top: 1px solid #f0efe9; }
+  .reply[hidden] { display: none; }
+  .reply textarea { flex: 1; resize: none; padding: 9px 11px; font: inherit; border: 1px solid #e2e1dc; border-radius: 10px; }
+  .reply textarea:focus { outline: none; border-color: #111; }
+  @media (max-width: 720px) {
+    .inbox { grid-template-columns: 1fr; }
+    .divider { display: none; }
+    .inbox:not(.open) .thread { display: none; }
+    .inbox.open .threads { display: none; }
+    .back { display: inline-block; }
+  }
   table { width: 100%; border-collapse: collapse; }
   th { position: sticky; top: 0; background: #fbfbfa; text-align: left; font-weight: 600; font-size: 12px; color: #888; }
   th, :global(td) { padding: 10px 14px; border-bottom: 1px solid #f0efe9; vertical-align: top; }
@@ -226,18 +274,136 @@ import { Show, SignInButton } from '@clerk/astro/components';
       $('panel').hidden = false;
     } catch (e: any) {
       note.textContent = e.status === 403 ? 'This account is not allowed here.' : 'Could not load. Refresh to try again.';
+      return;
     }
 
     $('filter').addEventListener('change', renderSubs);
     document.querySelectorAll<HTMLButtonElement>('.tab').forEach((t) =>
       t.addEventListener('click', () => {
+        const name = t.dataset.tab!;
         document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('on', x === t));
-        const users = t.dataset.tab === 'users';
-        $('tab-users').hidden = !users;
-        $('tab-subs').hidden = users;
-        ($('filter') as HTMLSelectElement).style.visibility = users ? 'hidden' : 'visible';
+        $('tab-subs').hidden = name !== 'subs';
+        $('tab-users').hidden = name !== 'users';
+        $('tab-msgs').hidden = name !== 'msgs';
+        ($('filter') as HTMLSelectElement).style.visibility = name === 'subs' ? 'visible' : 'hidden';
+        if (name === 'msgs') loadThreads();
       })
     );
+    setupInbox();
+  }
+
+  /* ---------- Messages ---------- */
+  type Thread = { user_id: string; user_email?: string; user_name?: string; last_body?: string; last_at?: string; unread: number };
+  type Msg = { id: number; sender: 'user' | 'admin'; body: string; created_at: string };
+  let threads: Thread[] = [];
+  let active: Thread | null = null;
+  let activeLast = 0;
+  let inboxBusy = false;
+
+  function renderThreads() {
+    const box = $('threads');
+    box.replaceChildren();
+    if (!threads.length) {
+      const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'No messages yet.'; box.append(p);
+    }
+    let unreadTotal = 0;
+    for (const t of threads) {
+      unreadTotal += t.unread;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = `uw${active?.user_id === t.user_id ? ' on' : ''}`;
+      const av = document.createElement('span');
+      av.className = 'av';
+      av.textContent = (t.user_name || t.user_email || '?').trim().charAt(0).toUpperCase();
+      const mid = document.createElement('span');
+      const nm = document.createElement('b'); nm.textContent = t.user_name || t.user_email || 'Unknown user';
+      const sm = document.createElement('small'); sm.textContent = (t.last_body || '').replace(/\s+/g, ' ');
+      mid.append(nm, sm);
+      b.append(av, mid);
+      if (t.unread) { const d = document.createElement('span'); d.className = 'dot'; d.textContent = String(t.unread); b.append(d); }
+      b.addEventListener('click', () => openThread(t));
+      box.append(b);
+    }
+    $('n-msgs').textContent = unreadTotal ? String(unreadTotal) : '';
+  }
+
+  function addBubbles(list: Msg[]) {
+    const box = $('msgs');
+    const near = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    for (const m of list) {
+      if (m.id <= activeLast) continue;
+      activeLast = m.id;
+      const d = document.createElement('div');
+      d.className = `bub ${m.sender}`;
+      d.textContent = m.body;
+      const tm = document.createElement('time');
+      tm.textContent = new Date(m.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+      d.append(tm);
+      box.append(d);
+    }
+    if (near) box.scrollTop = box.scrollHeight;
+  }
+
+  async function loadThreads() {
+    try {
+      const data = await api('GET', '/api/admin/messages');
+      threads = data.threads || [];
+      if (active) { const t = threads.find((x) => x.user_id === active!.user_id); if (t) t.unread = 0; }
+      renderThreads();
+    } catch {}
+  }
+
+  async function loadActive() {
+    if (!active) return;
+    const data = await api('GET', `/api/admin/messages?user=${encodeURIComponent(active.user_id)}&after=${activeLast}`);
+    addBubbles(data.messages || []);
+  }
+
+  async function openThread(t: Thread) {
+    active = t;
+    activeLast = 0;
+    $('msgs').replaceChildren();
+    $('thread-name').textContent = t.user_name || t.user_email || 'Unknown user';
+    $('thread-email').textContent = t.user_email || '';
+    $('reply').hidden = false;
+    $('tab-msgs').classList.add('open');
+    t.unread = 0;
+    renderThreads();
+    try { await loadActive(); $('msgs').scrollTop = $('msgs').scrollHeight; } catch {}
+    ($('reply-input') as HTMLTextAreaElement).focus();
+  }
+
+  function setupInbox() {
+    const form = $('reply') as HTMLFormElement;
+    if (form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const input = $('reply-input') as HTMLTextAreaElement;
+    $('thread-back').addEventListener('click', () => $('tab-msgs').classList.remove('open'));
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text || !active) return;
+      const btn = form.querySelector('button') as HTMLButtonElement;
+      btn.disabled = true;
+      try {
+        const { message } = await api('POST', '/api/admin/messages', { userId: active.user_id, body: text });
+        input.value = '';
+        addBubbles([message]);
+        $('msgs').scrollTop = $('msgs').scrollHeight;
+        loadThreads();
+      } catch (err: any) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    loadThreads();
+    setInterval(async () => {
+      if (document.hidden || inboxBusy) return;
+      inboxBusy = true;
+      try { await loadThreads(); await loadActive(); } catch {} finally { inboxBusy = false; }
+    }, 5000);
   }
 
   load();

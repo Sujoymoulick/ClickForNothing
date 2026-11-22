@@ -5,6 +5,12 @@ import {
   onRequestDelete as deleteSubmission,
 } from '../functions/api/submissions';
 import { onRequestGet as getStats } from '../functions/api/stats';
+import {
+  onRequestGet as getMessages,
+  onRequestPost as postMessage,
+  onAdminGet as getAdminMessages,
+  onAdminPost as postAdminMessage,
+} from '../functions/api/messages';
 import { onRequestGet as getAdminUsers } from '../functions/api/admin-users';
 import { onRequestGet as getSiteOfTheDay } from '../functions/api/site-of-the-day';
 import { onRequestPost as createSubmission } from '../functions/api/submit';
@@ -55,6 +61,18 @@ export default {
     if (pathname === '/api/site-of-the-day') {
       if (request.method === 'GET') return getSiteOfTheDay({ request, env });
       return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
+    }
+
+    if (pathname === '/api/messages') {
+      if (request.method === 'GET') return getMessages({ request, env });
+      if (request.method === 'POST') return postMessage({ request, env });
+      return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET, POST' } });
+    }
+
+    if (pathname === '/api/admin/messages') {
+      if (request.method === 'GET') return getAdminMessages({ request, env });
+      if (request.method === 'POST') return postAdminMessage({ request, env });
+      return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET, POST' } });
     }
 
     if (pathname === '/api/stats') {

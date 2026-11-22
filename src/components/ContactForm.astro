@@ -1,0 +1,111 @@
+---
+import { Show, SignInButton } from '@clerk/astro/components';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const locale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const dashboard = getLocalizedPath('/dashboard/', locale);
+---
+
+<div class="contact">
+  <Show when="signed-out">
+    <div class="gate">
+      <p>Sign in to send a message. Your conversation is saved in your dashboard.</p>
+      <SignInButton mode="modal" class="send">Sign in to continue</SignInButton>
+    </div>
+  </Show>
+  <Show when="signed-in">
+    <form id="contact-form" novalidate>
+      <label for="contact-topic">Topic</label>
+      <select id="contact-topic" name="topic">
+        <option>General question</option>
+        <option>Help with a submission</option>
+        <option>Report a website</option>
+        <option>Account help</option>
+        <option>Feedback</option>
+      </select>
+      <label for="contact-body">Message</label>
+      <textarea id="contact-body" name="body" rows="6" maxlength="1900" placeholder="How can we help?" required></textarea>
+      <button type="submit" class="send">Send message</button>
+      <p class="status" id="contact-status" role="status" aria-live="polite"></p>
+      <p class="hint">Replies show up in <a href={`${dashboard}#messages`}>your dashboard</a>.</p>
+    </form>
+  </Show>
+</div>
+
+<style>
+  .contact { margin: 18px 0 4px; }
+  .gate { padding: 18px; border: 1px dashed #dcdad3; border-radius: 12px; text-align: center; }
+  .gate p { margin: 0 0 12px; color: #666; font-size: 14px; }
+  form { display: grid; gap: 8px; }
+  label { font-size: 12.5px; font-weight: 600; color: #555; margin-top: 4px; }
+  select, textarea {
+    width: 100%;
+    padding: 11px 12px;
+    font: inherit;
+    font-size: 14.5px;
+    color: #111;
+    background: #fbfbfa;
+    border: 1px solid #e2e1dc;
+    border-radius: 10px;
+    resize: vertical;
+  }
+  select:focus, textarea:focus { outline: none; border-color: #111; background: #fff; }
+  .contact :global(.send) {
+    margin-top: 6px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font: 600 14px/1 inherit;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .contact :global(.send:disabled) { opacity: 0.5; cursor: default; }
+  .status { margin: 2px 0 0; min-height: 18px; font-size: 13px; color: #888; }
+  .status.ok { color: #1a7f37; }
+  .status.err { color: #b42318; }
+  .hint { margin: 0; font-size: 13px; color: #888; }
+  .hint a { color: #111; }
+</style>
+
+<script>
+  function bind() {
+    const form = document.getElementById('contact-form') as HTMLFormElement | null;
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const status = document.getElementById('contact-status')!;
+    const say = (t: string, k = '') => { status.textContent = t; status.className = `status ${k}`; };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = new FormData(form);
+      const text = String(f.get('body') || '').trim();
+      if (text.length < 5) return say('Please write a little more.', 'err');
+      const body = `[${String(f.get('topic') || 'General question')}]\n${text}`;
+      const btn = form.querySelector('button') as HTMLButtonElement;
+      btn.disabled = true;
+      say('Sending…');
+      try {
+        const token = await (window as any).Clerk?.session?.getToken();
+        const res = await fetch('/api/messages', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ body }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Could not send.');
+        form.reset();
+        say('Sent. You can follow the conversation in your dashboard.', 'ok');
+      } catch (err: any) {
+        say(err.message || 'Could not send.', 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+  bind();
+  new MutationObserver(bind).observe(document.body, { childList: true, subtree: true });
+</script>

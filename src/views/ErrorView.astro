@@ -1,0 +1,107 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import TopBar from '../components/TopBar.astro';
+
+interface Props {
+  code: '404' | '500';
+}
+
+const { code } = Astro.props;
+const copy = {
+  '404': {
+    title: 'Nothing here. Even less than usual.',
+    text: 'This page does not exist, which is impressive for a site about nothing.',
+  },
+  '500': {
+    title: 'Something broke. Ironically.',
+    text: 'The server tripped over nothing. Try again in a moment.',
+  },
+}[code];
+---
+
+<SiteLayout title={`${code} — ClickForNothing`} description={copy.text} canonicalPath={`/${code}`} noindex hreflang={false} hideFooter>
+  <TopBar />
+  <main class="err">
+    <div class="ball" aria-hidden="true"><span>{code}</span></div>
+    <h1>{copy.title}</h1>
+    <p>{copy.text}</p>
+    <div class="actions">
+      <a href="/" class="btn solid">Go home</a>
+      {code === '500' ? (
+        <button type="button" class="btn" onclick="location.reload()">Try again</button>
+      ) : (
+        <a href="/explore/" class="btn">Explore</a>
+      )}
+    </div>
+  </main>
+</SiteLayout>
+
+<style>
+  :global(html), :global(body) { height: 100%; overflow: hidden; }
+  .err {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 72px 20px 24px;
+    text-align: center;
+    background: #f7f6f3;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #111;
+  }
+  .ball {
+    width: clamp(140px, 30vw, 200px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    margin-bottom: 28px;
+    background: radial-gradient(circle at 32% 28%, #6a6a6a 0%, #2a2a2a 30%, #0d0d0d 70%, #000 100%);
+    box-shadow:
+      inset -12px -16px 32px rgba(0, 0, 0, 0.25),
+      0 24px 34px -14px rgba(0, 0, 0, 0.4);
+    position: relative;
+    animation: bob 2.6s ease-in-out infinite;
+  }
+  .ball::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    top: 12%;
+    width: 34%;
+    height: 22%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 70%);
+    transform: rotate(-30deg);
+  }
+  .ball span {
+    color: #fff;
+    font-size: clamp(36px, 8vw, 52px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .ball { animation: none; } }
+  h1 { margin: 0 0 8px; font-size: clamp(20px, 4vw, 26px); font-weight: 650; letter-spacing: -0.01em; }
+  p { margin: 0 0 24px; max-width: 420px; color: #777; font-size: 14.5px; line-height: 1.5; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    padding: 11px 20px;
+    border-radius: 999px;
+    border: 1px solid #e2e1dc;
+    background: #fff;
+    color: #111;
+    font: 600 14px/1 inherit;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: #111; }
+  .btn.solid { background: #111; color: #fff; border-color: #111; }
+</style>
