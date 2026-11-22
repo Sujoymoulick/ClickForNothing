@@ -168,13 +168,15 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
       }
     } catch {}
     const seen = new Set<string>();
-    const merged = [...shuffle(live), ...shuffle(seed)].filter((s) => {
+    // Real user submissions first (newest first, as the API returns them), then curated sites
+    const merged = [...live, ...shuffle(seed)].filter((s) => {
       const k = s.url.toLowerCase();
       if (seen.has(k)) return false;
       seen.add(k);
       return true;
     });
-    return merged.slice(0, 10 + Math.floor(Math.random() * 6));
+    const count = Math.max(10 + Math.floor(Math.random() * 6), Math.min(live.length, 15));
+    return merged.slice(0, count);
   }
 
   function init() {
