@@ -62,10 +62,27 @@ const home = getLocalizedPath('/', locale);
     background: #111; color: #fff; font: 600 14px/1 inherit; font-family: inherit; cursor: pointer;
   }
   .list { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
-  :global(.row) {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 12px 0; border-top: 1px solid #f0efe9;
+  :global(.row) { padding: 14px 0; border-top: 1px solid #f0efe9; }
+  :global(.row-top) { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  :global(.row-right) { display: flex; align-items: center; gap: 8px; flex: none; }
+  :global(.row .desc) { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: #555; }
+  :global(.row textarea) {
+    width: 100%; margin-top: 8px; padding: 9px 11px; font: inherit; font-size: 13px;
+    border: 1px solid #e2e1dc; border-radius: 8px; resize: vertical; color: #111;
   }
+  :global(.row textarea:focus) { outline: none; border-color: #111; }
+  :global(.actions) { display: flex; gap: 8px; margin-top: 10px; }
+  :global(.actions button) {
+    font: 500 12.5px/1 inherit; font-family: inherit; padding: 7px 12px; border-radius: 7px; cursor: pointer;
+  }
+  :global(.actions .ghost) { background: #fff; color: #111; border: 1px solid #e2e1dc; }
+  :global(.actions .ghost:hover) { border-color: #111; }
+  :global(.actions .danger) { color: #b42318; }
+  :global(.actions .danger:hover) { border-color: #b42318; }
+  :global(.actions .solid) { background: #111; color: #fff; border: 1px solid #111; }
+  :global(.actions button:disabled) { opacity: 0.5; cursor: default; }
+  :global(.row-msg) { margin: 6px 0 0; font-size: 12px; color: #888; }
+  :global(.row-msg:empty) { display: none; }
   :global(.row:first-child) { border-top: 0; }
   :global(.row a) { color: #111; text-decoration: none; font-size: 14.5px; font-weight: 550; }
   :global(.row a:hover) { text-decoration: underline; }
@@ -79,50 +96,119 @@ const home = getLocalizedPath('/', locale);
 </style>
 
 <script>
-  type Sub = { name: string; url: string; status: string; created_at?: string; rejection_reason?: string };
+  type Sub = { id: number; name: string; url: string; description?: string; status: string; created_at?: string; rejection_reason?: string };
+
+  const clerk = () => (window as any).Clerk;
+  async function api(method: string, path: string, body?: unknown) {
+    const token = await clerk()?.session?.getToken();
+    const res = await fetch(path, {
+      method,
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+    return data;
+  }
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text = '') {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+
+  function row(s: Sub, list: HTMLElement) {
+    const li = el('li', 'row');
+    const top = el('div', 'row-top');
+    const left = el('div');
+    const a = el('a', '', s.name);
+    a.href = s.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    const date = s.created_at ? new Date(s.created_at).toLocaleDateString() : '';
+    left.append(a, el('small', '', [date, s.status === 'rejected' ? s.rejection_reason : ''].filter(Boolean).join(' · ')));
+    const right = el('div', 'row-right');
+    right.append(el('span', `tag ${s.status}`, s.status || 'pending'));
+    top.append(left, right);
+
+    const desc = el('p', 'desc', s.description || '');
+    const msg = el('p', 'row-msg');
+    li.append(top, desc);
+
+    if (s.status === 'rejected') {
+      li.append(el('p', 'row-msg', 'Rejected submissions are locked.'));
+      return li;
+    }
+
+    const actions = el('div', 'actions');
+    const editBtn = el('button', 'ghost', 'Edit');
+    const delBtn = el('button', 'ghost danger', 'Delete');
+    actions.append(editBtn, delBtn);
+    li.append(actions, msg);
+
+    editBtn.type = delBtn.type = 'button';
+    editBtn.addEventListener('click', () => {
+      const ta = el('textarea');
+      ta.rows = 3; ta.maxLength = 500; ta.value = s.description || '';
+      const save = el('button', 'solid', 'Save');
+      const cancel = el('button', 'ghost', 'Cancel');
+      save.type = cancel.type = 'button';
+      const editActions = el('div', 'actions');
+      editActions.append(save, cancel);
+      desc.replaceWith(ta);
+      actions.replaceWith(editActions);
+      ta.focus();
+      const close = () => { ta.replaceWith(desc); editActions.replaceWith(actions); };
+      cancel.addEventListener('click', () => { msg.textContent = ''; close(); });
+      save.addEventListener('click', async () => {
+        const v = ta.value.trim();
+        if (v.length < 10) { msg.textContent = 'Description needs at least 10 characters.'; return; }
+        save.disabled = true; msg.textContent = 'Saving…';
+        try {
+          const data = await api('PUT', '/api/submissions', { id: s.id, description: v });
+          s.description = data.submission?.description ?? v;
+          desc.textContent = s.description || '';
+          msg.textContent = 'Saved.';
+          close();
+        } catch (e: any) {
+          msg.textContent = e.message;
+          save.disabled = false;
+        }
+      });
+    });
+
+    delBtn.addEventListener('click', async () => {
+      if (!confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
+      delBtn.disabled = true; msg.textContent = 'Deleting…';
+      try {
+        await api('DELETE', `/api/submissions?id=${encodeURIComponent(s.id)}`);
+        li.remove();
+        if (!list.children.length) list.append(el('li', 'muted', 'Nothing yet. Go submit something useless.'));
+      } catch (e: any) {
+        msg.textContent = e.message;
+        delBtn.disabled = false;
+      }
+    });
+    return li;
+  }
 
   let tries = 0;
   async function load() {
     const list = document.getElementById('list');
     if (!list || list.dataset.ready) return;
-    const clerk = (window as any).Clerk;
-    if (!clerk?.session) { if ((tries += 1) < 40) setTimeout(load, 250); return; }
+    if (!clerk()?.session) { if ((tries += 1) < 40) setTimeout(load, 250); return; }
     list.dataset.ready = '1';
     try {
-      const token = await clerk.session.getToken();
-      const res = await fetch('/api/submissions', {
-        headers: { Accept: 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error();
-      const subs: Sub[] = (await res.json()).submissions || [];
+      const subs: Sub[] = (await api('GET', '/api/submissions')).submissions || [];
       list.replaceChildren();
-      if (!subs.length) {
-        const li = document.createElement('li');
-        li.className = 'muted';
-        li.textContent = 'Nothing yet. Go submit something useless.';
-        list.appendChild(li);
-        return;
-      }
-      for (const s of subs) {
-        const li = document.createElement('li');
-        li.className = 'row';
-        const left = document.createElement('div');
-        const a = document.createElement('a');
-        a.href = s.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-        a.textContent = s.name;
-        const meta = document.createElement('small');
-        const date = s.created_at ? new Date(s.created_at).toLocaleDateString() : '';
-        meta.textContent = [date, s.status === 'rejected' ? s.rejection_reason : ''].filter(Boolean).join(' · ');
-        left.append(a, meta);
-        const tag = document.createElement('span');
-        tag.className = `tag ${s.status}`;
-        tag.textContent = s.status || 'pending';
-        li.append(left, tag);
-        list.appendChild(li);
-      }
+      if (!subs.length) { list.append(el('li', 'muted', 'Nothing yet. Go submit something useless.')); return; }
+      for (const s of subs) list.append(row(s, list));
     } catch {
-      list.innerHTML = '<li class="muted">Could not load. Refresh to try again.</li>';
+      list.replaceChildren(el('li', 'muted', 'Could not load. Refresh to try again.'));
     }
   }
 

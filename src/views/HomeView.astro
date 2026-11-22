@@ -14,8 +14,12 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
   <TopBar />
   <main class="stage" id="stage">
     <section class="panel" id="panel" aria-labelledby="panel-title">
+      <div class="counter" aria-label="Total sites submitted">
+        <strong id="sub-count">…</strong>
+        <span>submitted</span>
+      </div>
       <h1 id="panel-title">Submit a useless website</h1>
-      <p class="muted">Reviewed by a human. Published if it is pointless enough.</p>
+      <p class="muted">Free to submit. Reviewed by a human.</p>
 
       <Show when="signed-out">
         <SignInButton mode="modal" class="btn">Sign in to submit</SignInButton>
@@ -89,6 +93,25 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
     cursor: pointer;
   }
   .panel :global(.btn:disabled) { opacity: 0.5; cursor: default; }
+  .counter {
+    position: absolute;
+    top: -22px;
+    right: -22px;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  .counter strong { font-size: 20px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .counter span { font-size: 9.5px; letter-spacing: 0.04em; text-transform: uppercase; color: #bbb; }
+  h1, .muted { padding-right: 56px; }
   .msg { margin: 0; min-height: 16px; font-size: 12.5px; color: #888; }
   .msg.err { color: #b42318; }
   .msg.ok { color: #1a7f37; }
@@ -133,6 +156,9 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
 
   @media (max-width: 720px) {
     .panel { left: 12px; right: 12px; top: 64px; width: auto; transform: none; padding: 16px; }
+    .counter { top: 12px; right: 12px; width: 58px; height: 58px; }
+    .counter strong { font-size: 16px; }
+    .counter span { font-size: 8px; }
     .muted { margin-bottom: 12px; }
     textarea { display: none; }
   }
@@ -386,7 +412,21 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
     });
   }
 
-  const boot = () => { init(); bindForm(); };
+  async function loadCount() {
+    const out = document.getElementById('sub-count');
+    if (!out || out.dataset.ready) return;
+    out.dataset.ready = '1';
+    try {
+      const res = await fetch('/api/stats');
+      const { count } = await res.json();
+      if (typeof count === 'number') out.textContent = count.toLocaleString();
+      else out.textContent = '—';
+    } catch {
+      out.textContent = '—';
+    }
+  }
+
+  const boot = () => { init(); bindForm(); loadCount(); };
   boot();
   document.addEventListener('astro:page-load', boot);
   // Clerk renders <Show> content after load

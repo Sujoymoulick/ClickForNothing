@@ -2,7 +2,9 @@ import {
   onRequestGet as getSubmissions,
   onRequestPut as updateSubmissions,
   onRequestPatch as patchSubmissions,
+  onRequestDelete as deleteSubmission,
 } from '../functions/api/submissions';
+import { onRequestGet as getStats } from '../functions/api/stats';
 import { onRequestPost as createSubmission } from '../functions/api/submit';
 import { onRequestGet as getPublishedSites } from '../functions/api/published';
 import {
@@ -25,20 +27,26 @@ export default {
       if (request.method === 'GET') return getSubmissions({ request, env });
       if (request.method === 'PUT') return updateSubmissions({ request, env });
       if (request.method === 'PATCH') return patchSubmissions({ request, env });
+      if (request.method === 'DELETE') return deleteSubmission({ request, env });
       if (request.method === 'OPTIONS') {
         return new Response(null, {
           status: 204,
           headers: {
-            Allow: 'GET, PUT, PATCH, OPTIONS',
-            'Access-Control-Allow-Methods': 'GET, PUT, PATCH, OPTIONS',
+            Allow: 'GET, PUT, PATCH, DELETE, OPTIONS',
+            'Access-Control-Allow-Methods': 'GET, PUT, PATCH, DELETE, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-key',
           },
         });
       }
       return new Response('Method Not Allowed', {
         status: 405,
-        headers: { Allow: 'GET, PUT, PATCH, OPTIONS' },
+        headers: { Allow: 'GET, PUT, PATCH, DELETE, OPTIONS' },
       });
+    }
+
+    if (pathname === '/api/stats') {
+      if (request.method === 'GET') return getStats({ request, env });
+      return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET' } });
     }
 
     if (pathname === '/api/submit') {

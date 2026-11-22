@@ -201,6 +201,13 @@ export async function onRequestPut(context: { request: Request; env: Env }) {
 
     const existing = existingRows[0];
 
+    if (existing.status === 'rejected') {
+      return new Response(
+        JSON.stringify({ error: 'Rejected submissions cannot be edited.' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // 3. Security: Reject attempts to tamper with protected/immutable fields
     // Website URL, Website Name, Moderation Status, User ID are strictly locked.
     if ('userId' in body || 'user_id' in body) {
@@ -314,6 +321,66 @@ export async function onRequestPut(context: { request: Request; env: Env }) {
     logServerError('Error updating submission in Neon.', error);
     return new Response(
       JSON.stringify({ error: 'Failed to save submission changes.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+/**
+ * DELETE /api/submissions?id=123
+ * Owner removes their own submission. Rejected submissions are locked.
+ */
+export async function onRequestDelete(context: { request: Request; env: Env }) {
+  try {
+    const { request, env } = context;
+    const authUser = await getAuthenticatedUser(request, env);
+    if (!authUser?.userId) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized. Please sign in.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const subId = Number(new URL(request.url).searchParams.get('id'));
+    if (!Number.isSafeInteger(subId) || subId <= 0) {
+      return new Response(
+        JSON.stringify({ error: 'Valid submission ID is required.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const sql = getDb(env);
+    const rows = await sql`
+      SELECT status FROM website_submissions
+      WHERE id = ${subId} AND user_id = ${authUser.userId}
+      LIMIT 1;
+    `;
+    if (!rows || rows.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Submission not found or access denied.' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    if (rows[0].status === 'rejected') {
+      return new Response(
+        JSON.stringify({ error: 'Rejected submissions cannot be deleted.' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    await sql`
+      DELETE FROM website_submissions
+      WHERE id = ${subId} AND user_id = ${authUser.userId} AND status <> 'rejected';
+    `;
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    logServerError('Error deleting submission.', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to delete submission.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
