@@ -164,24 +164,42 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
     will-change: transform;
     z-index: 2;
   }
-  :global(.ball > span) {
+  :global(.ball > .shade), :global(.ball > .label) {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    transition: scale 0.18s ease;
+  }
+  /* Fixed light source (top-left): the shading never rotates, only the label rolls */
+  :global(.ball > .shade) {
+    background: var(--sphere);
+    box-shadow:
+      inset -10px -14px 28px rgba(0, 0, 0, 0.18),
+      inset 6px 8px 16px rgba(255, 255, 255, 0.10),
+      0 16px 24px -10px rgba(0, 0, 0, 0.35);
+  }
+  :global(.ball > .shade::after) {
+    content: '';
+    position: absolute;
+    left: 18%;
+    top: 12%;
+    width: 34%;
+    height: 22%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, var(--spec)) 0%, rgba(255, 255, 255, 0) 70%);
+    transform: rotate(-30deg);
+  }
+  :global(.ball > .label) {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: 100%;
-    padding: 14%;
-    border-radius: 50%;
-    background: var(--bg);
+    padding: 16%;
     color: var(--fg);
-    border: 1px solid var(--bd);
+    text-shadow: var(--ts);
     overflow-wrap: anywhere;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    will-change: transform;
   }
-  :global(.ball:hover > span), :global(.ball:focus-visible > span) {
-    transform: scale(1.08);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-  }
+  :global(.ball:hover > *), :global(.ball:focus-visible > *) { scale: 1.07; }
   :global(.ball.dragging) { cursor: grabbing; z-index: 3; }
 
   @media (max-width: 720px) {
@@ -198,13 +216,22 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
 </style>
 
 <script>
-  type Ball = { el: HTMLAnchorElement; x: number; y: number; vx: number; vy: number; r: number; m: number };
+  type Ball = { el: HTMLAnchorElement; label: HTMLSpanElement; x: number; y: number; vx: number; vy: number; r: number; m: number; a: number; w: number };
   type Site = { name: string; url: string };
 
   const PALETTE = [
-    { bg: '#111111', fg: '#ffffff', bd: '#111111' },
-    { bg: '#ffffff', fg: '#111111', bd: '#dddcd6' },
-    { bg: '#e9e7e1', fg: '#111111', bd: '#e9e7e1' },
+    {
+      sphere: 'radial-gradient(circle at 32% 28%, #6a6a6a 0%, #2a2a2a 30%, #0d0d0d 70%, #000 100%)',
+      fg: '#ffffff', spec: '0.55', ts: '0 1px 3px rgba(0,0,0,0.7)',
+    },
+    {
+      sphere: 'radial-gradient(circle at 32% 28%, #ffffff 0%, #f7f6f2 35%, #dcdad2 78%, #bcb9ae 100%)',
+      fg: '#111111', spec: '0.95', ts: '0 1px 0 rgba(255,255,255,0.7)',
+    },
+    {
+      sphere: 'radial-gradient(circle at 32% 28%, #fdfcf9 0%, #e8e5de 35%, #c9c5ba 78%, #a9a598 100%)',
+      fg: '#111111', spec: '0.9', ts: '0 1px 0 rgba(255,255,255,0.6)',
+    },
   ];
 
   function shuffle<T>(a: T[]) {
@@ -274,18 +301,23 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
       el.title = site.url;
       el.style.width = el.style.height = `${r * 2}px`;
       el.style.fontSize = `${Math.max(11, Math.min(17, r / 4.2))}px`;
-      el.style.setProperty('--bg', c.bg);
+      el.style.setProperty('--sphere', c.sphere);
       el.style.setProperty('--fg', c.fg);
-      el.style.setProperty('--bd', c.bd);
+      el.style.setProperty('--spec', c.spec);
+      el.style.setProperty('--ts', c.ts);
+      const shade = document.createElement('span');
+      shade.className = 'shade';
+      shade.setAttribute('aria-hidden', 'true');
       const label = document.createElement('span');
+      label.className = 'label';
       label.textContent = site.name;
-      el.appendChild(label);
+      el.append(shade, label);
       stage!.appendChild(el);
       measure();
       const minX = mobile ? r : Math.min(rect.r + r, W - r);
       const x = minX + Math.random() * Math.max(1, W - r - minX);
       const y = mobile ? rect.b + r + 4 : -r - 10;
-      const b: Ball = { el, x, y, vx: (Math.random() - 0.5) * 120, vy: 0, r, m: r * r };
+      const b: Ball = { el, label, x, y, vx: (Math.random() - 0.5) * 120, vy: 0, r, m: r * r, a: 0, w: (Math.random() - 0.5) * 2 };
       balls.push(b);
       bindPointer(b);
     }
@@ -323,6 +355,7 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
         if (drag.moved < 6) window.open(b.el.href, '_blank', 'noopener,noreferrer');
         b.vx = Math.max(-2500, Math.min(2500, b.vx));
         b.vy = Math.max(-2500, Math.min(2500, b.vy));
+        b.w = (b.vx / b.r) * 0.4;
         drag = null;
       };
       b.el.addEventListener('pointerup', end);
@@ -359,7 +392,14 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
         b.vx *= AIR;
         b.x += b.vx * dt;
         b.y += b.vy * dt;
-        if (b.y + b.r > H) { b.y = H - b.r; if (b.vy > 0) b.vy *= -REST; b.vx *= 0.985; if (Math.abs(b.vy) < 30) b.vy = 0; }
+        if (b.y + b.r > H) {
+          b.y = H - b.r;
+          if (b.vy > 0) b.vy *= -REST;
+          b.vx *= 0.985;
+          if (Math.abs(b.vy) < 30) b.vy = 0;
+          // Rolling contact: spin converges to v / r
+          b.w += (b.vx / b.r - b.w) * 0.25;
+        }
         if (b.x - b.r < 0) { b.x = b.r; if (b.vx < 0) b.vx *= -REST; }
         if (b.x + b.r > W) { b.x = W - b.r; if (b.vx > 0) b.vx *= -REST; }
         collideRect(b);
@@ -382,6 +422,23 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
           const jimp = (-(1 + REST) * rv) / sum;
           a.vx -= jimp * ia * nx; a.vy -= jimp * ia * ny;
           c.vx += jimp * ic * nx; c.vy += jimp * ic * ny;
+          // Friction at the contact point transfers spin between balls
+          const tx = -ny, ty = nx;
+          const vt = (c.vx - a.vx) * tx + (c.vy - a.vy) * ty + a.w * a.r + c.w * c.r;
+          const k = 0.12 * vt;
+          if (ia) a.w -= k / a.r;
+          if (ic) c.w -= k / c.r;
+        }
+      }
+      for (const b of balls) {
+        if (drag?.b === b) continue;
+        b.w *= 0.995;
+        b.a += b.w * dt;
+        // Nearly at rest: settle the label upright so the text stays readable
+        if (Math.abs(b.w) < 0.8 && Math.abs(b.vx) < 20 && Math.abs(b.vy) < 20) {
+          const target = Math.round(b.a / (2 * Math.PI)) * 2 * Math.PI;
+          b.a += (target - b.a) * Math.min(1, dt * 4);
+          b.w *= 0.9;
         }
       }
     }
@@ -391,7 +448,10 @@ const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
       const dt = Math.min(0.033, (now - last) / 1000);
       last = now;
       for (let k = 0; k < 4; k++) step(dt / 4);
-      for (const b of balls) b.el.style.transform = `translate(${b.x - b.r}px, ${b.y - b.r}px)`;
+      for (const b of balls) {
+        b.el.style.transform = `translate(${b.x - b.r}px, ${b.y - b.r}px)`;
+        b.label.style.transform = `rotate(${b.a}rad)`;
+      }
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
