@@ -373,10 +373,10 @@ const home = getLocalizedPath('/', locale);
       btn.disabled = true;
       status.textContent = '';
       try {
-        const { message } = await call('POST', { body: text });
+        const { message, auto } = await call('POST', { body: text });
         input.value = '';
         input.style.height = 'auto';
-        addMessages([message], false);
+        addMessages(auto ? [message, auto] : [message], false);
       } catch (err: any) {
         status.textContent = err.message;
       } finally {

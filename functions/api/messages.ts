@@ -11,6 +11,8 @@ interface Env {
 }
 
 const MAX_LEN = 2000;
+const AUTO_REPLY =
+  'Thanks for contacting ClickForNothing! We have received your message and will get back to you as soon as possible to help resolve it.';
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -89,7 +91,19 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       VALUES (${user.userId}, ${email}, ${name}, 'user', ${body}, TRUE)
       RETURNING id, sender, body, created_at;
     `;
-    return json({ success: true, message: rows[0] });
+
+    // First message from this user: send an automatic thank-you from the admin side
+    let auto = null;
+    const [{ n }] = await sql`SELECT COUNT(*)::int AS n FROM support_messages WHERE user_id = ${user.userId};`;
+    if (n === 1) {
+      const autoRows = await sql`
+        INSERT INTO support_messages (user_id, user_email, user_name, sender, body, read_by_user, read_by_admin)
+        VALUES (${user.userId}, ${email}, ${name}, 'admin', ${AUTO_REPLY}, TRUE, TRUE)
+        RETURNING id, sender, body, created_at;
+      `;
+      auto = autoRows[0];
+    }
+    return json({ success: true, message: rows[0], auto });
   } catch (error) {
     logServerError('Error sending message.', error);
     return json({ error: 'Could not send message.' }, 500);
