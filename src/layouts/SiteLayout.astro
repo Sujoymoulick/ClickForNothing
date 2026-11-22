@@ -49,7 +49,7 @@ const localeFontFamilies: Partial<Record<SupportedLocale, string>> = {
   zh: 'Noto+Sans+SC:wght@600;700',
 };
 const localeFont = localeFontFamilies[currentLocale];
-const fontsHref = `https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lilita+One${localeFont ? `&family=${localeFont}` : ''}&display=swap`;
+const fontsHref = localeFont ? `https://fonts.googleapis.com/css2?family=${localeFont}&display=swap` : '';
 
 const organizationSchema = {
   '@context': 'https://schema.org',
@@ -146,9 +146,8 @@ const websiteSchema = {
     <meta name="twitter:image" content={imageURL} />
     <meta name="twitter:image:alt" content={title} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href={fontsHref} rel="stylesheet" />
+    {fontsHref && <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />}
+    {fontsHref && <link href={fontsHref} rel="stylesheet" />}
 
     <!-- Deferred Google tag (gtag.js) for non-blocking initial page load -->
     <script is:inline>

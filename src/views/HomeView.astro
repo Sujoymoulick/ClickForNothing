@@ -1,171 +1,392 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import SiteHeader from '../components/SiteHeader.astro';
-import FallingCards from '../components/FallingCards.astro';
-import { useTranslations } from '../i18n';
-import { getLocalizedPath, getLocaleFromUrl } from '../i18n/routing';
-import type { SupportedLocale } from '../i18n/config';
+import TopBar from '../components/TopBar.astro';
+import { websites } from '../data/websites';
+import { categories } from '../data/categories';
+import { Show, SignInButton } from '@clerk/astro/components';
 
-const currentLocale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
-const { t } = await useTranslations(currentLocale);
-
-const title = `ClickForNothing — ${t('hero.title_start')} ${t('hero.title_end')}`;
-const description = t('hero.subtitle');
-const exploreUrl = getLocalizedPath('/explore/', currentLocale);
-const submitUrl = getLocalizedPath('/submit/', currentLocale);
+const title = 'ClickForNothing — Submit a useless website';
+const description = 'Submit a useless website. Watch it fall. Click it if you must.';
+const seed = websites.slice(0, 40).map((s) => ({ name: s.name, url: s.url }));
 ---
 
-<SiteLayout {title} {description}>
-  <SiteHeader />
+<SiteLayout {title} {description} canonicalPath="/" hideFooter>
+  <TopBar />
+  <main class="stage" id="stage">
+    <section class="panel" id="panel" aria-labelledby="panel-title">
+      <h1 id="panel-title">Submit a useless website</h1>
+      <p class="muted">Reviewed by a human. Published if it is pointless enough.</p>
 
-  <main class="home-main">
-    <div class="home-container">
-      <!-- Minimal Hero Section -->
-      <section class="minimal-hero" aria-labelledby="hero-heading">
-        <h1 id="hero-heading" class="hero-heading">
-          Nothing to do? Click something.
-        </h1>
-        <p class="hero-subtitle">
-          {description}
-        </p>
+      <Show when="signed-out">
+        <SignInButton mode="modal" class="btn">Sign in to submit</SignInButton>
+      </Show>
 
-        <div class="hero-cta-group">
-          <a href={exploreUrl} class="btn btn-primary">
-            Explore Randomly
-          </a>
-          <a href={submitUrl} class="btn btn-secondary">
-            Submit a Website
-          </a>
-        </div>
-      </section>
-
-      <!-- Falling Cards Section -->
-      <section class="falling-section" aria-label="Falling Cards Stream">
-        <FallingCards limit={45} />
-      </section>
-    </div>
+      <Show when="signed-in">
+        <form id="submit-form" novalidate>
+          <input name="url" type="url" placeholder="https://" required autocomplete="off" />
+          <input name="name" type="text" placeholder="Site name" maxlength="80" required autocomplete="off" />
+          <textarea name="description" rows="2" placeholder="What does it do? (nothing, ideally)" maxlength="300" required></textarea>
+          <select name="category" required>
+            <option value="" disabled selected>Category</option>
+            {categories.map((c) => <option value={c.slug}>{c.name}</option>)}
+          </select>
+          <button type="submit" class="btn">Submit</button>
+          <p class="msg" id="form-msg" role="status" aria-live="polite"></p>
+        </form>
+      </Show>
+    </section>
   </main>
+  <script id="ball-seed" type="application/json" set:html={JSON.stringify(seed)} />
 </SiteLayout>
 
 <style>
-  .home-main {
+  :global(html), :global(body) { height: 100%; overflow: hidden; }
+  .stage {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #f7f6f3;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    touch-action: none;
+  }
+  .panel {
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 340px;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #e6e5e0;
+    border-radius: 14px;
+    z-index: 5;
+    touch-action: auto;
+  }
+  h1 { margin: 0 0 6px; font-size: 18px; font-weight: 650; color: #111; letter-spacing: -0.01em; }
+  .muted { margin: 0 0 16px; font-size: 13px; color: #888; line-height: 1.45; }
+  form { display: grid; gap: 8px; }
+  input, textarea, select {
     width: 100%;
-    min-height: calc(100vh - 120px);
-    display: flex;
-    flex-direction: column;
-    padding: 32px 20px 48px;
-    background: var(--bg, #faf9f6);
+    font: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border: 1px solid #e2e1dc;
+    border-radius: 8px;
+    background: #fbfbfa;
+    color: #111;
+    resize: none;
   }
-
-  .home-container {
-    max-width: 1040px;
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #111; background: #fff; }
+  .panel :global(.btn) {
     width: 100%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(32px, 5vh, 48px);
-  }
-
-  .minimal-hero {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: clamp(24px, 4vh, 48px) 16px 0;
-  }
-
-  .hero-heading {
-    margin: 0 0 16px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: clamp(2.2rem, 5.2vw, 3.8rem);
-    font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.03em;
-    color: var(--text, #1a1a1a);
-    max-width: 780px;
-  }
-
-  .hero-subtitle {
-    margin: 0 0 28px;
-    font-size: clamp(1rem, 1.8vw, 1.2rem);
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--text-muted, #666666);
-    max-width: 580px;
-  }
-
-  .hero-cta-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 11px 22px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    border-radius: var(--radius, 8px);
-    text-decoration: none;
+    padding: 11px;
+    border: 0;
+    border-radius: 8px;
+    background: #111;
+    color: #fff;
+    font: 600 14px/1 inherit;
+    font-family: inherit;
     cursor: pointer;
-    transition: all 0.15s ease;
   }
+  .panel :global(.btn:disabled) { opacity: 0.5; cursor: default; }
+  .msg { margin: 0; min-height: 16px; font-size: 12.5px; color: #888; }
+  .msg.err { color: #b42318; }
+  .msg.ok { color: #1a7f37; }
 
-  .btn-primary {
-    background: #111111;
-    color: #ffffff;
-    border: 1px solid #111111;
+  :global(.ball) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1.15;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+    will-change: transform;
+    z-index: 2;
   }
-
-  .btn-primary:hover {
-    background: #2a2a2a;
-    border-color: #2a2a2a;
-    transform: translateY(-1px);
-  }
-
-  .btn-primary:active {
-    transform: translateY(0);
-  }
-
-  .btn-secondary {
-    background: #ffffff;
-    color: #111111;
-    border: 1px solid var(--border, #e6e5e0);
-  }
-
-  .btn-secondary:hover {
-    background: #f7f6f2;
-    border-color: #cccccc;
-    transform: translateY(-1px);
-  }
-
-  .btn-secondary:active {
-    transform: translateY(0);
-  }
-
-  .falling-section {
+  :global(.ball > span) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
+    height: 100%;
+    padding: 14%;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--bd);
+    overflow-wrap: anywhere;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
+  :global(.ball:hover > span), :global(.ball:focus-visible > span) {
+    transform: scale(1.08);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  }
+  :global(.ball.dragging) { cursor: grabbing; z-index: 3; }
 
-  @media (max-width: 640px) {
-    .home-main {
-      padding: 16px 12px 32px;
-    }
-    .hero-heading {
-      font-size: 2rem;
-    }
-    .hero-subtitle {
-      font-size: 0.98rem;
-      margin-bottom: 22px;
-    }
-    .btn {
-      width: 100%;
-      max-width: 280px;
-    }
+  @media (max-width: 720px) {
+    .panel { left: 12px; right: 12px; top: 64px; width: auto; transform: none; padding: 16px; }
+    .muted { margin-bottom: 12px; }
+    textarea { display: none; }
   }
 </style>
+
+<script>
+  type Ball = { el: HTMLAnchorElement; x: number; y: number; vx: number; vy: number; r: number; m: number };
+  type Site = { name: string; url: string };
+
+  const PALETTE = [
+    { bg: '#111111', fg: '#ffffff', bd: '#111111' },
+    { bg: '#ffffff', fg: '#111111', bd: '#dddcd6' },
+    { bg: '#e9e7e1', fg: '#111111', bd: '#e9e7e1' },
+  ];
+
+  function shuffle<T>(a: T[]) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  async function loadSites(): Promise<Site[]> {
+    let seed: Site[] = [];
+    try { seed = JSON.parse(document.getElementById('ball-seed')?.textContent || '[]'); } catch {}
+    let live: Site[] = [];
+    try {
+      const res = await fetch('/api/published?limit=60');
+      if (res.ok) {
+        const data = await res.json();
+        live = (data.sites || []).filter((s: Site) => s.name && s.url);
+      }
+    } catch {}
+    const seen = new Set<string>();
+    const merged = [...shuffle(live), ...shuffle(seed)].filter((s) => {
+      const k = s.url.toLowerCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+    return merged.slice(0, 10 + Math.floor(Math.random() * 6));
+  }
+
+  function init() {
+    const stage = document.getElementById('stage');
+    const panel = document.getElementById('panel');
+    if (!stage || !panel || stage.dataset.ready) return;
+    stage.dataset.ready = '1';
+
+    const balls: Ball[] = [];
+    let W = stage.clientWidth;
+    let H = stage.clientHeight;
+    let rect = { l: 0, t: 0, r: 0, b: 0 };
+    let mobile = false;
+    const measure = () => {
+      W = stage.clientWidth;
+      H = stage.clientHeight;
+      const p = panel.getBoundingClientRect();
+      const s = stage.getBoundingClientRect();
+      rect = { l: p.left - s.left, t: p.top - s.top, r: p.right - s.left, b: p.bottom - s.top };
+      mobile = window.matchMedia('(max-width: 720px)').matches;
+    };
+    measure();
+    new ResizeObserver(measure).observe(panel);
+    window.addEventListener('resize', measure);
+
+    const scale = () => (mobile ? Math.max(0.5, Math.min(0.75, W / 600)) : Math.min(1.1, Math.max(0.62, Math.min(W, H) / 820)));
+
+    function spawn(site: Site, i: number) {
+      const r = (40 + Math.min(site.name.length, 40) * 2.4) * scale();
+      const c = PALETTE[i % PALETTE.length];
+      const el = document.createElement('a');
+      el.className = 'ball';
+      el.href = site.url;
+      el.target = '_blank';
+      el.rel = 'noopener noreferrer';
+      el.title = site.url;
+      el.style.width = el.style.height = `${r * 2}px`;
+      el.style.fontSize = `${Math.max(11, Math.min(17, r / 4.2))}px`;
+      el.style.setProperty('--bg', c.bg);
+      el.style.setProperty('--fg', c.fg);
+      el.style.setProperty('--bd', c.bd);
+      const label = document.createElement('span');
+      label.textContent = site.name;
+      el.appendChild(label);
+      stage!.appendChild(el);
+      measure();
+      const minX = mobile ? r : Math.min(rect.r + r, W - r);
+      const x = minX + Math.random() * Math.max(1, W - r - minX);
+      const y = mobile ? rect.b + r + 4 : -r - 10;
+      const b: Ball = { el, x, y, vx: (Math.random() - 0.5) * 120, vy: 0, r, m: r * r };
+      balls.push(b);
+      bindPointer(b);
+    }
+
+    // Drag / throw / hover
+    let drag: { b: Ball; ox: number; oy: number; lx: number; ly: number; lt: number; moved: number } | null = null;
+    function bindPointer(b: Ball) {
+      b.el.addEventListener('pointerenter', (e) => {
+        if (drag || e.pointerType !== 'mouse') return;
+        b.vy -= 260;
+        b.vx += (Math.random() - 0.5) * 160;
+      });
+      b.el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        b.el.setPointerCapture(e.pointerId);
+        b.el.classList.add('dragging');
+        drag = { b, ox: e.clientX - b.x, oy: e.clientY - b.y, lx: e.clientX, ly: e.clientY, lt: performance.now(), moved: 0 };
+      });
+      b.el.addEventListener('pointermove', (e) => {
+        if (!drag || drag.b !== b) return;
+        const now = performance.now();
+        const dt = Math.max(1, now - drag.lt) / 1000;
+        b.vx = (e.clientX - drag.lx) / dt;
+        b.vy = (e.clientY - drag.ly) / dt;
+        drag.moved += Math.abs(e.clientX - drag.lx) + Math.abs(e.clientY - drag.ly);
+        drag.lx = e.clientX;
+        drag.ly = e.clientY;
+        drag.lt = now;
+        b.x = e.clientX - drag.ox;
+        b.y = e.clientY - drag.oy;
+      });
+      const end = () => {
+        if (!drag || drag.b !== b) return;
+        b.el.classList.remove('dragging');
+        if (drag.moved < 6) window.open(b.el.href, '_blank', 'noopener,noreferrer');
+        b.vx = Math.max(-2500, Math.min(2500, b.vx));
+        b.vy = Math.max(-2500, Math.min(2500, b.vy));
+        drag = null;
+      };
+      b.el.addEventListener('pointerup', end);
+      b.el.addEventListener('pointercancel', () => { b.el.classList.remove('dragging'); drag = null; });
+      b.el.addEventListener('click', (e) => e.preventDefault());
+      b.el.addEventListener('keydown', (e) => { if (e.key === 'Enter') window.open(b.el.href, '_blank', 'noopener,noreferrer'); });
+    }
+
+    const G = 1700, REST = 0.45, AIR = 0.999;
+    function collideRect(b: Ball) {
+      // Mobile: panel spans the width, so its bottom edge acts as the ceiling of the play area
+      if (mobile) {
+        if (b.y - b.r < rect.b) { b.y = rect.b + b.r; if (b.vy < 0) b.vy *= -REST; }
+        return;
+      }
+      const cx = Math.max(rect.l, Math.min(b.x, rect.r));
+      const cy = Math.max(rect.t, Math.min(b.y, rect.b));
+      let dx = b.x - cx, dy = b.y - cy;
+      const d2 = dx * dx + dy * dy;
+      if (d2 >= b.r * b.r) return;
+      let d = Math.sqrt(d2);
+      if (d === 0) { dx = 0; dy = -1; d = 1; b.y = rect.t; }
+      const nx = dx / d, ny = dy / d;
+      b.x += nx * (b.r - d);
+      b.y += ny * (b.r - d);
+      const vn = b.vx * nx + b.vy * ny;
+      if (vn < 0) { b.vx -= (1 + REST) * vn * nx; b.vy -= (1 + REST) * vn * ny; }
+    }
+
+    function step(dt: number) {
+      for (const b of balls) {
+        if (drag?.b === b) continue;
+        b.vy += G * dt;
+        b.vx *= AIR;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        if (b.y + b.r > H) { b.y = H - b.r; if (b.vy > 0) b.vy *= -REST; b.vx *= 0.985; if (Math.abs(b.vy) < 30) b.vy = 0; }
+        if (b.x - b.r < 0) { b.x = b.r; if (b.vx < 0) b.vx *= -REST; }
+        if (b.x + b.r > W) { b.x = W - b.r; if (b.vx > 0) b.vx *= -REST; }
+        collideRect(b);
+      }
+      for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+          const a = balls[i], c = balls[j];
+          const dx = c.x - a.x, dy = c.y - a.y;
+          const min = a.r + c.r;
+          const d2 = dx * dx + dy * dy;
+          if (d2 >= min * min || d2 === 0) continue;
+          const d = Math.sqrt(d2), nx = dx / d, ny = dy / d;
+          const overlap = min - d;
+          const ia = drag?.b === a ? 0 : 1 / a.m, ic = drag?.b === c ? 0 : 1 / c.m;
+          const sum = ia + ic || 1;
+          a.x -= nx * overlap * (ia / sum); a.y -= ny * overlap * (ia / sum);
+          c.x += nx * overlap * (ic / sum); c.y += ny * overlap * (ic / sum);
+          const rv = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+          if (rv > 0) continue;
+          const jimp = (-(1 + REST) * rv) / sum;
+          a.vx -= jimp * ia * nx; a.vy -= jimp * ia * ny;
+          c.vx += jimp * ic * nx; c.vy += jimp * ic * ny;
+        }
+      }
+    }
+
+    let last = performance.now();
+    function frame(now: number) {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      for (let k = 0; k < 4; k++) step(dt / 4);
+      for (const b of balls) b.el.style.transform = `translate(${b.x - b.r}px, ${b.y - b.r}px)`;
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    loadSites().then((sites) => sites.forEach((s, i) => setTimeout(() => spawn(s, i), 300 + i * 420)));
+  }
+
+  async function token(): Promise<string | null> {
+    try { return (await (window as any).Clerk?.session?.getToken()) || null; } catch { return null; }
+  }
+
+  function bindForm() {
+    const form = document.getElementById('submit-form') as HTMLFormElement | null;
+    if (!form || form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const msg = document.getElementById('form-msg')!;
+    const say = (t: string, kind = '') => { msg.textContent = t; msg.className = `msg ${kind}`; };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = new FormData(form);
+      const url = String(f.get('url') || '').trim();
+      const name = String(f.get('name') || '').trim();
+      let description = String(f.get('description') || '').trim();
+      const category = String(f.get('category') || '');
+      if (!description && window.matchMedia('(max-width: 720px)').matches) description = `${name} — a useless website.`;
+      if (!/^https?:\/\//i.test(url)) return say('URL must start with http:// or https://', 'err');
+      if (name.length < 2) return say('Name is too short.', 'err');
+      if (description.length < 10) return say('Description needs at least 10 characters.', 'err');
+      if (!category) return say('Pick a category.', 'err');
+
+      const btn = form.querySelector('button')!;
+      btn.disabled = true;
+      say('Sending…');
+      try {
+        const t = await token();
+        const res = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+          credentials: 'include',
+          body: JSON.stringify({ url, name, description, category, designId: 'theme-01' }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) { form.reset(); say('Submitted. Pending review.', 'ok'); }
+        else say(data.error || 'Could not submit. Try again.', 'err');
+      } catch {
+        say('Network error. Try again.', 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  const boot = () => { init(); bindForm(); };
+  boot();
+  document.addEventListener('astro:page-load', boot);
+  // Clerk renders <Show> content after load
+  new MutationObserver(bindForm).observe(document.body, { childList: true, subtree: true });
+</script>

@@ -1,0 +1,77 @@
+---
+import { Show, UserButton, SignInButton } from '@clerk/astro/components';
+import { getLocaleFromUrl, getLocalizedPath } from '../i18n/routing';
+import type { SupportedLocale } from '../i18n/config';
+
+const locale = (Astro.currentLocale as SupportedLocale) || getLocaleFromUrl(Astro.url);
+const home = getLocalizedPath('/', locale);
+const explore = getLocalizedPath('/explore/', locale);
+const dashboard = getLocalizedPath('/dashboard/', locale);
+const path = Astro.url.pathname;
+const isOn = (href: string) => path === href || path === href.replace(/\/$/, '');
+---
+
+<header class="topbar">
+  <a href={home} class="brand" aria-label="clickfornothing home">
+    <img src="/android-chrome-192x192.png" alt="" width="28" height="28" />
+    <span>clickfornothing</span>
+  </a>
+  <nav class="nav">
+    <a href={home} class:list={{ on: isOn(home) }}>Submit</a>
+    <a href={explore} class:list={{ on: isOn(explore) }}>Explore</a>
+    <Show when="signed-in">
+      <span class="nav-auth">
+        <a href={dashboard} class:list={{ on: isOn(dashboard) }}>Dashboard</a>
+        <span class="nav-avatar"><UserButton /></span>
+      </span>
+    </Show>
+    <Show when="signed-out">
+      <span class="nav-auth">
+        <SignInButton mode="modal" class="nav-btn">Sign in</SignInButton>
+      </span>
+    </Show>
+  </nav>
+</header>
+
+<style>
+  .topbar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 20;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    font: 500 14px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: rgba(247, 246, 243, 0.92);
+    backdrop-filter: blur(6px);
+  }
+  .brand { display: flex; align-items: center; gap: 8px; color: #111; text-decoration: none; font-weight: 700; letter-spacing: -0.01em; }
+  .brand img { width: 28px; height: 28px; border-radius: 7px; display: block; }
+  .nav { display: flex; align-items: center; gap: 18px; height: 100%; }
+  .nav :global(clerk-show) { display: contents !important; }
+  .nav-auth { display: flex; align-items: center; gap: 18px; height: 28px; }
+  .nav a { display: block; line-height: 28px; }
+  .nav-avatar, .nav-avatar :global(.cl-rootBox), .nav-avatar :global(.cl-userButtonBox), .nav-avatar :global(.cl-userButtonTrigger) { display: flex; align-items: center; }
+  .nav-avatar { width: 28px; height: 28px; }
+  .nav-avatar :global(.cl-userButtonTrigger), .nav-avatar :global(.cl-avatarBox) { width: 28px; height: 28px; margin: 0; }
+  .nav a { color: #777; text-decoration: none; }
+  .nav a:hover, .nav a.on { color: #111; }
+  .nav :global(.nav-btn) {
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 999px;
+    padding: 7px 14px;
+    font: inherit;
+    cursor: pointer;
+  }
+  @media (max-width: 560px) {
+    .topbar { padding: 0 12px; height: 52px; font-size: 13px; }
+    .nav, .nav-auth { gap: 12px; }
+    .nav :global(.nav-btn) { padding: 6px 11px; }
+  }
+  @media (max-width: 400px) {
+    .brand span { display: none; }
+  }
+</style>
